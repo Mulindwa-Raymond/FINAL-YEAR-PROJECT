@@ -1,0 +1,17 @@
+# Node modules
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# Build output (if using TypeScript or a build step)
+dist/
+build/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/

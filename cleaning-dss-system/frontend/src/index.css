@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-blue: #0c1b3a;
+  --color-primary-blue-soft: #12264a;
+  --color-primary-blue-deep: #030612;
+  --color-primary-green: #8ff2be;
+  --color-primary-green-soft: #5dd8a5;
+  --color-muted-text: #d7e5ff;
+  --color-muted-strong: #f4f8ff;
+  --color-card-border: rgba(255, 255, 255, 0.12);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-midnight: #030713;
+  --color-surface: rgba(6, 15, 34, 0.92);
+}
+
+@layer base {
+  body {
+    @apply text-[--color-muted-text] antialiased min-h-screen overflow-x-hidden;
+    background-image: radial-gradient(circle at top right, rgba(143, 242, 190, 0.15), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(17, 38, 90, 0.4), transparent 30%),
+      linear-gradient(135deg, var(--color-primary-blue-deep), var(--color-primary-blue-soft));
+    font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .surface-card {
+    background: linear-gradient(160deg, rgba(8, 18, 44, 0.98), rgba(7, 14, 34, 0.85));
+    border-radius: 2.5rem;
+    border: 1px solid var(--color-card-border);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), 0 15px 40px rgba(5, 12, 28, 0.7);
+  }
+
+  .surface-panel {
+    background: linear-gradient(140deg, rgba(19, 41, 92, 0.92), rgba(7, 13, 32, 0.95));
+    border-radius: 2rem;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 25px 50px rgba(1, 4, 17, 0.65);
+  }
+
+  .hero-pill {
+    background: linear-gradient(140deg, rgba(143, 242, 190, 0.25), transparent 55%);
+    border-radius: 999px;
+    padding: 0.9rem 2.25rem;
+    font-size: 0.63rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-weight: 900;
+    color: #e7faee;
+  }
+
+  .outline-button {
+    border: 1px solid var(--color-border);
+    border-radius: 2rem;
+    padding: 0.8rem 2.8rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-weight: 900;
+    color: var(--color-muted-text);
+    transition: all 0.3s ease;
+  }
+
+  .outline-button:hover {
+    border-color: var(--color-primary-green);
+    color: #fff;
+    background: rgba(135, 242, 190, 0.12);
+  }
+
+  .primary-button {
+    background: linear-gradient(120deg, var(--color-primary-blue), var(--color-primary-green));
+    border-radius: 2.5rem;
+    padding: 1rem 2.8rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #03040b;
+    border: none;
+    box-shadow: 0 18px 45px rgba(2, 10, 29, 0.6);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .primary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 50px rgba(2, 10, 29, 0.65);
+  }
+
+  .form-field {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 0.9rem 1.4rem;
+    color: var(--color-muted-text);
+    font-weight: 600;
+    width: 100%;
+  }
+
+  .form-field:focus {
+    border-color: var(--color-primary-green);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(143, 242, 190, 0.25);
+  }
+
+  .tag-chip {
+    border-radius: 999px;
+    padding: 0.45rem 1.4rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-weight: 900;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-muted-strong);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 18px rgba(143, 242, 190, 0.8);
+  }
+}
