@@ -1,0 +1,791 @@
+openapi: 3.0.0
+info:
+  title: Clean Match DSS API
+  description: |
+    Decision Support System for Selecting Cleaning Machines and Detergents.
+    Provides vendor-neutral recommendations, TCO calculation, chemical compatibility checking,
+    and administrative management for cleaning companies in Uganda.
+  version: 1.0.0
+  contact:
+    name: Clean Match Team
+    email: support@cleanmatch.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Development server
+  - url: https://api.cleanmatch.com/api/v1
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # ----- Common -----
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Validation failed"
+        timestamp:
+          type: string
+          format: date-time
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+        data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    # ----- Equipment -----
+    Equipment:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        brand:
+          type: string
+          enum: [Kärcher, Nilfisk, Numatic]
+        category:
+          type: string
+        intensity:
+          type: string
+          enum: [light, medium, heavy]
+        domain:
+          type: string
+          enum: [domestic, industrial]
+        price_ugx:
+          type: number
+        spare_part_lead_time_days:
+          type: integer
+        power_req:
+          type: object
+          properties:
+            kW:
+              type: number
+            type:
+              type: string
+              enum: [corded, battery, petrol]
+        motor_type:
+          type: string
+          enum: [brushed DC, brushless, induction]
+        noise_level_db:
+          type: integer
+        compatible_surfaces:
+          type: array
+          items:
+            type: string
+        compatible_dirt_types:
+          type: array
+          items:
+            type: string
+        materials:
+          type: array
+          items:
+            type: string
+        eco_certified:
+          type: boolean
+        in_stock:
+          type: boolean
+        local_supplier:
+          type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ----- Detergent -----
+    Detergent:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        brand:
+          type: string
+        category:
+          type: string
+          enum: [alkaline_heavy, alkaline_light, neutral, acidic, enzymatic, disinfectant, specialty_carpet, solvent_based]
+        intensity:
+          type: string
+          enum: [light, medium, heavy]
+        domain:
+          type: string
+          enum: [domestic, industrial, both]
+        ph:
+          type: number
+        dilution_ratio:
+          type: string
+        compatible_surfaces:
+          type: array
+          items:
+            type: string
+        incompatible_surfaces:
+          type: array
+          items:
+            type: string
+        compatible_machine_materials:
+          type: array
+          items:
+            type: string
+        incompatible_machine_materials:
+          type: array
+          items:
+            type: string
+        compatible_dirt_types:
+          type: array
+          items:
+            type: string
+        eco_certified:
+          type: boolean
+        biodegradable:
+          type: boolean
+        hazard_alerts:
+          type: array
+          items:
+            type: string
+        requires_ppe:
+          type: boolean
+        price_ugx:
+          type: number
+        package_size_liters:
+          type: number
+        local_supplier:
+          type: string
+        in_stock:
+          type: boolean
+        active:
+          type: boolean
+
+    # ----- Recommendation -----
+    RecommendationRequest:
+      type: object
+      required:
+        - surfaceType
+        - dirtType
+        - domain
+      properties:
+        surfaceType:
+          type: string
+          enum: [tile, concrete, vinyl, wood, marble, carpet, glass, stainless_steel]
+        dirtType:
+          type: string
+          enum: [grease, red laterite soil, dust, oil, organic, heavy soil, light dust, spills, lime scale, rust]
+        domain:
+          type: string
+          enum: [domestic, industrial]
+        usageHoursPerWeek:
+          type: number
+          default: 0
+        areaSizeM2:
+          type: number
+          default: 0
+        budgetUgx:
+          type: number
+          nullable: true
+        powerStability:
+          type: string
+          enum: [stable, unstable]
+          default: stable
+        ecoRequired:
+          type: boolean
+          default: false
+        noiseSensitive:
+          type: boolean
+          default: false
+
+    RecommendationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            intensity:
+              type: string
+            category:
+              type: string
+            recommendations:
+              type: array
+              items:
+                type: object
+                properties:
+                  machine:
+                    $ref: '#/components/schemas/Equipment'
+                  detergent:
+                    $ref: '#/components/schemas/Detergent'
+                  compatibility_alerts:
+                    type: array
+                    items:
+                      type: string
+                  tco_5year_ugx:
+                    type: number
+                  final_score:
+                    type: number
+
+    # ----- Authentication -----
+    LoginRequest:
+      type: object
+      required:
+        - password
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      oneOf:
+        - required: [username]
+        - required: [email]
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+                username:
+                  type: string
+                email:
+                  type: string
+                role:
+                  type: string
+
+    # ----- Admin -----
+    UserResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        is_active:
+          type: boolean
+        last_login:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    SystemMetrics:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        totalRecommendations:
+          type: integer
+        averageResponseTimeMs:
+          type: number
+        topCategories:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+              count:
+                type: integer
+        topIntensities:
+          type: array
+          items:
+            type: object
+            properties:
+              intensity:
+                type: string
+              count:
+                type: integer
+        activeUsers:
+          type: integer
+
+paths:
+  # ----- Health Check -----
+  /health:
+    get:
+      summary: API health check
+      tags: [System]
+      responses:
+        200:
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  version:
+                    type: string
+
+  # ----- Authentication -----
+  /auth/register:
+    post:
+      summary: Register a new user account
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        400:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: Username or email already exists
+
+  /auth/login:
+    post:
+      summary: Login and receive JWT token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        401:
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      summary: Get current authenticated user's profile
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /auth/change-password:
+    put:
+      summary: Change current user's password
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+                  minLength: 6
+      responses:
+        200:
+          description: Password changed
+        401:
+          description: Current password incorrect
+
+  # ----- Recommendations -----
+  /recommend:
+    post:
+      summary: Get cleaning machine and detergent recommendations
+      tags: [Recommendations]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationRequest'
+      responses:
+        200:
+          description: Recommendations generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+        400:
+          description: Invalid input
+        404:
+          description: No matching equipment found
+
+  # ----- Equipment (Public) -----
+  /equipment:
+    get:
+      summary: List all equipment with optional filters
+      tags: [Equipment]
+      parameters:
+        - name: brand
+          in: query
+          schema:
+            type: string
+            enum: [Kärcher, Nilfisk, Numatic]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: intensity
+          in: query
+          schema:
+            type: string
+            enum: [light, medium, heavy]
+        - name: domain
+          in: query
+          schema:
+            type: string
+            enum: [domestic, industrial]
+        - name: in_stock
+          in: query
+          schema:
+            type: boolean
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: List of equipment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Equipment'
+
+  /equipment/{id}:
+    get:
+      summary: Get a single equipment by ID
+      tags: [Equipment]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Equipment details
+        404:
+          description: Not found
+
+  # ----- Detergents (Public) -----
+  /detergents:
+    get:
+      summary: List all detergents with filters
+      tags: [Detergents]
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: intensity
+          in: query
+          schema:
+            type: string
+        - name: eco_certified
+          in: query
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: List of detergents
+
+  # ----- Admin Routes -----
+  /admin/users:
+    get:
+      summary: Get all users (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Paginated user list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserResponse'
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+
+    post:
+      summary: Create a new user (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [user, admin]
+                  default: user
+      responses:
+        201:
+          description: User created
+
+  /admin/users/{id}:
+    put:
+      summary: Update a user (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                is_active:
+                  type: boolean
+      responses:
+        200:
+          description: User updated
+
+    delete:
+      summary: Soft delete a user (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+      responses:
+        200:
+          description: User deactivated
+
+  /admin/metrics:
+    get:
+      summary: Get system metrics (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: System metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemMetrics'
+
+  /admin/audit:
+    get:
+      summary: Get audit logs (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: adminId
+          in: query
+          schema:
+            type: string
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        200:
+          description: List of audit logs
+
+  /admin/upload/equipment:
+    post:
+      summary: Bulk upload equipment via CSV/JSON (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                format:
+                  type: string
+                  enum: [csv, json]
+                  default: csv
+      responses:
+        200:
+          description: Import results
+
+  /admin/export:
+    get:
+      summary: Export entire database as JSON (admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: JSON file download
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ----- Metrics (public) -----
+  /metrics/daily:
+    get:
+      summary: Get daily recommendation counts (authenticated)
+      tags: [Metrics]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Daily metrics
+
+  /metrics/trends:
+    get:
+      summary: Get 7-day trends (authenticated)
+      tags: [Metrics]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Trend data
