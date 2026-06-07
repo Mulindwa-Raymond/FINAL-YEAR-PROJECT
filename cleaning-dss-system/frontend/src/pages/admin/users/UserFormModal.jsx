@@ -25,9 +25,9 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Helper function to get user ID (supports both _id and user_id)
-  const getUserId = (u) => {
-    return u?._id || u?.user_id || u?.id;
+  // Helper to get user ID (handles both _id and user_id)
+  const getUserId = (userData) => {
+    return userData?._id || userData?.user_id || userData?.id;
   };
 
   useEffect(() => {
@@ -77,6 +77,11 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
       setLoading(false);
       return;
     }
+    if (!formData.email.includes('@')) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
     
     try {
       const payload = {
@@ -94,19 +99,28 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
           setLoading(false);
           return;
         }
+        if (formData.password.length < 6) {
+          setError('Password must be at least 6 characters.');
+          setLoading(false);
+          return;
+        }
         payload.password = formData.password;
         await createUser(payload);
       } else {
         // Updating existing user - password optional
-        if (formData.password) {
-          payload.password = formData.password;
-        }
-        // Make sure we have the correct user ID
         const userId = getUserId(user);
         if (!userId) {
           setError('User ID is missing. Cannot update.');
           setLoading(false);
           return;
+        }
+        if (formData.password) {
+          if (formData.password.length < 6) {
+            setError('Password must be at least 6 characters.');
+            setLoading(false);
+            return;
+          }
+          payload.password = formData.password;
         }
         await updateUser(userId, payload);
         
@@ -142,9 +156,9 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/40 shadow-2xl w-full max-w-md">
-        <div className="flex justify-between items-center p-6 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200">
+        <div className="flex justify-between items-center p-5 border-b border-slate-200">
+          <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
             <Shield className="w-5 h-5 text-cyan-600" />
             {user ? 'Edit User' : 'Add New User'}
           </h2>
@@ -153,9 +167,9 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4" /> {error}
             </div>
           )}
@@ -168,7 +182,7 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
               value={formData.username}
               onChange={handleChange}
               required
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition"
+              className="w-full border border-slate-200 rounded-lg p-2.5 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none transition"
             />
           </div>
 
@@ -180,33 +194,29 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
+              className="w-full border border-slate-200 rounded-lg p-2.5 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Organization
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Organization</label>
             <input
               type="text"
               name="organization"
               value={formData.organization}
               onChange={handleChange}
               placeholder="Company name"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
+              className="w-full border border-slate-200 rounded-lg p-2.5"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Role
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
+              className="w-full border border-slate-200 rounded-lg p-2.5 bg-white"
               disabled={!isSuperAdmin && !!user}
             >
               {roleOptions.map(opt => (
@@ -230,8 +240,8 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder={user ? 'Leave blank to keep unchanged' : 'Enter password'}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 pr-10"
+                placeholder={user ? 'Leave blank to keep unchanged' : 'Enter password (min 6 characters)'}
+                className="w-full border border-slate-200 rounded-lg p-2.5 pr-10"
               />
               <button
                 type="button"
@@ -241,9 +251,10 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            <p className="text-xs text-slate-400 mt-1">Minimum 6 characters</p>
           </div>
 
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               name="is_active"
@@ -254,18 +265,18 @@ export const UserFormModal = ({ isOpen, onClose, user }) => {
             <span className="text-sm text-slate-700">Active (user can log in)</span>
           </label>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={() => onClose(false)}
-              className="px-4 py-2 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition"
+              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition disabled:opacity-70"
+              className="px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium flex items-center gap-2 hover:bg-cyan-700 transition disabled:opacity-70"
             >
               {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
               {loading ? 'Saving...' : 'Save User'}

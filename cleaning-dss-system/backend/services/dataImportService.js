@@ -1,8 +1,8 @@
 const fs = require('fs');
 const csv = require('csv-parser');
-const Equipment = require('../models/Equipment');
-const Detergent = require('../models/Detergent');
-const Rule = require('../models/Rule');
+const { Equipment } = require('../models/Equipment');
+const { Detergent } = require('../models/Detergent');
+const { Rule } = require('../models/Rule');
 
 /**
  * Parse CSV file and return array of objects.

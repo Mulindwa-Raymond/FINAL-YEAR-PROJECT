@@ -4,7 +4,7 @@
  */
 
 const Feedback = require('../models/Feedback');
-const Recommendation = require('../models/RecommendationHistory');
+const Recommendation = require('../models/Recommendation');
 const { success, error } = require('../utils/apiResponse');
 
 /**

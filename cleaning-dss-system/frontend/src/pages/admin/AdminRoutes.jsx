@@ -2,7 +2,7 @@
  * AdminRoutes.jsx
  * 
  * Defines all routes within the admin portal.
- * Each route renders a component (placeholders initially – will be filled later).
+ * Each route renders a component.
  * The layout is provided by AdminLayout (sidebar + main area).
  */
 
@@ -25,6 +25,7 @@ import { EquipmentDetail } from './equipment/EquipmentDetail';
 // Detergents
 import { DetergentList } from './detergents/DetergentList';
 import { DetergentForm } from './detergents/DetergentForm';
+import { DetergentDetail } from './detergents/DetergentDetail';  // ADDED: Detergent detail view
 
 // Rules
 import { RuleList } from './rules/RuleList';
@@ -76,6 +77,7 @@ export const AdminRoutes = () => {
         {/* Detergents */}
         <Route path="detergents" element={<DetergentList />} />
         <Route path="detergents/new" element={<DetergentForm />} />
+        <Route path="detergents/:id" element={<DetergentDetail />} />      {/* ADDED: View detergent details */}
         <Route path="detergents/:id/edit" element={<DetergentForm />} />
         
         {/* Rules */}

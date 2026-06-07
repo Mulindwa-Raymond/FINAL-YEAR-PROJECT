@@ -267,19 +267,33 @@ export const BulkUpload = () => {
 
         {/* Result display */}
         {result && (
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-            <div className="flex items-center gap-2 text-green-700 font-semibold">
-              <CheckCircle className="w-5 h-5" /> Upload Successful
+          <div className={`mt-6 p-4 border rounded-xl ${result.errorCount && result.errorCount > 0 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+            <div className={`flex items-center gap-2 font-semibold ${result.errorCount && result.errorCount > 0 ? 'text-amber-700' : 'text-green-700'}`}>
+              {result.errorCount && result.errorCount > 0 ? (
+                <AlertTriangle className="w-5 h-5" />
+              ) : (
+                <CheckCircle className="w-5 h-5" />
+              )}
+              {result.message || `Upload completed`}
             </div>
-            <div className="mt-2 text-sm text-green-700">
-              <p>Inserted: {result.insertedCount || result.inserted || 0}</p>
-              {result.errors && result.errors.length > 0 && (
-                <details className="mt-2">
-                  <summary className="cursor-pointer text-amber-700">Errors ({result.errors.length})</summary>
-                  <pre className="mt-2 p-2 bg-white rounded text-xs overflow-x-auto">
-                    {JSON.stringify(result.errors, null, 2)}
-                  </pre>
-                </details>
+            <div className={`mt-2 text-sm ${result.errorCount && result.errorCount > 0 ? 'text-amber-700' : 'text-green-700'}`}>
+              <p>✓ Successfully inserted: <span className="font-medium">{result.insertedCount || 0}</span></p>
+              {result.errorCount && result.errorCount > 0 && (
+                <>
+                  <p className="mt-1">✗ Errors: <span className="font-medium">{result.errorCount}</span></p>
+                  {result.errors && result.errors.length > 0 && (
+                    <details className="mt-3 cursor-pointer">
+                      <summary className="font-medium hover:underline">Show error details ({result.errors.length})</summary>
+                      <div className="mt-2 p-3 bg-white rounded-lg border border-amber-100">
+                        {result.errors.map((err, idx) => (
+                          <div key={idx} className="text-xs mb-2 p-2 bg-red-50 rounded border border-red-200 text-red-700">
+                            <strong>Row {err.row || idx + 1}:</strong> {err.message || err.error || JSON.stringify(err)}
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </>
               )}
             </div>
           </div>

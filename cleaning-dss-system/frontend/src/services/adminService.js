@@ -23,6 +23,17 @@ const validateUserId = (userId, operation) => {
   return true;
 };
 
+/**
+ * Extract user ID from various possible formats
+ * @param {string|Object} userId - User ID string or user object
+ * @returns {string|null} Extracted user ID
+ */
+export const extractUserId = (userId) => {
+  if (!userId) return null;
+  if (typeof userId === 'string') return userId;
+  return userId?._id || userId?.user_id || userId?.id || null;
+};
+
 // ============================================
 // USER MANAGEMENT
 // ============================================
@@ -47,8 +58,14 @@ export const createUser = (userData) => {
   if (!userData.email) {
     return Promise.reject(new Error('Email is required'));
   }
+  if (!userData.email.includes('@')) {
+    return Promise.reject(new Error('Please enter a valid email address'));
+  }
   if (!userData.password) {
     return Promise.reject(new Error('Password is required for new users'));
+  }
+  if (userData.password.length < 6) {
+    return Promise.reject(new Error('Password must be at least 6 characters'));
   }
   return api.post('/admin/users', userData);
 };
@@ -60,8 +77,9 @@ export const createUser = (userData) => {
  * @returns {Promise}
  */
 export const updateUser = (userId, data) => {
-  validateUserId(userId, 'updateUser');
-  return api.put(`/admin/users/${userId}`, data);
+  const id = extractUserId(userId) || userId;
+  validateUserId(id, 'updateUser');
+  return api.put(`/admin/users/${id}`, data);
 };
 
 /**
@@ -70,8 +88,9 @@ export const updateUser = (userId, data) => {
  * @returns {Promise}
  */
 export const deleteUser = (userId) => {
-  validateUserId(userId, 'deleteUser');
-  return api.delete(`/admin/users/${userId}`);
+  const id = extractUserId(userId) || userId;
+  validateUserId(id, 'deleteUser');
+  return api.delete(`/admin/users/${id}`);
 };
 
 /**

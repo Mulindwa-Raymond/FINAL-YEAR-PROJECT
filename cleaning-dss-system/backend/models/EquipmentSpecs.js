@@ -2,9 +2,20 @@
  * EquipmentSpecs Model
  * Stores category-specific technical specifications for each machine.
  * Allows dynamic attributes per machine type.
+ * 
+ * NEW FIELDS:
+ * - filtration_type: For vacuums (standard, HEPA_H13, HEPA_H14, absolute)
+ * - brush_type: For floor scrubbers (disc, cylindrical, both)
+ * - upholstery_attachment: For vacuums (boolean)
+ * - noise_level_db: For noise-sensitive environments
+ * - tank_capacity_liters: For solution/recovery tanks
  */
 
 const mongoose = require('mongoose');
+
+// Predefined allowed values for new spec fields
+const filtrationTypes = ['standard', 'HEPA_H13', 'HEPA_H14', 'absolute'];
+const brushTypes = ['disc', 'cylindrical', 'both'];
 
 const equipmentSpecsSchema = new mongoose.Schema({
   specs_id: {

@@ -8,10 +8,11 @@
  * - Submit and skip buttons
  * - Confirmation message after submission
  * - Integration with feedback API
+ * - Modern UI matching system design
  */
 
-import React, { useState } from 'react';
-import { Star, X, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Star, X, MessageSquare, CheckCircle, AlertCircle, Sparkles, ThumbsUp, ThumbsDown, Award } from 'lucide-react';
 import { submitFeedback } from '../services/feedbackService';
 
 export const FeedbackModal = ({ isOpen, onClose, recommendationId, onSuccess }) => {
@@ -22,14 +23,24 @@ export const FeedbackModal = ({ isOpen, onClose, recommendationId, onSuccess }) 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [skipConfirmed, setSkipConfirmed] = useState(false);
+  const [fadeIn, setFadeIn] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFadeIn(true);
+    } else {
+      setFadeIn(false);
+    }
+  }, [isOpen]);
 
   const handleRatingClick = (value) => {
     setRating(value);
+    setError('');
   };
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      setError('Please select a rating before submitting.');
+      setError('Please select a rating before submitting');
       return;
     }
 
@@ -68,50 +79,79 @@ export const FeedbackModal = ({ isOpen, onClose, recommendationId, onSuccess }) 
 
   if (!isOpen) return null;
 
+  // Get rating label and icon
+  const getRatingLabel = (rate) => {
+    switch(rate) {
+      case 1: return { text: 'Poor', icon: <ThumbsDown size={14} className="text-red-500" /> };
+      case 2: return { text: 'Fair', icon: <ThumbsDown size={14} className="text-orange-500" /> };
+      case 3: return { text: 'Good', icon: <ThumbsUp size={14} className="text-blue-500" /> };
+      case 4: return { text: 'Very Good', icon: <ThumbsUp size={14} className="text-emerald-500" /> };
+      case 5: return { text: 'Excellent', icon: <Award size={14} className="text-amber-500" /> };
+      default: return { text: '', icon: null };
+    }
+  };
+
+  const ratingLabel = getRatingLabel(rating);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/40 shadow-2xl w-full max-w-md">
-        {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-cyan-600" />
-            Share Your Feedback
-          </h2>
-          <button
-            onClick={handleSkip}
-            disabled={loading}
-            className="p-1 hover:bg-slate-100 rounded-lg transition disabled:opacity-50"
-          >
-            <X className="w-5 h-5 text-slate-500" />
-          </button>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transition-all duration-300 ${fadeIn ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
+        
+        {/* Header with Gradient */}
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-5 text-white">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                <MessageSquare size={18} className="text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">Share Your Feedback</h2>
+                <p className="text-white/80 text-[10px] font-mono mt-0.5">Help us improve your experience</p>
+              </div>
+            </div>
+            <button
+              onClick={handleSkip}
+              disabled={loading}
+              className="p-1.5 hover:bg-white/20 rounded-lg transition disabled:opacity-50"
+            >
+              <X size={18} className="text-white" />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
         <div className="p-6">
           {submitted ? (
-            <div className="text-center py-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="text-center py-8">
+              <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5 shadow-inner">
+                <CheckCircle size={32} className="text-emerald-600" />
               </div>
-              <h3 className="text-lg font-bold text-slate-800 mb-2">Thank You!</h3>
-              <p className="text-slate-500 text-sm">Your feedback helps us improve our recommendations.</p>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Thank You!</h3>
+              <p className="text-sm text-slate-500">Your feedback helps us improve our recommendations.</p>
+              <div className="mt-4 flex items-center justify-center gap-1">
+                <Sparkles size={12} className="text-amber-500" />
+                <span className="text-[10px] text-slate-400">AI Learning Enhanced</span>
+              </div>
             </div>
           ) : skipConfirmed ? (
-            <div className="text-center py-6">
-              <p className="text-slate-500 text-sm">You can provide feedback later from your history page.</p>
+            <div className="text-center py-8">
+              <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-5">
+                <MessageSquare size={32} className="text-slate-400" />
+              </div>
+              <p className="text-sm text-slate-500">You can provide feedback later from your history page.</p>
             </div>
           ) : (
             <>
-              <p className="text-slate-600 text-sm mb-6">
-                How would you rate these recommendations? Your feedback helps us improve our matching algorithm.
+              <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                How would you rate these recommendations? Your feedback helps us improve our matching algorithm and deliver better results.
               </p>
 
-              {/* Star Rating Widget */}
+              {/* Star Rating Widget - Enhanced */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 mb-3">
                   Rating *
                 </label>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
@@ -119,73 +159,100 @@ export const FeedbackModal = ({ isOpen, onClose, recommendationId, onSuccess }) 
                       onClick={() => handleRatingClick(star)}
                       onMouseEnter={() => setHoverRating(star)}
                       onMouseLeave={() => setHoverRating(0)}
-                      className="focus:outline-none transition-transform hover:scale-110"
+                      className="focus:outline-none transition-all duration-200 hover:scale-110"
                     >
                       <Star
-                        className={`w-8 h-8 ${
-                          (hoverRating >= star || rating >= star)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-slate-300'
-                        } transition-colors`}
+                        size={32}
+                        className={`
+                          transition-all duration-200
+                          ${(hoverRating >= star || rating >= star)
+                            ? 'fill-amber-400 text-amber-400 drop-shadow-sm'
+                            : 'text-slate-200 hover:text-slate-300'
+                          }
+                        `}
                       />
                     </button>
                   ))}
-                  <span className="ml-3 text-sm text-slate-500">
-                    {rating === 1 && 'Poor'}
-                    {rating === 2 && 'Fair'}
-                    {rating === 3 && 'Good'}
-                    {rating === 4 && 'Very Good'}
-                    {rating === 5 && 'Excellent'}
-                  </span>
+                  
+                  {/* Rating Label */}
+                  {rating > 0 && ratingLabel.text && (
+                    <div className="ml-3 flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-full">
+                      {ratingLabel.icon}
+                      <span className="text-xs font-semibold text-slate-700">{ratingLabel.text}</span>
+                    </div>
+                  )}
                 </div>
+                
+                {/* Rating description */}
+                <p className="text-[10px] text-slate-400 mt-2">
+                  {rating === 0 && "Click a star to rate this recommendation"}
+                  {rating === 1 && "Needs significant improvement"}
+                  {rating === 2 && "Below expectations"}
+                  {rating === 3 && "Meets expectations"}
+                  {rating === 4 && "Exceeds expectations"}
+                  {rating === 5 && "Perfect match!"}
+                </p>
               </div>
 
-              {/* Comment Textarea */}
+              {/* Comment Textarea - Enhanced */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Additional Comments (Optional)
+                <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  Additional Comments
                 </label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value.slice(0, 500))}
-                  placeholder="Tell us what you liked or how we can improve..."
+                  placeholder="Tell us what you liked or how we can improve the recommendations..."
                   rows="4"
                   maxLength="500"
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition resize-none"
+                  className="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition resize-none text-sm placeholder:text-slate-400"
                 />
-                <div className="flex justify-end mt-1">
-                  <span className="text-xs text-slate-400">{comment.length}/500</span>
+                <div className="flex justify-between items-center mt-1.5">
+                  <span className="text-[9px] text-slate-400">Optional</span>
+                  <span className="text-[9px] font-mono text-slate-400">{comment.length}/500</span>
                 </div>
               </div>
 
+              {/* Error Message */}
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {error}
+                <div className="mb-5 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-center gap-2">
+                  <AlertCircle size={14} className="text-red-500 flex-shrink-0" />
+                  <span>{error}</span>
                 </div>
               )}
 
-              {/* Buttons */}
+              {/* Buttons - Enhanced */}
               <div className="flex gap-3">
                 <button
                   onClick={handleSkip}
                   disabled={loading}
-                  className="flex-1 py-2 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+                  className="flex-1 py-3 border-2 border-slate-200 rounded-xl text-slate-600 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 transition disabled:opacity-50"
                 >
                   Skip
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={loading || rating === 0}
-                  className="flex-1 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold text-sm hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                 >
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Submitting...</span>
+                    </>
                   ) : (
-                    'Submit Feedback'
+                    <>
+                      <ThumbsUp size={14} />
+                      <span>Submit Feedback</span>
+                    </>
                   )}
                 </button>
               </div>
+              
+              {/* Footer note */}
+              <p className="text-[9px] text-slate-400 text-center mt-4">
+                Your feedback helps train our AI matching engine
+              </p>
             </>
           )}
         </div>

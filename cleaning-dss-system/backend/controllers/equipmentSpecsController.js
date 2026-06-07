@@ -4,7 +4,7 @@
  */
 
 const EquipmentSpecs = require('../models/EquipmentSpecs');
-const Equipment = require('../models/Equipment');
+const { Equipment } = require('../models/Equipment');
 const { success, error } = require('../utils/apiResponse');
 
 /**

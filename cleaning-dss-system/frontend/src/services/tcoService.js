@@ -1,6 +1,9 @@
-// frontend/src/services/tcoService.js
+/**
+ * TCO Service
+ * Handles global TCO multiplier settings.
+ */
+
 import api from './api';
 
-// Admin only (TCO multipliers are sensitive configuration)
 export const getTcoMultipliers = () => api.get('/tco');
 export const updateTcoMultipliers = (data) => api.put('/tco', data);

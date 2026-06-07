@@ -1,7 +1,7 @@
 /**
  * format.js
  * 
- * Reusable formatting functions for currency, dates, strings, etc.
+ * Reusable formatting functions for currency, dates, strings, area, noise levels, etc.
  */
 
 /**
@@ -11,6 +11,23 @@
  */
 export const formatCurrencyUGX = (amount) => {
   if (amount === undefined || amount === null) return 'UGX 0';
+  return `UGX ${amount.toLocaleString('en-US')}`;
+};
+
+/**
+ * Format a number as Ugandan Shillings with abbreviation (e.g., UGX 1.2M)
+ * @param {number} amount - Amount in UGX
+ * @returns {string} Abbreviated currency string
+ */
+export const formatCurrencyUGXAbbr = (amount) => {
+  if (amount === undefined || amount === null) return 'UGX 0';
+  
+  if (amount >= 1_000_000) {
+    return `UGX ${(amount / 1_000_000).toFixed(1)}M`;
+  }
+  if (amount >= 1_000) {
+    return `UGX ${(amount / 1_000).toFixed(0)}K`;
+  }
   return `UGX ${amount.toLocaleString('en-US')}`;
 };
 
@@ -81,6 +98,19 @@ export const capitalizeWords = (str) => {
 };
 
 /**
+ * Convert snake_case to Title Case with spaces.
+ * @param {string} str - Snake case string (e.g., "floor_scrubber")
+ * @returns {string} Title Case (e.g., "Floor Scrubber")
+ */
+export const snakeToTitle = (str) => {
+  if (!str) return '';
+  return str
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+/**
  * Convert intensity value to user-friendly label.
  * @param {string} intensity - 'light', 'medium', 'heavy'
  * @returns {string} Human‑readable label
@@ -96,11 +126,16 @@ export const intensityToLabel = (intensity) => {
 
 /**
  * Convert domain to user-friendly label.
- * @param {string} domain - 'domestic' or 'industrial'
+ * @param {string} domain - 'domestic', 'commercial', 'industrial'
  * @returns {string} Human‑readable label
  */
 export const domainToLabel = (domain) => {
-  return domain === 'domestic' ? 'Domestic / Home' : 'Industrial / Commercial';
+  const map = {
+    domestic: 'Domestic / Home',
+    commercial: 'Commercial / Professional',
+    industrial: 'Industrial / Heavy-Duty',
+  };
+  return map[domain] || domain;
 };
 
 /**
@@ -124,4 +159,108 @@ export const formatFileSize = (bytes) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+/**
+ * Format area size with appropriate unit.
+ * @param {number} areaSize - Area in square meters
+ * @returns {string} Formatted area (e.g., "500 m²")
+ */
+export const formatArea = (areaSize) => {
+  if (!areaSize) return '-';
+  return `${formatNumber(areaSize)} m²`;
+};
+
+/**
+ * Format noise level with dB unit.
+ * @param {number} noiseLevel - Noise level in decibels
+ * @returns {string} Formatted noise level (e.g., "68 dB")
+ */
+export const formatNoiseLevel = (noiseLevel) => {
+  if (!noiseLevel) return '-';
+  return `${noiseLevel} dB`;
+};
+
+/**
+ * Format pressure with bar unit.
+ * @param {number} pressure - Pressure in bar
+ * @returns {string} Formatted pressure (e.g., "120 bar")
+ */
+export const formatPressure = (pressure) => {
+  if (!pressure) return '-';
+  return `${pressure} bar`;
+};
+
+/**
+ * Format flow rate with L/min unit.
+ * @param {number} flowRate - Flow rate in L/min
+ * @returns {string} Formatted flow rate (e.g., "7.5 L/min")
+ */
+export const formatFlowRate = (flowRate) => {
+  if (!flowRate) return '-';
+  return `${flowRate} L/min`;
+};
+
+/**
+ * Format tank capacity with liters unit.
+ * @param {number} capacity - Capacity in liters
+ * @returns {string} Formatted capacity (e.g., "45 L")
+ */
+export const formatTankCapacity = (capacity) => {
+  if (!capacity) return '-';
+  return `${capacity} L`;
+};
+
+/**
+ * Format working width with mm unit.
+ * @param {number} width - Width in millimeters
+ * @returns {string} Formatted width (e.g., "750 mm")
+ */
+export const formatWorkingWidth = (width) => {
+  if (!width) return '-';
+  return `${width} mm`;
+};
+
+/**
+ * Get noise level category based on dB value.
+ * @param {number} dB - Decibel value
+ * @returns {string} 'low', 'medium', or 'high'
+ */
+export const getNoiseCategory = (dB) => {
+  if (!dB) return 'medium';
+  if (dB <= 60) return 'low';
+  if (dB <= 70) return 'medium';
+  return 'high';
+};
+
+/**
+ * Get color class for match score.
+ * @param {number} score - Score from 0-100
+ * @returns {string} Tailwind CSS color classes
+ */
+export const getMatchScoreColor = (score) => {
+  if (score >= 80) return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+  if (score >= 60) return 'text-amber-600 bg-amber-50 border-amber-200';
+  return 'text-red-600 bg-red-50 border-red-200';
+};
+
+/**
+ * Format relative time (e.g., "2 hours ago", "just now")
+ * @param {string|Date} date - Date to format
+ * @returns {string} Relative time string
+ */
+export const formatRelativeTime = (date) => {
+  if (!date) return '-';
+  const d = new Date(date);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  return formatDate(date);
 };

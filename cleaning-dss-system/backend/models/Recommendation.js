@@ -1,7 +1,7 @@
 /**
  * Recommendation Model
  * Logs every user query and system output with full reasoning trace.
- * Updated to include explanation facility.
+ * Updated to include explanation facility and category tracking.
  */
 
 const mongoose = require('mongoose');
@@ -56,12 +56,36 @@ const recommendationSchema = new mongoose.Schema({
   },
   
   // Input facts
-  area_size: Number,
-  surface_type: String,
-  dirt_type: String,
-  power_stability: String,
-  budget_ugx: Number,
-  eco_preference: Boolean,
+  area_size: { type: Number, default: null },
+  surface_type: { type: String, default: null },
+  dirt_type: { type: String, default: null },
+  power_stability: { type: String, default: 'stable' },
+  budget_ugx: { type: Number, default: 0 },
+  eco_preference: { type: Boolean, default: false },
+  
+  // Category and brand tracking (NEW)
+  machine_category: {
+    type: String,
+    enum: ['floor_scrubber', 'vacuum_cleaner', 'window_cleaner', 'pressure_washer', 
+           'steam_cleaner', 'carpet_cleaner', 'sweeper', 'scrubber_drier'],
+    default: null
+  },
+  machine_subtype: { type: String, default: null },
+  brand_name: { type: String, default: null },
+  
+  // Additional user inputs (NEW)
+  usage_hours_per_week: { type: Number, default: 0 },
+  noise_sensitive: { type: Boolean, default: false },
+  floor_texture: { type: String, default: null },
+  environment: { type: String, default: null },
+  power_source: { type: String, default: null },
+  aisle_width: { type: String, default: null },
+  soil_level: { type: String, default: null },
+  use_case: { type: String, default: null },
+  pressure_required: { type: String, default: null },
+  filtration: { type: String, default: null },
+  tank_capacity: { type: String, default: null },
+  noise_sensitivity: { type: String, default: null },
   
   // Complete reasoning trace (Explanation Facility)
   reasoning_trace: [reasoningStepSchema],
@@ -91,8 +115,8 @@ const recommendationSchema = new mongoose.Schema({
   }],
   
   // TCO and scoring
-  estimated_tco_per_year_ugx: Number,
-  final_score: Number,
+  estimated_tco_per_year_ugx: { type: Number, default: null },
+  final_score: { type: Number, default: null },
   
   // Alerts with explanations
   alerts_triggered: [{
@@ -112,16 +136,24 @@ const recommendationSchema = new mongoose.Schema({
     default: null
   },
   
+  // Saved by user flag
+  saved: {
+    type: Boolean,
+    default: false
+  },
+  
   timestamp: {
     type: Date,
     default: Date.now
   }
 });
 
-// Indexes
+// Indexes for efficient queries
 recommendationSchema.index({ user_id: 1, timestamp: -1 });
 recommendationSchema.index({ working_memory_id: 1 });
 recommendationSchema.index({ recommended_equipment_id: 1 });
 recommendationSchema.index({ recommended_detergent_id: 1 });
+recommendationSchema.index({ machine_category: 1 });
+recommendationSchema.index({ saved: 1 });
 
 module.exports = mongoose.model('Recommendation', recommendationSchema);

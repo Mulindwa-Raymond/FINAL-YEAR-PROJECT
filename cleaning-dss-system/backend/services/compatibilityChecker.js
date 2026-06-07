@@ -10,11 +10,11 @@ const checkCompatibility = (detergent, machine, surfaceType) => {
 
   // 1. Surface compatibility
   if (detergent.incompatible_surfaces?.includes(surfaceType)) {
-    alerts.push(`Detergent ${detergent.name} is incompatible with ${surfaceType}.`);
+    alerts.push(`Detergent ${detergent.product_name} is incompatible with ${surfaceType}.`);
     return { compatible: false, alerts };
   }
-  if (!detergent.compatible_surfaces?.includes(surfaceType) && detergent.compatible_surfaces?.length) {
-    alerts.push(`Detergent ${detergent.name} has not been tested on ${surfaceType}. Use with caution.`);
+  if (!detergent.surface_compatibility?.includes(surfaceType) && detergent.surface_compatibility?.length) {
+    alerts.push(`Detergent ${detergent.product_name} has not been tested on ${surfaceType}. Use with caution.`);
     // Not a hard block, but alert
   }
 
@@ -22,16 +22,16 @@ const checkCompatibility = (detergent, machine, surfaceType) => {
   if (machine.materials && detergent.incompatible_machine_materials) {
     const badMaterial = machine.materials.find(mat => detergent.incompatible_machine_materials.includes(mat));
     if (badMaterial) {
-      alerts.push(`⚠️ Detergent ${detergent.name} may damage machine parts made of ${badMaterial}.`);
+      alerts.push(`⚠️ Detergent ${detergent.product_name} may damage machine parts made of ${badMaterial}.`);
       return { compatible: false, alerts };
     }
   }
 
   // 3. pH vs machine material corrosion risk
-  if (detergent.ph >= 12 && machine.materials?.includes('aluminum')) {
+  if (detergent.ph_value >= 12 && machine.materials?.includes('aluminum')) {
     alerts.push('High alkaline detergent (pH >12) can corrode aluminum components. Rinse thoroughly after use.');
   }
-  if (detergent.ph <= 3 && machine.materials?.includes('stainless_steel')) {
+  if (detergent.ph_value <= 3 && machine.materials?.includes('stainless_steel')) {
     alerts.push('Acidic detergent may cause pitting on stainless steel. Neutralise after cleaning.');
   }
 
@@ -49,10 +49,10 @@ const checkCompatibility = (detergent, machine, surfaceType) => {
  */
 const findBestDetergent = (detergents, machine, dirtType, surfaceType, ecoRequired = false) => {
   let candidates = detergents.filter(d => 
-    d.active && d.in_stock &&
+    d.active && 
     (d.domain === machine.domain || d.domain === 'both') &&
     d.intensity === machine.intensity &&
-    (d.compatible_dirt_types?.includes(dirtType) || !d.compatible_dirt_types?.length) &&
+    (d.dirt_compatibility?.includes(dirtType) || !d.dirt_compatibility?.length) &&
     (!ecoRequired || d.eco_certified === true)
   );
 
@@ -64,7 +64,7 @@ const findBestDetergent = (detergents, machine, dirtType, surfaceType, ecoRequir
     if (alerts.length) score -= 20; // penalty for alerts
     if (d.eco_certified) score += 10;
     // lower price is better
-    const pricePerLiter = d.price_ugx / (d.package_size_liters || 1);
+    const pricePerLiter = d.current_price_ugx / (d.unit_size || 1);
     score -= pricePerLiter / 10000; // arbitrary normalisation
     return { detergent: d, compatibility: { compatible, alerts }, score };
   }).filter(s => s !== null);

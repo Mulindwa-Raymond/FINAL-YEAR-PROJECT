@@ -141,4 +141,9 @@ ruleSchema.index({ category: 1, active: 1 });
 ruleSchema.index({ priority: -1, salience: -1 });
 ruleSchema.index({ 'antecedent.conditions.attribute': 1 });
 
-module.exports = mongoose.model('Rule', ruleSchema);
+module.exports = {
+  Rule: mongoose.model('Rule', ruleSchema),
+  // Export enums for use in other files
+  operators,
+  actionTypes
+};

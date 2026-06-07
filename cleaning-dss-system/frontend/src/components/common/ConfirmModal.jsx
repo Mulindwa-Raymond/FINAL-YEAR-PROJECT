@@ -4,14 +4,14 @@
  * Reusable confirmation modal component.
  * Used for delete confirmations, important actions, etc.
  * Features:
- * - Glassmorphism styling
- * - Custom title and message
- * - Confirm and cancel buttons
- * - Loading state for confirm action
+ * - Modern glassmorphism styling with gradient accents
+ * - Custom title and message with variant-based coloring
+ * - Confirm and cancel buttons with loading states
+ * - Smooth animations matching system design
  */
 
 import React, { useState, useEffect } from 'react';
-import { X, AlertTriangle } from 'lucide-react';
+import { X, AlertTriangle, Trash2, ShieldAlert, Info, CheckCircle } from 'lucide-react';
 
 export const ConfirmModal = ({ 
   isOpen, 
@@ -21,19 +21,27 @@ export const ConfirmModal = ({
   message = 'Are you sure you want to proceed?',
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  confirmVariant = 'danger' // 'danger', 'primary', 'warning'
+  confirmVariant = 'danger' // 'danger', 'primary', 'warning', 'success'
 }) => {
   const [loading, setLoading] = useState(false);
+  const [fadeIn, setFadeIn] = useState(false);
 
-  // Reset loading when modal closes
   useEffect(() => {
-    if (!isOpen) setLoading(false);
+    if (isOpen) {
+      setFadeIn(true);
+    } else {
+      setFadeIn(false);
+      setLoading(false);
+    }
   }, [isOpen]);
 
   const handleConfirm = async () => {
     setLoading(true);
     try {
       await onConfirm();
+      onClose();
+    } catch (error) {
+      console.error('Confirm action failed:', error);
     } finally {
       setLoading(false);
     }
@@ -41,59 +49,123 @@ export const ConfirmModal = ({
 
   if (!isOpen) return null;
 
-  const getConfirmButtonClass = () => {
+  // Variant configurations
+  const getVariantConfig = () => {
     switch (confirmVariant) {
       case 'danger':
-        return 'bg-red-600 hover:bg-red-700';
+        return {
+          icon: <Trash2 size={20} />,
+          iconBg: 'bg-red-100',
+          iconColor: 'text-red-600',
+          headerBg: 'from-red-500 to-red-600',
+          buttonBg: 'bg-red-600 hover:bg-red-700',
+          buttonShadow: 'shadow-red-600/30',
+          borderColor: 'border-red-200'
+        };
       case 'warning':
-        return 'bg-amber-600 hover:bg-amber-700';
+        return {
+          icon: <AlertTriangle size={20} />,
+          iconBg: 'bg-amber-100',
+          iconColor: 'text-amber-600',
+          headerBg: 'from-amber-500 to-orange-600',
+          buttonBg: 'bg-amber-600 hover:bg-amber-700',
+          buttonShadow: 'shadow-amber-600/30',
+          borderColor: 'border-amber-200'
+        };
+      case 'success':
+        return {
+          icon: <CheckCircle size={20} />,
+          iconBg: 'bg-emerald-100',
+          iconColor: 'text-emerald-600',
+          headerBg: 'from-emerald-500 to-green-600',
+          buttonBg: 'bg-emerald-600 hover:bg-emerald-700',
+          buttonShadow: 'shadow-emerald-600/30',
+          borderColor: 'border-emerald-200'
+        };
       default:
-        return 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:shadow-lg';
+        return {
+          icon: <Info size={20} />,
+          iconBg: 'bg-blue-100',
+          iconColor: 'text-blue-600',
+          headerBg: 'from-blue-600 to-cyan-600',
+          buttonBg: 'bg-gradient-to-r from-blue-600 to-cyan-600',
+          buttonShadow: 'shadow-blue-600/30',
+          borderColor: 'border-blue-200'
+        };
     }
   };
 
+  const variant = getVariantConfig();
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/40 shadow-2xl w-full max-w-md">
-        {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <AlertTriangle className={`w-5 h-5 ${
-              confirmVariant === 'danger' ? 'text-red-600' : 
-              confirmVariant === 'warning' ? 'text-amber-600' : 
-              'text-cyan-600'
-            }`} />
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="p-1 hover:bg-slate-100 rounded-lg transition disabled:opacity-50"
-          >
-            <X className="w-5 h-5 text-slate-500" />
-          </button>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-300 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transition-all duration-300 ${fadeIn ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
+        
+        {/* Header with Gradient */}
+        <div className={`bg-gradient-to-r ${variant.headerBg} px-6 py-5 text-white`}>
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center`}>
+                {variant.icon}
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">{title}</h2>
+                <p className="text-white/80 text-[10px] font-mono mt-0.5">This action requires confirmation</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="p-1.5 hover:bg-white/20 rounded-lg transition disabled:opacity-50"
+            >
+              <X size={18} className="text-white" />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
         <div className="p-6">
-          <p className="text-slate-700">{message}</p>
+          {/* Alert Icon */}
+          <div className="flex items-start gap-3 mb-4">
+            <div className={`w-10 h-10 rounded-full ${variant.iconBg} flex items-center justify-center flex-shrink-0`}>
+              <ShieldAlert size={18} className={variant.iconColor} />
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">{message}</p>
+          </div>
+
+          {/* Warning Note */}
+          <div className={`mb-6 p-3 ${variant.iconBg.replace('bg-', 'bg-').replace('100', '50')} rounded-xl border ${variant.borderColor}`}>
+            <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <AlertTriangle size={10} className={variant.iconColor} />
+              This action cannot be undone
+            </p>
+          </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 mt-6">
+          <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+              className="px-5 py-2.5 border-2 border-slate-200 rounded-xl text-slate-600 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 transition disabled:opacity-50"
             >
               {cancelText}
             </button>
             <button
               onClick={handleConfirm}
               disabled={loading}
-              className={`px-4 py-2 ${getConfirmButtonClass()} text-white rounded-xl font-semibold flex items-center gap-2 transition disabled:opacity-70`}
+              className={`px-5 py-2.5 ${variant.buttonBg} text-white rounded-xl font-semibold text-sm transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-2 ${variant.buttonShadow}`}
             >
-              {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : null}
-              {loading ? 'Processing...' : confirmText}
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  {variant.icon}
+                  <span>{confirmText}</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -101,3 +173,5 @@ export const ConfirmModal = ({
     </div>
   );
 };
+
+export default ConfirmModal;

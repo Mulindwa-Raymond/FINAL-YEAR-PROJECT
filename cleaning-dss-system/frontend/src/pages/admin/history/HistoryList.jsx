@@ -51,11 +51,27 @@ export const HistoryList = () => {
         params[key] === '' || params[key] === undefined ? delete params[key] : null
       );
       const res = await getRecommendationHistory(params);
-      setHistory(res.data.data?.history || res.data.data || []);
-      setTotal(res.data.data?.total || (res.data.data?.length || 0));
+      
+      // Handle different response structures
+      const data = res.data.data;
+      if (data?.history) {
+        setHistory(data.history);
+        setTotal(data.total || 0);
+      } else if (Array.isArray(data)) {
+        setHistory(data);
+        setTotal(data.length);
+      } else if (data) {
+        setHistory([data]);
+        setTotal(1);
+      } else {
+        setHistory([]);
+        setTotal(0);
+      }
     } catch (err) {
       setError('Failed to load recommendation history.');
       console.error(err);
+      setHistory([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }

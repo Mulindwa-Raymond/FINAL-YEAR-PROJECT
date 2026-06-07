@@ -2,11 +2,6 @@
  * CompatibilityList.jsx
  * 
  * Admin page for managing equipment-detergent compatibility.
- * Features:
- * - List all compatibility records
- * - Filter by equipment or detergent
- * - Add, edit, delete compatibility records
- * - Visual indicators for recommended vs compatible
  */
 
 import React, { useEffect, useState } from 'react';
@@ -16,12 +11,12 @@ import {
   Search, 
   Edit, 
   Trash2, 
-  Filter, 
   X,
   HeartHandshake,
   CheckCircle,
   AlertCircle,
-  RefreshCw
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { getAllCompatibilities, deleteCompatibility } from '../../../services/compatibilityService';
 import { getAllEquipment } from '../../../services/equipmentService';
@@ -34,7 +29,8 @@ export const CompatibilityList = () => {
   const [equipmentMap, setEquipmentMap] = useState({});
   const [detergentMap, setDetergentMap] = useState({});
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [searchEquip, setSearchEquip] = useState('');
+  const [searchDet, setSearchDet] = useState('');
   const [filterEquipment, setFilterEquipment] = useState('');
   const [filterDetergent, setFilterDetergent] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -42,29 +38,66 @@ export const CompatibilityList = () => {
   const [total, setTotal] = useState(0);
   const limit = 20;
 
+  // Helper to extract ID from various formats (handles objects, strings, and IDs)
+  const extractId = (item) => {
+    if (!item) return null;
+    if (typeof item === 'string') return item;
+    if (typeof item === 'object') {
+      return item._id || item.equipment_id || item.detergent_id || item.id;
+    }
+    return null;
+  };
+
+  // Helper to get equipment display name
+  const getEquipmentName = (equipment) => {
+    if (!equipment) return 'Unknown Equipment';
+    if (typeof equipment === 'object' && equipment.brand_name) {
+      return `${equipment.brand_name} ${equipment.model_name || ''}`.trim() || 'Unknown Equipment';
+    }
+    const id = extractId(equipment);
+    return equipmentMap[id] || 'Unknown Equipment';
+  };
+
+  // Helper to get detergent display name
+  const getDetergentName = (detergent) => {
+    if (!detergent) return 'Unknown Detergent';
+    if (typeof detergent === 'object' && detergent.product_name) {
+      return detergent.product_name;
+    }
+    const id = extractId(detergent);
+    return detergentMap[id] || 'Unknown Detergent';
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
       // Fetch all data in parallel
       const [compRes, equipRes, detRes] = await Promise.all([
-        getAllCompatibilities({ page, limit, equipment_id: filterEquipment || undefined, detergent_id: filterDetergent || undefined }),
+        getAllCompatibilities({ page, limit }),
         getAllEquipment({ limit: 1000 }),
         getAllDetergents({ limit: 1000 })
       ]);
       
-      setCompatibilities(compRes.data.data?.compatibilities || compRes.data.data || []);
-      setTotal(compRes.data.data?.total || (compRes.data.data?.length || 0));
+      const compatData = compRes.data.data?.compatibilities || compRes.data.data || [];
+      setCompatibilities(compatData);
+      setTotal(compRes.data.data?.total || compatData.length);
       
-      // Build maps for quick lookup
+      // Build maps for quick lookup from IDs to names
       const equipMap = {};
-      (equipRes.data.data?.equipment || equipRes.data.data || []).forEach(e => {
-        equipMap[e._id] = `${e.brand_name} ${e.model_name}`;
+      const equipList = equipRes.data.data?.equipment || equipRes.data.data || [];
+      equipList.forEach(e => {
+        const id = e._id || e.equipment_id;
+        const name = `${e.brand_name || ''} ${e.model_name || ''}`.trim() || e.name || 'Unknown Equipment';
+        equipMap[id] = name;
       });
       setEquipmentMap(equipMap);
       
       const detMap = {};
-      (detRes.data.data?.detergents || detRes.data.data || []).forEach(d => {
-        detMap[d._id] = d.product_name;
+      const detList = detRes.data.data?.detergents || detRes.data.data || [];
+      detList.forEach(d => {
+        const id = d._id || d.detergent_id;
+        const name = d.product_name || d.name || 'Unknown Detergent';
+        detMap[id] = name;
       });
       setDetergentMap(detMap);
     } catch (err) {
@@ -76,12 +109,17 @@ export const CompatibilityList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, filterEquipment, filterDetergent]);
+  }, [page]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    const compatId = deleteTarget._id || deleteTarget.compatibility_id;
+    if (!compatId) {
+      console.error('No compatibility ID found:', deleteTarget);
+      return;
+    }
     try {
-      await deleteCompatibility(deleteTarget._id);
+      await deleteCompatibility(compatId);
       fetchData();
     } catch (err) {
       console.error('Delete failed:', err);
@@ -90,141 +128,285 @@ export const CompatibilityList = () => {
     }
   };
 
+  // Prepare equipment and detergent lists for filter dropdowns
+  const equipmentOptions = Object.entries(equipmentMap).map(([id, name]) => ({ id, name }));
+  const detergentOptions = Object.entries(detergentMap).map(([id, name]) => ({ id, name }));
+
+  const filteredEquipmentOptions = equipmentOptions.filter(opt =>
+    opt.name.toLowerCase().includes(searchEquip.toLowerCase())
+  );
+  const filteredDetergentOptions = detergentOptions.filter(opt =>
+    opt.name.toLowerCase().includes(searchDet.toLowerCase())
+  );
+
+  // Apply client-side filters
+  const filteredCompatibilities = compatibilities.filter(comp => {
+    const equipId = extractId(comp.equipment_id);
+    const detId = extractId(comp.detergent_id);
+    const equipName = getEquipmentName(comp.equipment_id);
+    const detName = getDetergentName(comp.detergent_id);
+    
+    if (filterEquipment && equipId !== filterEquipment && equipName !== filterEquipment) return false;
+    if (filterDetergent && detId !== filterDetergent && detName !== filterDetergent) return false;
+    return true;
+  });
+
+  const clearFilters = () => {
+    setFilterEquipment('');
+    setFilterDetergent('');
+    setSearchEquip('');
+    setSearchDet('');
+  };
+
   const totalPages = Math.ceil(total / limit);
 
   if (loading && page === 1) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="pb-8 px-4 lg:px-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
         <div>
-          <h1 className="text-2xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Equipment-Detergent Compatibility
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">Manage which detergents work safely with each equipment</p>
+          <div className="flex items-center gap-2">
+            <HeartHandshake className="w-5 h-5 text-cyan-600" />
+            <h1 className="text-xl font-semibold text-slate-800">Equipment-Detergent Compatibility</h1>
+          </div>
+          <p className="text-slate-500 text-sm mt-0.5">Manage which detergents work safely with each equipment</p>
         </div>
         <Link
           to="/admin/compatibility/new"
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold text-sm hover:shadow-lg transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Compatibility
         </Link>
       </div>
 
-      {/* Search and filter bar */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl p-4">
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="flex-1 min-w-[200px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      {/* Stats bar */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="text-sm text-slate-500">
+          Showing <span className="font-medium text-slate-700">{filteredCompatibilities.length}</span> of{' '}
+          <span className="font-medium text-slate-700">{total}</span> records
+        </div>
+        <div className="text-sm text-slate-400">
+          Last updated: {new Date().toLocaleDateString()}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Equipment Filter */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Filter by Equipment</label>
+          <div className="relative">
             <input
               type="text"
-              placeholder="Search by equipment or detergent name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+              placeholder="Search equipment..."
+              value={searchEquip}
+              onChange={(e) => setSearchEquip(e.target.value)}
+              className="w-full pl-3 pr-3 py-2 border border-slate-200 rounded-lg focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-sm"
             />
           </div>
-          <input
-            type="text"
-            placeholder="Equipment ID"
-            value={filterEquipment}
-            onChange={(e) => setFilterEquipment(e.target.value)}
-            className="w-48 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
-          />
-          <input
-            type="text"
-            placeholder="Detergent ID"
-            value={filterDetergent}
-            onChange={(e) => setFilterDetergent(e.target.value)}
-            className="w-48 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
-          />
-          {(search || filterEquipment || filterDetergent) && (
-            <button
-              onClick={() => { setSearch(''); setFilterEquipment(''); setFilterDetergent(''); }}
-              className="flex items-center gap-1 px-3 py-2 text-sm text-slate-500 hover:text-red-600"
-            >
-              <X className="w-3 h-3" /> Clear
-            </button>
+          {searchEquip && filteredEquipmentOptions.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full md:w-80 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-lg shadow-lg">
+              {filteredEquipmentOptions.map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    setFilterEquipment(opt.id);
+                    setSearchEquip('');
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                >
+                  <span className="font-medium text-slate-700">{opt.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {filterEquipment && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-cyan-600 bg-cyan-50 px-2 py-1 rounded-md">
+                Filtering: {equipmentMap[filterEquipment] || filterEquipment}
+              </span>
+              <button onClick={() => setFilterEquipment('')} className="text-slate-400 hover:text-red-500">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Detergent Filter */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Filter by Detergent</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search detergent..."
+              value={searchDet}
+              onChange={(e) => setSearchDet(e.target.value)}
+              className="w-full pl-3 pr-3 py-2 border border-slate-200 rounded-lg focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-sm"
+            />
+          </div>
+          {searchDet && filteredDetergentOptions.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full md:w-80 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-lg shadow-lg">
+              {filteredDetergentOptions.map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    setFilterDetergent(opt.id);
+                    setSearchDet('');
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                >
+                  <span className="font-medium text-slate-700">{opt.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {filterDetergent && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-cyan-600 bg-cyan-50 px-2 py-1 rounded-md">
+                Filtering: {detergentMap[filterDetergent] || filterDetergent}
+              </span>
+              <button onClick={() => setFilterDetergent('')} className="text-slate-400 hover:text-red-500">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl overflow-hidden">
+      {/* Clear filters button */}
+      {(filterEquipment || filterDetergent) && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={clearFilters}
+            className="inline-flex items-center gap-1 px-3 py-1 text-sm text-slate-500 hover:text-red-600 transition-colors"
+          >
+            <X className="w-3 h-3" /> Clear all filters
+          </button>
+        </div>
+      )}
+
+      {/* Compatibility Table */}
+      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50/80">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Equipment</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Detergent</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Notes</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Equipment</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Detergent</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Notes</th>
+                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
-              {compatibilities.length === 0 ? (
+            <tbody className="divide-y divide-slate-100">
+              {filteredCompatibilities.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
                     No compatibility records found.
                   </td>
                 </tr>
               ) : (
-                compatibilities.map((comp) => (
-                  <tr key={comp._id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-800">
-                      {equipmentMap[comp.equipment_id] || comp.equipment_id}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">
-                      {detergentMap[comp.detergent_id] || comp.detergent_id}
-                    </td>
-                    <td className="px-6 py-4">
-                      {comp.is_recommended ? (
-                        <span className="flex items-center gap-1 text-green-600 text-sm">
-                          <CheckCircle className="w-4 h-4" /> Recommended
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-amber-600 text-sm">
-                          <AlertCircle className="w-4 h-4" /> Compatible (Not Recommended)
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-500 max-w-md truncate">
-                      {comp.compatibility_notes || '-'}
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <Link
-                        to={`/admin/compatibility/${comp._id}/edit`}
-                        className="inline-flex p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Link>
-                      <button
-                        onClick={() => setDeleteTarget(comp)}
-                        className="inline-flex p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredCompatibilities.map((comp) => {
+                  // Extract equipment name safely
+                  let equipName = 'Unknown Equipment';
+                  if (comp.equipment_id) {
+                    if (typeof comp.equipment_id === 'object' && comp.equipment_id.brand_name) {
+                      equipName = `${comp.equipment_id.brand_name} ${comp.equipment_id.model_name || ''}`.trim();
+                    } else {
+                      const equipId = extractId(comp.equipment_id);
+                      equipName = equipmentMap[equipId] || 'Unknown Equipment';
+                    }
+                  }
+                  
+                  // Extract detergent name safely
+                  let detName = 'Unknown Detergent';
+                  if (comp.detergent_id) {
+                    if (typeof comp.detergent_id === 'object' && comp.detergent_id.product_name) {
+                      detName = comp.detergent_id.product_name;
+                    } else {
+                      const detId = extractId(comp.detergent_id);
+                      detName = detergentMap[detId] || 'Unknown Detergent';
+                    }
+                  }
+                  
+                  return (
+                    <tr key={comp._id || comp.compatibility_id} className="hover:bg-slate-50 transition-colors group">
+                      <td className="px-6 py-4 font-medium text-slate-800">{equipName}</td>
+                      <td className="px-6 py-4 text-slate-600">{detName}</td>
+                      <td className="px-6 py-4">
+                        {comp.is_recommended ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700">
+                            <CheckCircle className="w-3 h-3" /> Recommended
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-700">
+                            <AlertCircle className="w-3 h-3" /> Compatible (Not Recommended)
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-500 max-w-md truncate">
+                        {comp.compatibility_notes || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Link 
+                          to={`/admin/compatibility/${comp._id}/edit`} 
+                          className="inline-flex p-2 text-slate-500 hover:text-blue-600 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Link>
+                        <button 
+                          onClick={() => setDeleteTarget(comp)} 
+                          className="inline-flex p-2 text-slate-500 hover:text-red-600 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
+        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-slate-200 flex justify-between items-center">
-            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1} className="px-3 py-1 border rounded-lg disabled:opacity-50">Previous</button>
+          <div className="px-6 py-3 border-t border-slate-200 flex justify-between items-center bg-slate-50">
+            <button
+              onClick={() => setPage(p => Math.max(1, p-1))}
+              disabled={page === 1}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-slate-600 hover:text-cyan-600 disabled:opacity-50 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" /> Previous
+            </button>
             <span className="text-sm text-slate-500">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages} className="px-3 py-1 border rounded-lg disabled:opacity-50">Next</button>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p+1))}
+              disabled={page === totalPages}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-slate-600 hover:text-cyan-600 disabled:opacity-50 transition-colors"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>
 
-      <ConfirmModal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Delete Compatibility" message={`Are you sure you want to delete this compatibility record?`} confirmVariant="danger" />
+      {/* Delete confirmation modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete Compatibility"
+        message={`Are you sure you want to delete this compatibility record?`}
+        confirmVariant="danger"
+      />
     </div>
   );
 };

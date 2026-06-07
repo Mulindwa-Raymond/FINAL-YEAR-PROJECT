@@ -1,4 +1,4 @@
-const Rule = require('../models/Rule');
+const { Rule } = require('../models/Rule');
 
 let cachedRules = { equipment: [], detergent: [] };
 let lastLoad = null;

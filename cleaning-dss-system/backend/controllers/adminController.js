@@ -8,15 +8,15 @@ const AuditLog = require('../models/AuditLog');
 const SystemMetric = require('../models/SystemMetric');
 const TcoMultiplier = require('../models/TcoMultiplier');
 const Training = require('../models/Training');
-const RecommendationHistory = require('../models/RecommendationHistory');
+const RecommendationHistory = require('../models/Recommendation');
 const { importEquipment, importDetergents, importRules } = require('../services/dataImportService');
 const { success, error } = require('../utils/apiResponse');
 const { roles, hasPermission } = require('../config/roles');
 
 // Models for export/import
-const Equipment = require('../models/Equipment');
-const Detergent = require('../models/Detergent');
-const Rule = require('../models/Rule');
+const { Equipment } = require('../models/Equipment');
+const { Detergent } = require('../models/Detergent');
+const { Rule } = require('../models/Rule');
 const fs = require('fs');
 
 // ============================================
@@ -252,12 +252,32 @@ const updateMyProfile = async (req, res, next) => {
 const getSystemMetrics = async (req, res, next) => {
   try {
     const { date } = req.query;
+    
+    // Build default metrics structure
+    const defaultMetrics = {
+      totalRecommendations: 0,
+      activeUsers: 0,
+      avgResponseTime: 0,
+      topCategories: [],
+      topIntensities: [],
+      topSurfaces: [],
+      topDirtTypes: []
+    };
+    
     let query = {};
     if (date) query.date = new Date(date);
     else query.date = { $gte: new Date(new Date().setHours(0,0,0)) };
+    
     const metrics = await SystemMetric.findOne(query);
-    if (!metrics) return success(res, { message: 'No metrics for today yet' });
-    return success(res, metrics, 'System metrics retrieved');
+    
+    if (!metrics) {
+      // Return default structure if no metrics exist
+      return success(res, defaultMetrics, 'No metrics for today yet');
+    }
+    
+    // Merge with defaults to ensure all expected fields exist
+    const response = { ...defaultMetrics, ...metrics.toObject() };
+    return success(res, response, 'System metrics retrieved');
   } catch (err) {
     next(err);
   }
@@ -265,12 +285,39 @@ const getSystemMetrics = async (req, res, next) => {
 
 const getAuditLogs = async (req, res, next) => {
   try {
-    const { adminId, action, limit = 50 } = req.query;
+    const { adminId, action, startDate, endDate, page = 1, limit = 20 } = req.query;
     const filter = {};
+    
     if (adminId) filter.adminId = adminId;
     if (action) filter.action = action;
-    const logs = await AuditLog.find(filter).sort({ timestamp: -1 }).limit(parseInt(limit)).populate('adminId', 'username');
-    return success(res, logs, 'Audit logs retrieved');
+    
+    // Date range filter
+    if (startDate || endDate) {
+      filter.timestamp = {};
+      if (startDate) filter.timestamp.$gte = new Date(startDate);
+      if (endDate) filter.timestamp.$lte = new Date(endDate);
+    }
+    
+    // Pagination
+    const pageNum = Math.max(1, parseInt(page));
+    const pageSize = Math.max(1, Math.min(100, parseInt(limit)));
+    const skip = (pageNum - 1) * pageSize;
+    
+    const logs = await AuditLog.find(filter)
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .populate('adminId', 'username email');
+    
+    const total = await AuditLog.countDocuments(filter);
+    
+    return success(res, { 
+      logs, 
+      total, 
+      page: pageNum, 
+      limit: pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    }, 'Audit logs retrieved');
   } catch (err) {
     next(err);
   }
@@ -278,16 +325,42 @@ const getAuditLogs = async (req, res, next) => {
 
 const uploadEquipment = async (req, res, next) => {
   try {
-    if (!req.file) return error(res, 'No file uploaded', 400);
+    if (!req.file) {
+      return error(res, 'No file uploaded', 400);
+    }
+    
     const format = req.body.format || 'csv';
+    
+    // Validate format
+    if (!['csv', 'json'].includes(format)) {
+      return error(res, 'Invalid format. Use "csv" or "json"', 400);
+    }
+    
     const result = await importEquipment(req.file.path, format);
+    
+    // Validate result
+    if (!result) {
+      return error(res, 'Failed to import equipment', 400);
+    }
+    
     await AuditLog.create({
       adminId: req.user.id,
       action: 'BULK_UPLOAD_EQUIPMENT',
-      details: { insertedCount: result.insertedCount, errors: result.errors.length },
+      targetType: 'Equipment',
+      details: { 
+        insertedCount: result.insertedCount || 0, 
+        errorCount: result.errors ? result.errors.length : 0,
+        errors: result.errors || []
+      },
       ipAddress: req.ip
     });
-    return success(res, result, 'Equipment import completed');
+    
+    return success(res, {
+      insertedCount: result.insertedCount || 0,
+      errorCount: result.errors ? result.errors.length : 0,
+      errors: result.errors || [],
+      message: `Equipment import completed. ${result.insertedCount || 0} records inserted.`
+    }, 'Equipment import completed');
   } catch (err) {
     next(err);
   }
@@ -295,16 +368,40 @@ const uploadEquipment = async (req, res, next) => {
 
 const uploadDetergents = async (req, res, next) => {
   try {
-    if (!req.file) return error(res, 'No file uploaded', 400);
+    if (!req.file) {
+      return error(res, 'No file uploaded', 400);
+    }
+    
     const format = req.body.format || 'csv';
+    
+    if (!['csv', 'json'].includes(format)) {
+      return error(res, 'Invalid format. Use "csv" or "json"', 400);
+    }
+    
     const result = await importDetergents(req.file.path, format);
+    
+    if (!result) {
+      return error(res, 'Failed to import detergents', 400);
+    }
+    
     await AuditLog.create({
       adminId: req.user.id,
       action: 'BULK_UPLOAD_DETERGENTS',
-      details: { insertedCount: result.insertedCount, errors: result.errors.length },
+      targetType: 'Detergent',
+      details: { 
+        insertedCount: result.insertedCount || 0, 
+        errorCount: result.errors ? result.errors.length : 0,
+        errors: result.errors || []
+      },
       ipAddress: req.ip
     });
-    return success(res, result, 'Detergents import completed');
+    
+    return success(res, {
+      insertedCount: result.insertedCount || 0,
+      errorCount: result.errors ? result.errors.length : 0,
+      errors: result.errors || [],
+      message: `Detergent import completed. ${result.insertedCount || 0} records inserted.`
+    }, 'Detergents import completed');
   } catch (err) {
     next(err);
   }
@@ -312,18 +409,49 @@ const uploadDetergents = async (req, res, next) => {
 
 const uploadRules = async (req, res, next) => {
   try {
-    if (!req.file) return error(res, 'No file uploaded', 400);
+    if (!req.file) {
+      return error(res, 'No file uploaded', 400);
+    }
+    
     const format = req.body.format || 'csv';
+    
+    if (!['csv', 'json'].includes(format)) {
+      return error(res, 'Invalid format. Use "csv" or "json"', 400);
+    }
+    
     const result = await importRules(req.file.path, format);
+    
+    if (!result) {
+      return error(res, 'Failed to import rules', 400);
+    }
+    
     await AuditLog.create({
       adminId: req.user.id,
       action: 'BULK_UPLOAD_RULES',
-      details: { insertedCount: result.insertedCount, errors: result.errors.length },
+      targetType: 'Rule',
+      details: { 
+        insertedCount: result.insertedCount || 0, 
+        errorCount: result.errors ? result.errors.length : 0,
+        errors: result.errors || []
+      },
       ipAddress: req.ip
     });
-    const { loadRules } = require('../services/ruleLoader');
-    await loadRules();
-    return success(res, result, 'Rules import completed');
+    
+    // Reload rules into memory
+    try {
+      const { loadRules } = require('../services/ruleLoader');
+      await loadRules();
+    } catch (reloadErr) {
+      console.error('Error reloading rules:', reloadErr);
+      // Don't fail the upload just because rule reload failed
+    }
+    
+    return success(res, {
+      insertedCount: result.insertedCount || 0,
+      errorCount: result.errors ? result.errors.length : 0,
+      errors: result.errors || [],
+      message: `Rules import completed. ${result.insertedCount || 0} records inserted.`
+    }, 'Rules import completed');
   } catch (err) {
     next(err);
   }
@@ -396,8 +524,38 @@ const importDatabase = async (req, res, next) => {
 // Training management functions (add as needed)
 const getAllTrainings = async (req, res, next) => {
   try {
-    const trainings = await Training.find();
-    return success(res, trainings, 'Trainings retrieved');
+    const { page = 1, limit = 20, search, active } = req.query;
+    const filter = {};
+    
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (active !== undefined) {
+      filter.is_active = active === 'true';
+    }
+    
+    const pageNum = Math.max(1, parseInt(page));
+    const pageSize = Math.max(1, Math.min(100, parseInt(limit)));
+    const skip = (pageNum - 1) * pageSize;
+    
+    const trainings = await Training.find(filter)
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(pageSize);
+    
+    const total = await Training.countDocuments(filter);
+    
+    return success(res, {
+      trainings,
+      total,
+      page: pageNum,
+      limit: pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    }, 'Trainings retrieved');
   } catch (err) {
     next(err);
   }
@@ -405,8 +563,38 @@ const getAllTrainings = async (req, res, next) => {
 
 const getRecommendationHistory = async (req, res, next) => {
   try {
-    const history = await RecommendationHistory.find().sort({ timestamp: -1 }).limit(50);
-    return success(res, history, 'History retrieved');
+    const { userId, startDate, endDate, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    
+    if (userId) filter.userId = userId;
+    
+    // Date range filter
+    if (startDate || endDate) {
+      filter.timestamp = {};
+      if (startDate) filter.timestamp.$gte = new Date(startDate);
+      if (endDate) filter.timestamp.$lte = new Date(endDate);
+    }
+    
+    // Pagination
+    const pageNum = Math.max(1, parseInt(page));
+    const pageSize = Math.max(1, Math.min(100, parseInt(limit)));
+    const skip = (pageNum - 1) * pageSize;
+    
+    const history = await RecommendationHistory.find(filter)
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .populate('userId', 'username email organization');
+    
+    const total = await RecommendationHistory.countDocuments(filter);
+    
+    return success(res, { 
+      history, 
+      total, 
+      page: pageNum, 
+      limit: pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    }, 'Recommendation history retrieved');
   } catch (err) {
     next(err);
   }

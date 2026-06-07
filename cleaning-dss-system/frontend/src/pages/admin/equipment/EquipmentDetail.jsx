@@ -2,12 +2,7 @@
  * EquipmentDetail.jsx
  * 
  * Admin page for viewing detailed information of a single equipment item.
- * Fetches data from GET /equipment/:id and displays all fields in a structured card layout.
- * Features:
- * - Back button to return to equipment list
- * - Edit button to navigate to edit form
- * - Displays image, basic info, technical specs, compatibility, pricing, etc.
- * - Uses glassmorphism styling and Lucide icons.
+ * Displays: basic info, intensity, domain, environment, aisle width, technical specs, cost breakdown, TCO, compatibility.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -16,24 +11,33 @@ import {
   ArrowLeft, 
   Edit, 
   Package, 
-  Tag, 
-  TrendingUp, 
   Zap, 
-  Volume2, 
   Clock, 
   DollarSign,
-  Leaf,
   CheckCircle,
   XCircle,
-  Truck,
   Building2,
-  Image as ImageIcon,
-  HardDrive,
-  AlertTriangle
+  Weight,
+  Battery,
+  Truck,
+  Gauge,
+  Droplet,
+  Brush,
+  Tag,
+  MapPin,
+  Ruler,
+  Settings
 } from 'lucide-react';
 import { getEquipmentById } from '../../../services/equipmentService';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
 import { formatCurrencyUGX } from '../../../utils/format';
+import { 
+  intensityLabels, 
+  intensityDescriptions,
+  environmentLabels,
+  getFiltrationLabel,
+  getBrushLabel
+} from '../../../utils/constants';
 
 export const EquipmentDetail = () => {
   const { id } = useParams();
@@ -44,6 +48,11 @@ export const EquipmentDetail = () => {
 
   useEffect(() => {
     const fetchEquipment = async () => {
+      if (!id) {
+        setError('No equipment ID provided');
+        setLoading(false);
+        return;
+      }
       try {
         const res = await getEquipmentById(id);
         setEquipment(res.data.data);
@@ -57,209 +66,187 @@ export const EquipmentDetail = () => {
     fetchEquipment();
   }, [id]);
 
+  const getPowerIcon = (source) => {
+    switch(source) {
+      case 'battery': return <Battery className="w-5 h-5 text-green-600" />;
+      case 'corded_electric': return <Zap className="w-5 h-5 text-amber-600" />;
+      default: return <Truck className="w-5 h-5 text-slate-600" />;
+    }
+  };
+
+  const getDomainLabel = (domain) => {
+    const map = {
+      domestic: 'Domestic / Residential',
+      commercial: 'Commercial / Professional',
+      industrial: 'Industrial / Heavy-Duty',
+    };
+    return map[domain] || domain || 'Not specified';
+  };
+
+  const getEnvironmentLabel = (environment) => {
+    const map = {
+      indoor: 'Indoor Only',
+      outdoor: 'Outdoor / Semi-outdoor',
+      food_grade: 'Food‑Grade / Wet Area',
+      hazardous: 'Hazardous / ATEX Zone',
+      any: 'Any Environment',
+    };
+    return map[environment] || environment || 'Not specified';
+  };
+
+  // Helper to get spec value by attribute name
+  const getSpecValue = (attributeName) => {
+    return equipment.specifications?.find(s => s.attribute_name === attributeName)?.attribute_value;
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto animate-fade-in">
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl p-8 text-center">
-          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+      <div className="max-w-4xl mx-auto py-12 px-4">
+        <div className="bg-white border border-slate-200 rounded-lg p-8 text-center">
           <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={() => navigate('/admin/equipment')}
-            className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl"
-          >
-            Back to Equipment List
-          </button>
+          <button onClick={() => navigate('/admin/equipment')} className="px-4 py-2 bg-cyan-600 text-white rounded-lg">Back to Equipment</button>
         </div>
       </div>
     );
   }
   if (!equipment) return null;
 
+  const equipmentId = equipment._id || equipment.equipment_id;
+  const intensityLabel = intensityLabels[equipment.intensity] || equipment.intensity;
+  const domainLabel = getDomainLabel(equipment.domain);
+  const environmentLabel = getEnvironmentLabel(equipment.environment);
+  const filtrationType = getSpecValue('filtration_type');
+  const brushType = getSpecValue('brush_type');
+  const upholsteryAttachment = getSpecValue('upholstery_attachment') === 'true';
+
   return (
-    <div className="max-w-5xl mx-auto animate-fade-in">
+    <div className="max-w-5xl mx-auto py-6 px-4 lg:px-6">
       <div className="mb-6 flex justify-between items-center">
-        <button
-          onClick={() => navigate('/admin/equipment')}
-          className="flex items-center gap-2 text-slate-600 hover:text-cyan-600 transition"
-        >
+        <button onClick={() => navigate('/admin/equipment')} className="flex items-center gap-2 text-slate-600 hover:text-cyan-600 transition">
           <ArrowLeft className="w-4 h-4" /> Back to Equipment
         </button>
-        <Link
-          to={`/admin/equipment/${id}/edit`}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold text-sm hover:shadow-lg transition"
-        >
+        <Link to={`/admin/equipment/${equipmentId}/edit`} className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition">
           <Edit className="w-4 h-4" /> Edit Equipment
         </Link>
       </div>
 
-      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl overflow-hidden">
-        {/* Header with image and basic info */}
-        <div className="p-6 md:p-8 border-b border-slate-200">
+      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        {/* Header */}
+        <div className="p-6 border-b border-slate-200 bg-slate-50/50">
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Image */}
-            <div className="w-full md:w-48 h-48 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
+            <div className="w-full md:w-48 h-48 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
               {equipment.image_url ? (
-                <img src={equipment.image_url} alt={equipment.name} className="w-full h-full object-cover" />
+                <img src={equipment.image_url} alt={equipment.model_name} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Package className="w-12 h-12 text-slate-400" />
-                </div>
+                <div className="w-full h-full flex items-center justify-center"><Package className="w-12 h-12 text-slate-400" /></div>
               )}
             </div>
-            {/* Basic info */}
             <div className="flex-1">
-              <h1 className="text-2xl font-black text-slate-800">{equipment.name}</h1>
+              <h1 className="text-2xl font-bold text-slate-800">{equipment.brand_name} {equipment.model_name}</h1>
               <div className="flex flex-wrap gap-2 mt-2">
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                  {equipment.brand}
+                <span className="px-2 py-1 bg-cyan-50 text-cyan-700 rounded-md text-xs font-medium">
+                  {equipment.machine_category?.replace(/_/g, ' ')}
                 </span>
-                <span className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded-full text-xs capitalize">
-                  {equipment.intensity} duty
+                <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium flex items-center gap-1">
+                  {getPowerIcon(equipment.power_source)} {equipment.power_source?.replace(/_/g, ' ')}
                 </span>
-                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
-                  {equipment.category.replace(/_/g, ' ')}
+                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-md text-xs font-medium flex items-center gap-1">
+                  <Tag className="w-3 h-3" /> {intensityLabel}
+                </span>
+                <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-md text-xs font-medium">
+                  {domainLabel}
+                </span>
+                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> {environmentLabel}
                 </span>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-slate-500">Price:</span>
-                  <p className="font-semibold text-slate-800">{formatCurrencyUGX(equipment.price_ugx)}</p>
-                </div>
-                <div>
-                  <span className="text-slate-500">Status:</span>
-                  <p className="flex items-center gap-1">
-                    {equipment.in_stock ? (
-                      <><CheckCircle className="w-4 h-4 text-green-600" /> In Stock</>
-                    ) : (
-                      <><XCircle className="w-4 h-4 text-red-600" /> Out of Stock</>
-                    )}
-                  </p>
-                </div>
+                <div><span className="text-slate-500">Price:</span><p className="font-semibold text-slate-800">{formatCurrencyUGX(equipment.current_price_ugx)}</p></div>
+                <div><span className="text-slate-500">Status:</span><p className="flex items-center gap-1">{equipment.in_stock !== false ? <><CheckCircle className="w-4 h-4 text-green-600" /> In Stock</> : <><XCircle className="w-4 h-4 text-red-600" /> Out of Stock</>}</p></div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Details sections */}
-        <div className="p-6 md:p-8 space-y-8">
-          {/* Technical Specifications */}
+        <div className="p-6 space-y-6">
+          {/* Specifications Section */}
           <div>
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
-              <Zap className="w-5 h-5 text-cyan-600" /> Technical Specifications
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-slate-50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase">Power</span>
-                <p className="font-semibold">{equipment.power_req?.kW} kW ({equipment.power_req?.type})</p>
+            <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2 mb-4"><Settings className="w-5 h-5 text-cyan-600" /> Specifications</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="bg-slate-50 rounded-lg p-3">
+                <span className="text-xs text-slate-500 uppercase">Weight</span>
+                <p className="font-semibold">{equipment.weight_kg ? `${equipment.weight_kg} kg` : '-'}</p>
               </div>
-              <div className="bg-slate-50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase">Motor Type</span>
-                <p className="font-semibold">{equipment.motor_type || '-'}</p>
+              <div className="bg-slate-50 rounded-lg p-3">
+                <span className="text-xs text-slate-500 uppercase">Power Source</span>
+                <p className="font-semibold capitalize">{equipment.power_source?.replace(/_/g, ' ')}</p>
               </div>
-              <div className="bg-slate-50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase">Noise Level</span>
-                <p className="font-semibold">{equipment.noise_level_db} dB</p>
-              </div>
+              {equipment.min_aisle_width_mm && (
+                <div className="bg-slate-50 rounded-lg p-3">
+                  <span className="text-xs text-slate-500 uppercase">Min Aisle Width</span>
+                  <p className="font-semibold">{equipment.min_aisle_width_mm / 10} cm</p>
+                </div>
+              )}
+              {filtrationType && (
+                <div className="bg-slate-50 rounded-lg p-3">
+                  <span className="text-xs text-slate-500 uppercase">Filtration</span>
+                  <p className="font-semibold">{getFiltrationLabel(filtrationType)}</p>
+                </div>
+              )}
+              {brushType && (
+                <div className="bg-slate-50 rounded-lg p-3">
+                  <span className="text-xs text-slate-500 uppercase">Brush Type</span>
+                  <p className="font-semibold">{getBrushLabel(brushType)}</p>
+                </div>
+              )}
+              {upholsteryAttachment && (
+                <div className="bg-slate-50 rounded-lg p-3">
+                  <span className="text-xs text-slate-500 uppercase">Upholstery Attachment</span>
+                  <p className="font-semibold text-green-600">✓ Included</p>
+                </div>
+              )}
+              {equipment.specifications?.map((spec, idx) => {
+                // Skip already displayed specs
+                const skipAttributes = ['filtration_type', 'brush_type', 'upholstery_attachment'];
+                if (skipAttributes.includes(spec.attribute_name)) return null;
+                return (
+                  <div key={idx} className="bg-slate-50 rounded-lg p-3">
+                    <span className="text-xs text-slate-500 uppercase">{spec.attribute_name}</span>
+                    <p className="font-semibold">{spec.attribute_value} {spec.unit_of_measure}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Logistics & Maintenance */}
+          {/* Cost Breakdown */}
           <div>
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
-              <Clock className="w-5 h-5 text-teal-600" /> Logistics & Maintenance
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-slate-50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase">Spare Part Lead Time</span>
-                <p className="font-semibold">{equipment.spare_part_lead_time_days} days</p>
-              </div>
-              <div className="bg-slate-50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase">Local Supplier</span>
-                <p className="font-semibold">{equipment.local_supplier || '-'}</p>
-              </div>
+            <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2 mb-4"><DollarSign className="w-5 h-5 text-emerald-600" /> Cost Breakdown</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-slate-50 rounded-lg p-3"><span className="text-xs text-slate-500 uppercase">Purchase Price</span><p className="font-semibold">{formatCurrencyUGX(equipment.current_price_ugx)}</p></div>
+              <div className="bg-slate-50 rounded-lg p-3"><span className="text-xs text-slate-500 uppercase">Maintenance / Year</span><p className="font-semibold">{formatCurrencyUGX(equipment.estimated_maintenance_cost_per_year_ugx)}</p></div>
+              <div className="bg-slate-50 rounded-lg p-3"><span className="text-xs text-slate-500 uppercase">Running Cost / Year</span><p className="font-semibold">{formatCurrencyUGX(equipment.estimated_running_cost_per_year_ugx)}</p></div>
             </div>
+            <div className="mt-3 p-3 bg-cyan-50 rounded-lg"><span className="text-xs text-slate-500 uppercase">Estimated TCO per Year</span><p className="text-xl font-bold text-cyan-700">{formatCurrencyUGX(equipment.estimated_tco_per_year_ugx)}</p></div>
           </div>
 
           {/* Compatibility */}
           <div>
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
-              <CheckCircle className="w-5 h-5 text-green-600" /> Compatibility
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <span className="text-sm font-medium text-slate-700">Compatible Surfaces</span>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {equipment.compatible_surfaces?.length ? (
-                    equipment.compatible_surfaces.map(s => (
-                      <span key={s} className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded-full text-xs">{s}</span>
-                    ))
-                  ) : <span className="text-slate-400 text-sm">None specified</span>}
-                </div>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-slate-700">Compatible Dirt Types</span>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {equipment.compatible_dirt_types?.length ? (
-                    equipment.compatible_dirt_types.map(d => (
-                      <span key={d} className="px-2 py-1 bg-teal-100 text-teal-700 rounded-full text-xs">{d}</span>
-                    ))
-                  ) : <span className="text-slate-400 text-sm">None specified</span>}
-                </div>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-slate-700">Materials</span>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {equipment.materials?.length ? (
-                    equipment.materials.map(m => (
-                      <span key={m} className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">{m}</span>
-                    ))
-                  ) : <span className="text-slate-400 text-sm">None specified</span>}
-                </div>
-              </div>
+            <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2 mb-4"><Brush className="w-5 h-5 text-purple-600" /> Compatibility</h2>
+            <div className="space-y-3">
+              <div><span className="text-sm font-medium text-slate-700">Compatible Surfaces</span><div className="flex flex-wrap gap-2 mt-1">{equipment.surface_compatibility?.length ? equipment.surface_compatibility.map(s => <span key={s} className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded-md text-xs">{s}</span>) : <span className="text-slate-400 text-sm">None specified</span>}</div></div>
+              <div><span className="text-sm font-medium text-slate-700">Compatible Dirt Types</span><div className="flex flex-wrap gap-2 mt-1">{equipment.dirt_compatibility?.length ? equipment.dirt_compatibility.map(d => <span key={d} className="px-2 py-1 bg-teal-100 text-teal-700 rounded-md text-xs">{d}</span>) : <span className="text-slate-400 text-sm">None specified</span>}</div></div>
             </div>
           </div>
 
-          {/* TCO & Eco */}
-          <div>
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
-              <TrendingUp className="w-5 h-5 text-orange-600" /> TCO & Environmental
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-slate-50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase">Maintenance Factor</span>
-                <p className="font-semibold">{equipment.tco_multipliers?.maintenance_factor || 1.0}</p>
-              </div>
-              <div className="bg-slate-50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase">Power Factor</span>
-                <p className="font-semibold">{equipment.tco_multipliers?.power_factor || 1.0}</p>
-              </div>
-            </div>
-            {equipment.eco_certified && (
-              <div className="mt-3 flex items-center gap-2 text-green-700 bg-green-50 rounded-xl p-3">
-                <Leaf className="w-4 h-4" /> Eco Certified
-              </div>
-            )}
-          </div>
-
-          {/* Additional Info */}
-          <div>
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
-              <Building2 className="w-5 h-5 text-slate-600" /> Additional Information
-            </h2>
+          {/* Metadata */}
+          <div className="border-t border-slate-200 pt-4">
+            <h2 className="text-lg font-semibold text-slate-800 mb-3">Metadata</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-slate-500">Created at:</span>
-                <p>{new Date(equipment.createdAt).toLocaleString()}</p>
-              </div>
-              <div>
-                <span className="text-slate-500">Last updated:</span>
-                <p>{new Date(equipment.updatedAt).toLocaleString()}</p>
-              </div>
-              <div>
-                <span className="text-slate-500">Active:</span>
-                <p>{equipment.active ? 'Yes' : 'No'}</p>
-              </div>
+              <div><span className="text-slate-500">Created:</span><p>{new Date(equipment.createdAt).toLocaleString()}</p></div>
+              <div><span className="text-slate-500">Last Updated:</span><p>{new Date(equipment.updatedAt).toLocaleString()}</p></div>
             </div>
           </div>
         </div>

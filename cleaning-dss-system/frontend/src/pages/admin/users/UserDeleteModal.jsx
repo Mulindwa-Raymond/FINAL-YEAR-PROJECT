@@ -16,8 +16,8 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDeleted }) => {
   const [error, setError] = useState('');
 
   // Helper function to get user ID (supports both _id and user_id)
-  const getUserId = (user) => {
-    return user?._id || user?.user_id || user?.id;
+  const getUserId = (userObj) => {
+    return userObj?._id || userObj?.user_id || userObj?.id;
   };
 
   // Check if user is trying to delete themselves
@@ -70,10 +70,10 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDeleted }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/40 shadow-2xl w-full max-w-md">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-red-600 flex items-center gap-2">
+        <div className="flex justify-between items-center p-5 border-b border-slate-200">
+          <h2 className="text-lg font-semibold text-red-600 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5" /> Confirm Deletion
           </h2>
           <button 
@@ -86,7 +86,7 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDeleted }) => {
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-5">
           {/* Warning icon */}
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
@@ -95,12 +95,12 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDeleted }) => {
           </div>
           
           {/* User info */}
-          <div className="bg-slate-50 rounded-xl p-4 mb-4">
-            <p className="text-sm text-slate-500 mb-1">User to delete:</p>
+          <div className="bg-slate-50 rounded-lg p-4 mb-4 border border-slate-100">
+            <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">User to delete:</p>
             <p className="font-semibold text-slate-800">{userName}</p>
             <p className="text-sm text-slate-600">{userEmail}</p>
             <div className="mt-2">
-              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
                 userRole === 'super_admin' ? 'bg-purple-100 text-purple-700' :
                 userRole === 'admin' ? 'bg-cyan-100 text-cyan-700' :
                 'bg-slate-100 text-slate-600'
@@ -112,7 +112,7 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDeleted }) => {
           
           {/* Warning message */}
           {isSelfDeletion ? (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm flex items-start gap-2 mb-4">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm flex items-start gap-2 mb-4">
               <ShieldAlert className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>You cannot delete your own account. Please ask another admin to perform this action.</span>
             </div>
@@ -129,7 +129,7 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDeleted }) => {
 
           {/* Error display */}
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2">
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
@@ -140,7 +140,7 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDeleted }) => {
             <button
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
             >
               Cancel
             </button>
@@ -148,7 +148,7 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDeleted }) => {
               <button
                 onClick={handleConfirm}
                 disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded-xl font-semibold flex items-center gap-2 hover:bg-red-700 transition disabled:opacity-70"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium flex items-center gap-2 hover:bg-red-700 transition disabled:opacity-70"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

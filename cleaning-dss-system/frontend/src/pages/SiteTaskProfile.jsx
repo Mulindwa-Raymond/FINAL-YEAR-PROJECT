@@ -1,426 +1,697 @@
 /**
  * SiteTaskProfile.jsx
- * 
- * Step 2 of the user flow – collects site and task details.
- * Uses the machine category selected in the previous step (MachineTypeSelection).
- * Fields align with the ERD Recommendation model:
- * - area_size (m²)
- * - surface_type (enum)
- * - dirt_type (enum)
- * - power_stability (enum)
- * - budget (used for filtering)
- * - cleaning_frequency (used for intensity calculation)
- * - eco_preference (filter for detergents)
- * 
- * Navigates to /recommendation-results with all collected data.
+ * Step 2 – Dynamic questionnaire based on selected machine category.
+ * Enhanced with smooth animations, better progress tracking, and engaging visuals.
  */
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  ChevronRight, 
-  ChevronLeft,
-  CheckCircle2,
-  Cpu,
-  Activity,
-  Layers,
-  DollarSign,
-  Shield,
-  Sparkles,
-  ArrowRight,
-  Clock,
-  Ruler,
-  Droplet,
-  Battery,
-  Leaf,
-  Calendar
+  ChevronRight, ChevronLeft, Sparkles, Cpu, Loader2, AlertCircle, 
+  Shield, Clock, Layers, ArrowRight, CheckCircle2, Zap, Gauge,
+  Building2, Droplets, Brush, Wind, Flame, Package, Award,
+  Activity, TrendingUp, HardDrive, Bot, User, LayoutGrid,
+  Compass, Star, Circle, CheckCircle, HelpCircle
 } from 'lucide-react';
-import Navbar from '../components/Navbar';
+import DynamicFormField from '../components/common/DynamicFormField';
+import { getCategoryQuestions } from '../utils/categoryQuestions';
+import { getRecommendations, saveRecommendationToHistory } from '../services/recommendationService';
+import { useAuth } from '../contexts/AuthContext';
 
-// Surface type options (matching Equipment model)
-const surfaceOptions = [
-  { value: 'tile', label: 'Ceramic Tile / Vinyl', icon: '🔲' },
-  { value: 'concrete', label: 'Concrete / Industrial Floor', icon: '🏭' },
-  { value: 'wood', label: 'Hardwood / Laminate', icon: '🪵' },
-  { value: 'carpet', label: 'Textile / Carpet', icon: '🧺' },
-  { value: 'marble', label: 'Marble / Natural Stone', icon: '💎' },
-  { value: 'glass', label: 'Glass / Window', icon: '🪟' },
-];
-
-// Dirt type options (matching Equipment model)
-const dirtOptions = [
-  { value: 'red laterite soil', label: 'Red Laterite (Uganda Standard)', icon: '🔴' },
-  { value: 'grease', label: 'Industrial Grease / Oil', icon: '⚙️' },
-  { value: 'dust', label: 'General Dust / Construction', icon: '💨' },
-  { value: 'heavy soil', label: 'Heavy Soil / Mud', icon: '🌍' },
-  { value: 'organic', label: 'Organic Stains / Food', icon: '🍽️' },
-  { value: 'lime scale', label: 'Lime Scale / Mineral Deposits', icon: '🧂' },
-];
-
-// Power stability options
-const powerOptions = [
-  { value: 'stable', label: 'Regulated / Stable Grid', description: 'Recommended for corded machines', icon: '⚡' },
-  { value: 'unstable', label: 'Fluctuating / Generator Based', description: 'Battery‑powered machines recommended', icon: '🔋' },
-];
+// Category icon mapping for visual enhancement
+const categoryIcons = {
+  floor_scrubber: <Brush size={20} />,
+  vacuum_cleaner: <Wind size={20} />,
+  pressure_washer: <Zap size={20} />,
+  steam_cleaner: <Flame size={20} />,
+  carpet_cleaner: <Package size={20} />,
+  sweeper: <Activity size={20} />,
+  scrubber_drier: <Award size={20} />,
+  window_cleaner: <Droplets size={20} />,
+};
 
 export default function SiteTaskProfile() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated, user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({
-    machineCategory: '',
-    categoryName: '',
-    areaSize: '',
-    surfaceType: 'tile',
-    dirtType: 'dust',
-    powerStability: 'stable',
-    budget: '',
-    ecoPreference: false,
-    cleaningFrequency: 'daily',
-  });
+  const [answers, setAnswers] = useState({});
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [categoryConfig, setCategoryConfig] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
 
-  // Load machine category from navigation state
+  useEffect(() => {
+    setFadeIn(true);
+  }, []);
+
   useEffect(() => {
     const state = location.state;
-    if (state?.machineCategory) {
-      setFormData(prev => ({
-        ...prev,
-        machineCategory: state.machineCategory,
-        categoryName: state.categoryName || state.machineCategory.replace(/_/g, ' '),
-      }));
-    } else {
-      // Redirect back to machine type selection if no category selected
+    if (!state?.machineCategory) {
       navigate('/machine-type', { replace: true });
+      return;
     }
+
+    const config = getCategoryQuestions(state.machineCategory);
+    if (!config) {
+      navigate('/machine-type', { replace: true });
+      return;
+    }
+
+    setCategoryConfig({
+      ...config,
+      categoryName: state.categoryName || state.machineCategory.replace(/_/g, ' '),
+      categoryId: state.machineCategory,
+      selectedBrand: state.selectedBrand,
+      selectedSubtype: state.machineSubtype,
+    });
+    setIsLoading(false);
   }, [location, navigate]);
 
-  const steps = [
-    { id: 'area', title: 'Area & Surface', icon: <Ruler size={18} /> },
-    { id: 'soil', title: 'Soil & Dirt', icon: <Droplet size={18} /> },
-    { id: 'power', title: 'Power & Budget', icon: <Battery size={18} /> },
-    { id: 'preferences', title: 'Preferences', icon: <Sparkles size={18} /> },
-  ];
+  const steps = categoryConfig?.steps || [];
+  const progressSteps = steps.map((step, idx) => ({
+    id: step.id,
+    title: step.title,
+    icon: idx + 1,
+  }));
 
-  const handleNext = () => {
+  const handleFieldChange = (fieldId, value) => {
+    setAnswers(prev => ({ ...prev, [fieldId]: value }));
+    if (errors[fieldId]) {
+      setErrors(prev => ({ ...prev, [fieldId]: undefined }));
+    }
+  };
+
+  const handleFieldBlur = (fieldId) => {
+    setTouched(prev => ({ ...prev, [fieldId]: true }));
+  };
+
+  const validateCurrentStep = () => {
+    const step = steps[currentStep];
+    if (!step) return true;
+    const value = answers[step.id];
+    
+    if (step.required !== false && (value === undefined || value === null || value === '')) {
+      setErrors(prev => ({ ...prev, [step.id]: `${step.title} is required` }));
+      return false;
+    }
+    if (Array.isArray(value) && value.length === 0) {
+      setErrors(prev => ({ ...prev, [step.id]: `Please select at least one ${step.title.toLowerCase()}` }));
+      return false;
+    }
+    return true;
+  };
+
+  const buildApiPayload = () => {
+    const category = categoryConfig.categoryId;
+
+    const floorTypeToSurface = {
+      smooth: 'tile',
+      textured: 'concrete',
+      sensitive: 'wood',
+    };
+
+    const soilLevelToDirt = {
+      light: 'dust',
+      medium: 'grease',
+      heavy: 'heavy soil',
+    };
+
+    const sweepLocationToSurface = {
+      indoor_smooth: 'tile',
+      indoor_rough: 'concrete',
+      outdoor_smooth: 'asphalt',
+      outdoor_rough: 'concrete',
+    };
+
+    const debrisTypeMapping = {
+      dry_dust: 'dust',
+      wet_spills: 'wet spills',
+      dry_wet: 'dust',
+      fine_dust: 'fine dust',
+      large_particles: 'dry debris',
+      hazardous_dust: 'dust',
+      food_waste: 'organic',
+    };
+
+    const vacuumSurfaceMapping = {
+      hard_floor: 'tile',
+      carpet: 'carpet',
+      upholstery: 'carpet',
+      outdoor: 'concrete',
+      machinery: 'concrete',
+    };
+
+    const windowSoilingMapping = {
+      dust: 'dust',
+      lime_scale: 'water marks',
+      grime: 'grime',
+    };
+
+    let surfaceType = null;
+    let dirtType = null;
+
+    if (category === 'floor_scrubber') {
+      surfaceType = floorTypeToSurface[answers.floor_type] || answers.floor_type || 'tile';
+      dirtType = soilLevelToDirt[answers.soil_level] || answers.soil_level || 'dust';
+    } else if (category === 'scrubber_drier') {
+      const rawFloor = answers.floor_type;
+      if (Array.isArray(rawFloor) && rawFloor.length > 0) {
+        surfaceType = rawFloor[0];
+      } else if (rawFloor) {
+        surfaceType = floorTypeToSurface[rawFloor] || rawFloor;
+      } else {
+        surfaceType = 'tile';
+      }
+      dirtType = soilLevelToDirt[answers.soil_level] || answers.soil_level || 'grease';
+    } else if (category === 'sweeper') {
+      surfaceType = sweepLocationToSurface[answers.location] || 'concrete';
+      const rawDirt = answers.dirt_type;
+      if (Array.isArray(rawDirt) && rawDirt.length > 0) {
+        dirtType = rawDirt[0];
+      } else if (rawDirt) {
+        dirtType = rawDirt;
+      } else {
+        dirtType = 'dust';
+      }
+    } else if (category === 'vacuum_cleaner') {
+      const rawSurface = answers.surface_type;
+      if (Array.isArray(rawSurface) && rawSurface.length > 0) {
+        surfaceType = vacuumSurfaceMapping[rawSurface[0]] || rawSurface[0];
+      } else if (rawSurface) {
+        surfaceType = vacuumSurfaceMapping[rawSurface] || rawSurface;
+      } else {
+        surfaceType = 'tile';
+      }
+      const rawDebris = answers.debris_type;
+      if (Array.isArray(rawDebris) && rawDebris.length > 0) {
+        dirtType = debrisTypeMapping[rawDebris[0]] || rawDebris[0];
+      } else if (rawDebris) {
+        dirtType = debrisTypeMapping[rawDebris] || rawDebris;
+      } else {
+        dirtType = 'dust';
+      }
+    } else if (category === 'pressure_washer') {
+      const rawSurface = answers.surface_type;
+      surfaceType = rawSurface === 'tiles' ? 'tile' : (rawSurface || 'concrete');
+      const rawDirt = answers.dirt_type;
+      if (Array.isArray(rawDirt) && rawDirt.length > 0) {
+        const mapped = { light_dust: 'dust', grease: 'grease', chewing_gum: 'heavy soil', bio_algae: 'algae', food_residue: 'grease' };
+        dirtType = mapped[rawDirt[0]] || rawDirt[0];
+      } else if (rawDirt) {
+        const mapped = { light_dust: 'dust', grease: 'grease', chewing_gum: 'heavy soil', bio_algae: 'algae', food_residue: 'grease' };
+        dirtType = mapped[rawDirt] || rawDirt;
+      } else {
+        dirtType = 'grease';
+      }
+    } else if (category === 'carpet_cleaner') {
+      surfaceType = 'carpet';
+      const rawDirt = answers.dirt_type;
+      if (Array.isArray(rawDirt) && rawDirt.length > 0) {
+        dirtType = rawDirt[0];
+      } else if (rawDirt) {
+        dirtType = rawDirt;
+      } else {
+        dirtType = 'stains';
+      }
+    } else if (category === 'window_cleaner') {
+      surfaceType = 'glass';
+      dirtType = windowSoilingMapping[answers.dirt_type] || answers.dirt_type || 'dust';
+    } else if (category === 'steam_cleaner') {
+      surfaceType = 'tile';
+      dirtType = 'bacteria';
+    } else {
+      const rawSurface = answers.surface_type || answers.floor_type;
+      const rawDirt = answers.dirt_type || answers.soil_level || answers.debris_type;
+      surfaceType = Array.isArray(rawSurface) ? rawSurface[0] : (rawSurface || 'tile');
+      dirtType = Array.isArray(rawDirt) ? rawDirt[0] : (rawDirt || 'dust');
+    }
+
+    const payload = {
+      machine_category: category,
+      machine_subtype: categoryConfig.selectedSubtype,
+      brand_name: categoryConfig.selectedBrand,
+      surface_type: surfaceType,
+      dirt_type: dirtType,
+      area_size: parseFloat(answers.area_size) || 0,
+      power_stability: answers.power_stability || 'stable',
+      budget_ugx: parseFloat(answers.budget) || 0,
+      eco_preference: answers.eco_preference || false,
+      cleaning_frequency: answers.cleaning_frequency || 'weekly',
+      floor_texture: answers.floor_texture,
+      environment: answers.environment,
+      power_source: answers.power_source !== 'any' ? answers.power_source : undefined,
+      aisle_width: answers.aisle_width,
+      soil_level: answers.soil_level,
+      use_case: answers.use_case,
+      pressure_required: answers.pressure_required,
+      debris_type: answers.debris_type,
+      filtration: answers.filtration,
+      tank_capacity: answers.tank_capacity,
+      noise_sensitivity: answers.noise_sensitivity,
+      function: answers.function,
+      carpet_type: answers.carpet_type,
+      location: answers.location,
+      operation_mode: answers.operation_mode,
+      special_requirements: answers.special_requirements,
+      domain: answers.use_case === 'domestic' ? 'domestic' : answers.use_case === 'industrial' ? 'industrial' : undefined,
+    };
+
+    Object.keys(payload).forEach(key => {
+      if (payload[key] === undefined || payload[key] === null || payload[key] === '') {
+        delete payload[key];
+      }
+    });
+
+    return payload;
+  };
+
+  // Function to save recommendation to history
+  const saveToHistory = async (recommendationsData, apiPayload, recommendationId) => {
+    if (!isAuthenticated) {
+      console.log('User not authenticated, skipping save to history');
+      return;
+    }
+
+    try {
+      const primaryMachine = recommendationsData[0];
+      const detergentData = recommendationsData.find(m => m.detergent)?.detergent;
+
+      const historyData = {
+        area_size: apiPayload.area_size,
+        surface_type: apiPayload.surface_type,
+        dirt_type: apiPayload.dirt_type,
+        power_stability: apiPayload.power_stability,
+        budget_ugx: apiPayload.budget_ugx,
+        eco_preference: apiPayload.eco_preference,
+        machine_category: apiPayload.machine_category,
+        machine_subtype: apiPayload.machine_subtype,
+        brand_name: apiPayload.brand_name,
+        usage_hours_per_week: answers.usage_hours_per_week || 0,
+        noise_sensitive: answers.noise_sensitive || false,
+        floor_texture: apiPayload.floor_texture,
+        environment: apiPayload.environment,
+        power_source: primaryMachine?.power_source,
+        aisle_width: apiPayload.aisle_width,
+        soil_level: apiPayload.soil_level,
+        use_case: apiPayload.use_case,
+        pressure_required: apiPayload.pressure_required,
+        filtration: apiPayload.filtration,
+        tank_capacity: apiPayload.tank_capacity,
+        noise_sensitivity: apiPayload.noise_sensitivity,
+        recommended_equipment_id: primaryMachine?._id || primaryMachine?.id,
+        recommended_detergent_id: detergentData?._id || detergentData?.id,
+        estimated_tco_per_year_ugx: primaryMachine?.estimated_tco_per_year_ugx,
+        final_score: primaryMachine?.match_score || primaryMachine?.final_score,
+        alerts_triggered: recommendationsData.flatMap(m => m.alerts || []).map(alert => ({
+          message: alert,
+          explanation: alert,
+          severity: 'warning'
+        })),
+        summary_explanation: primaryMachine?.reasoning || `Recommended for ${apiPayload.surface_type} surface`,
+        cleaning_frequency: apiPayload.cleaning_frequency,
+        function: apiPayload.function,
+        carpet_type: apiPayload.carpet_type,
+        location: apiPayload.location
+      };
+
+      // Remove undefined values
+      Object.keys(historyData).forEach(key => {
+        if (historyData[key] === undefined || historyData[key] === null) {
+          delete historyData[key];
+        }
+      });
+
+      console.log('💾 Saving recommendation to history:', historyData);
+      const saveResponse = await saveRecommendationToHistory(historyData);
+      console.log('✅ Recommendation saved:', saveResponse.data);
+    } catch (error) {
+      console.error('Failed to save recommendation to history:', error);
+      // Don't block navigation if save fails
+    }
+  };
+
+  const handleNext = async () => {
+    if (!validateCurrentStep()) return;
+
     if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      // Validate required fields
-      if (!formData.areaSize || !formData.budget) {
-        alert('Please fill in all required fields (Area and Budget).');
-        return;
-      }
-      // Final step – process and navigate to results
       setIsProcessing(true);
-      setTimeout(() => {
-        navigate('/recommendation-results', { state: { formData } });
-      }, 2000);
+      setErrors({});
+      
+      const apiPayload = buildApiPayload();
+      console.log('📤 Sending recommendation request:', apiPayload);
+
+      try {
+        const response = await getRecommendations(apiPayload);
+        console.log('✅ API Response:', response);
+        
+        // Handle different response structures
+        let recommendationsData;
+        let recommendationId;
+        
+        if (response.data?.data?.recommendations) {
+          recommendationsData = response.data.data.recommendations;
+          recommendationId = response.data.data.recommendation_id;
+        } else if (response.data?.recommendations) {
+          recommendationsData = response.data.recommendations;
+          recommendationId = response.data.recommendation_id;
+        } else {
+          recommendationsData = response.data;
+          recommendationId = new Date().getTime().toString();
+        }
+        
+        // Save to history (async, don't await to avoid delay)
+        saveToHistory(recommendationsData, apiPayload, recommendationId);
+        
+        // Navigate to results
+        navigate('/recommendation-results', {
+          state: {
+            recommendations: recommendationsData,
+            recommendationId: recommendationId,
+            answers: answers,
+            categoryInfo: {
+              categoryId: categoryConfig.categoryId,
+              categoryName: categoryConfig.categoryName,
+              selectedSubtype: categoryConfig.selectedSubtype,
+              selectedBrand: categoryConfig.selectedBrand,
+            },
+          },
+        });
+      } catch (err) {
+        console.error('❌ Recommendation failed:', err);
+        console.error('Error details:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+          config: err.config
+        });
+        
+        let errorMessage = 'Failed to get recommendations. ';
+        if (err.response?.status === 404) {
+          errorMessage += 'The recommendation service is unavailable. Please try again later.';
+        } else if (err.response?.status === 401) {
+          errorMessage += 'Please log in again to continue.';
+        } else if (err.response?.data?.error) {
+          errorMessage += err.response.data.error;
+        } else if (err.response?.data?.message) {
+          errorMessage += err.response.data.message;
+        } else {
+          errorMessage += 'Please check your connection and try again.';
+        }
+        
+        setErrors({ general: errorMessage });
+        setIsProcessing(false);
+      }
     }
   };
 
   const handleBack = () => {
-    if (currentStep > 0) setCurrentStep(prev => prev - 1);
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+  const handleStepClick = (stepIndex) => {
+    if (stepIndex < currentStep) {
+      setCurrentStep(stepIndex);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const progress = ((currentStep + 1) / steps.length) * 100;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-cyan-50/30">
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
+            <Cpu className="absolute inset-0 m-auto w-6 h-6 text-blue-600 animate-pulse" />
+          </div>
+          <p className="text-slate-500 mt-6 font-medium">Loading questionnaire...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Check if the current step has required fields filled
-  const isStepValid = () => {
-    if (currentStep === 0) return formData.areaSize && formData.surfaceType;
-    if (currentStep === 1) return formData.dirtType;
-    if (currentStep === 2) return formData.powerStability && formData.budget;
-    return true;
-  };
+  if (!categoryConfig) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-cyan-50/30">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+          <AlertCircle className="w-16 h-16 text-red-400 mb-4" />
+          <p className="text-red-600 mb-4">Invalid machine category selected.</p>
+          <button onClick={() => navigate('/machine-type')} className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold">
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const safeCurrentStep = Math.min(currentStep, steps.length - 1);
+  const currentField = steps[safeCurrentStep];
+  const progress = ((safeCurrentStep + 1) / steps.length) * 100;
+  const isLastStep = safeCurrentStep === steps.length - 1;
+  const categoryIcon = categoryIcons[categoryConfig.categoryId] || <Zap size={20} />;
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans antialiased selection:bg-cyan-200">
-      {/* Animated background */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(224,242,254,0.4)_0%,_rgba(248,250,252,1)_100%)]"></div>
-        <div className="absolute top-1/4 -left-32 w-[600px] h-[600px] bg-blue-400/20 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-1/4 -right-32 w-[600px] h-[600px] bg-cyan-400/20 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '8s' }}></div>
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#0ea5e9 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+    <div className="relative min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-cyan-50/30">
+      
+      {/* Background Elements */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-400/20 rounded-full blur-[120px] animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-400/10 rounded-full blur-[140px]"></div>
+        <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,_rgba(59,130,246,0.03)_0px,_rgba(59,130,246,0.03)_2px,_transparent_2px,_transparent_20px)]"></div>
       </div>
 
-      <Navbar />
-
-      <main className="relative z-10 max-w-4xl mx-auto px-6 py-12 lg:py-16">
+      <main className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-8 lg:py-12">
         
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-100 border border-cyan-200 text-cyan-700 text-[10px] font-mono font-bold tracking-[0.2em] uppercase rounded-full mb-4">
-            <Activity size={12} className="animate-pulse" /> Step 2 of 3
+        {/* Step Tracker - Compact Horizontal */}
+        <div className={`mb-8 transition-all duration-700 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-5'}`}>
+          <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center shadow-md">
+                <CheckCircle2 size={14} className="text-white" />
+              </div>
+              <span className="ml-2 text-xs font-semibold text-blue-700">Machine Type</span>
+            </div>
+            <div className="w-12 h-0.5 bg-slate-200"></div>
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center shadow-md">
+                <span className="text-xs font-bold text-white">2</span>
+              </div>
+              <span className="ml-2 text-xs font-semibold text-blue-700">Site Profile</span>
+            </div>
+            <div className="w-12 h-0.5 bg-slate-200"></div>
+            <div className="flex items-center opacity-40">
+              <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center">
+                <span className="text-xs font-bold text-slate-500">3</span>
+              </div>
+              <span className="ml-2 text-xs text-slate-400">Results</span>
+            </div>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-slate-900">
-            Site & Task Profile
+        </div>
+
+        {/* Header */}
+        <div className={`text-center mb-6 transition-all duration-700 delay-100 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 mb-2">
+            Site & Task{' '}
+            <span className="bg-gradient-to-r from-blue-700 to-cyan-600 bg-clip-text text-transparent">Profile</span>
           </h1>
-          <p className="text-slate-500 mt-3 max-w-xl mx-auto">
-            Tell us about your cleaning environment for <span className="font-semibold text-cyan-700">{formData.categoryName || 'selected machine'}</span>
+          <p className="text-sm text-slate-500 max-w-xl mx-auto">
+            Tell us about your cleaning environment for{' '}
+            <span className="font-semibold text-blue-600">{categoryConfig.categoryName}</span>
           </p>
         </div>
 
-        {/* Step Progress */}
-        <div className="relative mb-12 px-4">
-          <div className="flex justify-between items-center relative z-10">
-            {steps.map((step, idx) => (
-              <div key={step.id} className="flex flex-col items-center">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border-2 ${
-                  idx <= currentStep ? 'bg-cyan-600 border-cyan-600 text-white shadow-lg shadow-cyan-100' : 'bg-white border-slate-200 text-slate-400'
-                }`}>
-                  {idx < currentStep ? <CheckCircle2 size={20} /> : step.icon}
+        {/* Machine Category & Subtype Card */}
+        <div className={`mb-6 transition-all duration-700 delay-150 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100 shadow-sm">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-md">
+                  {categoryIcon}
                 </div>
-                <span className={`text-[10px] font-mono uppercase tracking-widest mt-3 font-bold transition-colors ${idx <= currentStep ? 'text-cyan-600' : 'text-slate-400'}`}>
-                  {step.title}
-                </span>
+                <div>
+                  <p className="text-[9px] font-mono font-bold text-blue-600 uppercase tracking-wider">Selected Equipment</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold text-slate-800">{categoryConfig.categoryName}</span>
+                    {categoryConfig.selectedSubtype && (
+                      <>
+                        <span className="text-slate-300 text-xs">•</span>
+                        <span className="text-xs text-slate-600 capitalize font-mono">
+                          {categoryConfig.selectedSubtype.replace(/_/g, ' ')}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="absolute top-6 left-12 right-12 h-0.5 bg-slate-100 -z-0">
-            <div className="h-full bg-cyan-600 transition-all duration-700" style={{ width: `${progress}%` }}></div>
+              <button 
+                onClick={() => navigate('/machine-type')}
+                className="text-[10px] font-mono text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors"
+              >
+                Change <ArrowRight size={10} />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Form Card */}
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-cyan-200 to-blue-200 rounded-[2rem] blur opacity-10 transition duration-1000"></div>
-          <div className="relative bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] shadow-2xl shadow-slate-200/50 overflow-hidden">
-            
-            <div className="p-8 md:p-12">
+        {/* Progress Bar */}
+        <div className={`mb-8 transition-all duration-700 delay-200 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+          <div className="flex justify-between text-[10px] text-slate-400 mb-1.5">
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+              <span>Questionnaire Progress</span>
+            </div>
+            <span className="font-mono font-bold text-blue-600">{Math.round(progress)}% Complete</span>
+          </div>
+          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-500 via-cyan-500 to-emerald-500 rounded-full transition-all duration-500 relative"
+              style={{ width: `${progress}%` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" style={{ width: '200%' }} />
+            </div>
+          </div>
+          
+          {/* Quick tip based on progress */}
+          {progress < 30 && (
+            <p className="text-[9px] text-slate-400 mt-2 flex items-center gap-1">
+              <Star size={9} className="text-amber-400" />
+              Tip: Provide accurate details for better recommendations
+            </p>
+          )}
+          {progress >= 30 && progress < 70 && (
+            <p className="text-[9px] text-slate-400 mt-2 flex items-center gap-1">
+              <Zap size={9} className="text-cyan-500" />
+              You're making great progress! Almost there.
+            </p>
+          )}
+          {progress >= 70 && (
+            <p className="text-[9px] text-slate-400 mt-2 flex items-center gap-1">
+              <Sparkles size={9} className="text-emerald-500" />
+              Almost complete! Ready to see your recommendations.
+            </p>
+          )}
+        </div>
+
+        {/* Main Question Card */}
+        <div className={`transition-all duration-700 delay-300 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+          <div className="relative">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-200 via-cyan-200 to-blue-200 rounded-2xl blur opacity-30 animate-pulse" />
+            <div className="relative bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+              
               {isProcessing ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="relative mb-8">
-                    <div className="w-24 h-24 border-4 border-cyan-100 border-t-cyan-600 rounded-full animate-spin"></div>
-                    <Cpu size={32} className="absolute inset-0 m-auto text-cyan-600 animate-pulse" />
+                  <div className="relative mb-6">
+                    <div className="w-20 h-20 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
+                    <TrendingUp size={28} className="absolute inset-0 m-auto text-blue-600 animate-pulse" />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 mb-2">Processing your profile...</h3>
-                  <div className="space-y-1 font-mono text-[10px] text-slate-400 uppercase tracking-widest">
-                    <p className="animate-pulse">Analyzing surface compatibility</p>
-                    <p className="animate-pulse delay-75">Calculating TCO projections</p>
-                    <p className="animate-pulse delay-150">Matching detergents to soil type</p>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Analyzing Your Requirements</h3>
+                  <div className="space-y-2 text-sm text-slate-500 max-w-md">
+                    <div className="flex items-center justify-center gap-2 animate-pulse">
+                      <Activity size={14} className="text-blue-500" />
+                      <span>Processing site conditions...</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 animate-pulse delay-75">
+                      <Zap size={14} className="text-cyan-500" />
+                      <span>Calculating TCO projections...</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 animate-pulse delay-150">
+                      <HardDrive size={14} className="text-emerald-500" />
+                      <span>Matching optimal equipment...</span>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="animate-in slide-in-from-bottom-4 fade-in duration-500">
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">{steps[currentStep].title}</h2>
-                  <p className="text-slate-400 text-sm mb-8">
-                    {currentStep === 0 && "Enter the area size and select the surface type you'll be cleaning."}
-                    {currentStep === 1 && "What type of dirt or soil do you need to remove?"}
-                    {currentStep === 2 && "Tell us about your power situation and budget."}
-                    {currentStep === 3 && "Set your preferences for eco-friendly options and cleaning frequency."}
-                  </p>
-
-                  <div className="space-y-6">
-                    {/* Step 0: Area Size & Surface Type */}
-                    {currentStep === 0 && (
-                      <>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                            Operational Area (m²) *
-                          </label>
-                          <div className="relative">
-                            <Ruler size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
-                              type="number"
-                              name="areaSize"
-                              value={formData.areaSize}
-                              onChange={handleChange}
-                              placeholder="e.g., 500"
-                              className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 focus:bg-white focus:border-cyan-500 transition-all outline-none"
-                              required
-                            />
-                          </div>
-                          <p className="text-[9px] text-slate-400 mt-1">* Used to match machine capacity and runtime requirements.</p>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                            Surface Type *
-                          </label>
-                          <div className="grid grid-cols-2 gap-3">
-                            {surfaceOptions.map(option => (
-                              <button
-                                key={option.value}
-                                type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, surfaceType: option.value }))}
-                                className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
-                                  formData.surfaceType === option.value
-                                    ? 'border-cyan-500 bg-cyan-50 text-cyan-700'
-                                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
-                                }`}
-                              >
-                                <span className="text-xl">{option.icon}</span>
-                                <span className="text-sm font-medium">{option.label}</span>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Step 1: Dirt Type */}
-                    {currentStep === 1 && (
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                          Primary Soil / Dirt Type *
-                        </label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {dirtOptions.map(option => (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => setFormData(prev => ({ ...prev, dirtType: option.value }))}
-                              className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
-                                formData.dirtType === option.value
-                                  ? 'border-cyan-500 bg-cyan-50 text-cyan-700'
-                                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
-                              }`}
-                            >
-                              <span className="text-xl">{option.icon}</span>
-                              <div className="text-left">
-                                <p className="text-sm font-medium">{option.label}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
+                <>
+                  {/* Question Header */}
+                  <div className="px-6 pt-6 pb-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-md">
+                        <span className="text-sm font-bold">{safeCurrentStep + 1}</span>
                       </div>
-                    )}
-
-                    {/* Step 2: Power Stability & Budget */}
-                    {currentStep === 2 && (
-                      <>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                            Power Stability *
-                          </label>
-                          <div className="grid grid-cols-2 gap-3">
-                            {powerOptions.map(option => (
-                              <button
-                                key={option.value}
-                                type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, powerStability: option.value }))}
-                                className={`flex flex-col items-start gap-2 p-4 rounded-2xl border-2 transition-all ${
-                                  formData.powerStability === option.value
-                                    ? 'border-cyan-500 bg-cyan-50 text-cyan-700'
-                                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
-                                }`}
-                              >
-                                <span className="text-xl">{option.icon}</span>
-                                <div>
-                                  <p className="text-sm font-medium">{option.label}</p>
-                                  <p className="text-[10px] text-slate-400 mt-1">{option.description}</p>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                            Estimated Budget (UGX) *
-                          </label>
-                          <div className="relative">
-                            <DollarSign size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
-                              type="number"
-                              name="budget"
-                              value={formData.budget}
-                              onChange={handleChange}
-                              placeholder="e.g., 5000000"
-                              className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 focus:bg-white focus:border-cyan-500 transition-all outline-none"
-                              required
-                            />
-                          </div>
-                          <p className="text-[9px] text-slate-400 mt-1">* Used to filter equipment within your price range.</p>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Step 3: Eco Preference & Cleaning Frequency */}
-                    {currentStep === 3 && (
-                      <>
-                        <div className="space-y-2">
-                          <label className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer hover:bg-cyan-50/50 hover:border-cyan-200 transition-all group">
-                            <div className="flex items-center gap-4">
-                              <Leaf className={`w-6 h-6 ${formData.ecoPreference ? 'text-green-600' : 'text-slate-400'}`} />
-                              <div>
-                                <span className="text-sm font-bold text-slate-800 block">Eco‑Efficiency Filter</span>
-                                <span className="text-[10px] text-slate-400 uppercase tracking-tighter">Prioritise biodegradable detergents</span>
-                              </div>
-                            </div>
-                            <input
-                              type="checkbox"
-                              name="ecoPreference"
-                              checked={formData.ecoPreference}
-                              onChange={handleChange}
-                              className="w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
-                            />
-                          </label>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
-                            Cleaning Frequency
-                          </label>
-                          <div className="relative">
-                            <Calendar size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <select
-                              name="cleaningFrequency"
-                              value={formData.cleaningFrequency}
-                              onChange={handleChange}
-                              className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 focus:bg-white focus:border-cyan-500 transition-all outline-none appearance-none"
-                            >
-                              <option value="daily">Daily (High traffic / Intensive use)</option>
-                              <option value="weekly">Weekly (Moderate / Commercial)</option>
-                              <option value="monthly">Monthly (Light / Occasional)</option>
-                            </select>
-                          </div>
-                        </div>
-                      </>
-                    )}
+                      <div className="flex-1">
+                        <h2 className="text-lg font-bold text-slate-800">{currentField.title}</h2>
+                        {currentField.description && (
+                          <p className="text-sm text-slate-500 mt-1 leading-relaxed">{currentField.description}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
 
-            {/* Navigation Buttons */}
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-              <button 
-                onClick={handleBack}
-                disabled={currentStep === 0 || isProcessing}
-                className="flex items-center gap-2 px-6 py-3 text-slate-400 hover:text-slate-900 disabled:opacity-0 transition-all font-bold text-xs uppercase tracking-widest"
-              >
-                <ChevronLeft size={16} /> Previous
-              </button>
-              <button 
-                onClick={handleNext}
-                disabled={isProcessing || !isStepValid()}
-                className={`flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all hover:bg-cyan-600 hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:hover:bg-slate-900 disabled:hover:translate-y-0 shadow-lg shadow-slate-200`}
-              >
-                {currentStep === steps.length - 1 ? 'Generate Recommendations' : 'Continue'}
-                <ChevronRight size={16} />
-              </button>
+                  {/* Question Body */}
+                  <div className="p-6">
+                    <DynamicFormField
+                      field={currentField}
+                      value={answers[currentField.id]}
+                      onChange={handleFieldChange}
+                      onBlur={() => handleFieldBlur(currentField.id)}
+                      error={!!errors[currentField.id] && touched[currentField.id]}
+                      errorMessage={errors[currentField.id]}
+                    />
+                  </div>
+
+                  {/* Navigation Buttons */}
+                  <div className="px-6 py-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                    <button
+                      onClick={handleBack}
+                      disabled={safeCurrentStep === 0}
+                      className="flex items-center gap-2 px-5 py-2.5 text-slate-600 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-medium text-sm rounded-xl hover:bg-white"
+                    >
+                      <ChevronLeft size={18} /> Back
+                    </button>
+                    
+                    <button
+                      onClick={handleNext}
+                      className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold text-sm hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                    >
+                      {isLastStep ? (
+                        <>Find My Match <Sparkles size={16} /></>
+                      ) : (
+                        <>Continue <ArrowRight size={16} /></>
+                      )}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Info Box */}
-        <div className="mt-10 text-center text-[10px] text-slate-400 flex items-center justify-center gap-4">
-          <div className="flex items-center gap-2"><Shield size={12} /> Data encrypted</div>
-          <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
-          <div className="flex items-center gap-2"><Clock size={12} /> 4‑step process</div>
-          <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
-          <div className="flex items-center gap-2"><Layers size={12} /> Accurate recommendations</div>
+        {/* Error Message */}
+        {errors.general && (
+          <div className="mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-700 text-sm flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
+            <span>{errors.general}</span>
+          </div>
+        )}
+
+        {/* Footer Info */}
+        <div className="mt-10 text-center text-[10px] text-slate-400 flex flex-wrap items-center justify-center gap-4">
+          <div className="flex items-center gap-1.5"><Shield size={12} className="text-emerald-500" /> Enterprise Security</div>
+          <div className="w-1 h-1 bg-slate-300 rounded-full" />
+          <div className="flex items-center gap-1.5"><Zap size={12} className="text-amber-500" /> Real-time Processing</div>
+          <div className="w-1 h-1 bg-slate-300 rounded-full" />
+          <div className="flex items-center gap-1.5"><Layers size={12} className="text-purple-500" /> Knowledge-Based Engine</div>
         </div>
       </main>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
     </div>
   );
 }

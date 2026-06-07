@@ -1,8 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 const User = require('./models/User');
-const roles = require('./config/roles');
+const { roles } = require('./config/roles');
 
 const fixAdminUser = async () => {
   try {
@@ -21,12 +20,11 @@ const fixAdminUser = async () => {
     // Create new admin user with correct password
     console.log('👤 Creating new admin user...');
     const adminPassword = 'admin123';
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
     const adminUser = new User({
       username: 'admin',
       email: 'admin@cleanmatch.com',
-      password: hashedPassword,
+      password_hash: adminPassword,
       role: roles.ADMIN,
       is_active: true,
     });
@@ -40,7 +38,8 @@ const fixAdminUser = async () => {
 
     // Verify the password works
     console.log('\n🔍 Verifying password...');
-    const isMatch = await adminUser.comparePassword(adminPassword);
+    const createdUser = await User.findOne({ username: 'admin' }).select('+password_hash');
+    const isMatch = await createdUser.comparePassword(adminPassword);
     console.log(`Password verification: ${isMatch ? '✅ SUCCESS' : '❌ FAILED'}`);
 
     await mongoose.disconnect();

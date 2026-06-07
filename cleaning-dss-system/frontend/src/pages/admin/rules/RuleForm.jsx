@@ -18,7 +18,9 @@ import {
   Plus, 
   Trash2,
   TrendingUp,
-  Zap
+  Zap,
+  Gavel,
+  Tag
 } from 'lucide-react';
 import { createRule, updateRule, getRuleById } from '../../../services/ruleService';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
@@ -59,6 +61,10 @@ export const RuleForm = () => {
   };
 
   const removeCondition = (index) => {
+    if (formData.antecedent.conditions.length === 1) {
+      setError('You need at least one condition');
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       antecedent: {
@@ -90,6 +96,10 @@ export const RuleForm = () => {
   };
 
   const removeAction = (index) => {
+    if (formData.consequent.actions.length === 1) {
+      setError('You need at least one action');
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       consequent: {
@@ -104,6 +114,17 @@ export const RuleForm = () => {
       consequent: {
         actions: prev.consequent.actions.map((action, i) => 
           i === index ? { ...action, [field]: value } : action
+        )
+      }
+    }));
+  };
+
+  const updateActionParams = (index, paramKey, value) => {
+    setFormData(prev => ({
+      ...prev,
+      consequent: {
+        actions: prev.consequent.actions.map((action, i) => 
+          i === index ? { ...action, parameters: { ...action.parameters, [paramKey]: value } } : action
         )
       }
     }));
@@ -131,6 +152,24 @@ export const RuleForm = () => {
     e.preventDefault();
     setSaving(true);
     setError('');
+    
+    // Validate required fields
+    if (!formData.rule_id) {
+      setError('Rule ID is required');
+      setSaving(false);
+      return;
+    }
+    if (!formData.rule_text) {
+      setError('Rule text is required');
+      setSaving(false);
+      return;
+    }
+    if (!formData.antecedent.conditions.some(c => c.attribute)) {
+      setError('At least one valid condition is required');
+      setSaving(false);
+      return;
+    }
+    
     try {
       if (id) {
         await updateRule(id, formData);
@@ -149,24 +188,28 @@ export const RuleForm = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="max-w-5xl mx-auto animate-fade-in">
-      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl p-6 md:p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            {id ? 'Edit Rule' : 'Add New Rule'}
-          </h1>
-          <button onClick={() => navigate('/admin/rules')} className="p-2 hover:bg-slate-100 rounded-xl transition">
+    <div className="max-w-5xl mx-auto py-6 px-4 lg:px-6">
+      <div className="bg-white rounded-lg border border-slate-200">
+        {/* Header */}
+        <div className="flex justify-between items-center p-5 border-b border-slate-200">
+          <div className="flex items-center gap-2">
+            <Gavel className="w-5 h-5 text-cyan-600" />
+            <h1 className="text-xl font-semibold text-slate-800">
+              {id ? 'Edit Rule' : 'Add New Rule'}
+            </h1>
+          </div>
+          <button onClick={() => navigate('/admin/rules')} className="p-2 hover:bg-slate-100 rounded-lg transition">
             <X className="w-5 h-5 text-slate-500" />
           </button>
         </div>
 
         {error && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2">
+          <div className="m-5 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
             <AlertCircle className="w-4 h-4" /> {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="p-5 space-y-6">
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -178,15 +221,17 @@ export const RuleForm = () => {
                 onChange={(e) => setFormData({ ...formData, rule_id: e.target.value })}
                 placeholder="e.g., R001, R002"
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono text-sm"
+                className="w-full border border-slate-200 rounded-lg p-2.5 font-mono text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Category *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1">
+                <Tag className="w-4 h-4 text-cyan-600" /> Category *
+              </label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
+                className="w-full border border-slate-200 rounded-lg p-2.5 bg-white"
               >
                 {ruleCategories.map(cat => (
                   <option key={cat} value={cat}>{cat.toUpperCase()}</option>
@@ -203,7 +248,7 @@ export const RuleForm = () => {
               rows="3"
               placeholder="e.g., IF surface_type = tile AND dirt_type = grease THEN recommend floor scrubber"
               required
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono text-sm"
+              className="w-full border border-slate-200 rounded-lg p-2.5 font-mono text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none"
             />
           </div>
 
@@ -216,7 +261,7 @@ export const RuleForm = () => {
                 <select
                   value={formData.antecedent.operator}
                   onChange={(e) => setFormData({ ...formData, antecedent: { ...formData.antecedent, operator: e.target.value } })}
-                  className="bg-slate-50 border border-slate-200 rounded-lg p-1 text-sm"
+                  className="border border-slate-200 rounded-lg p-1 text-sm bg-white"
                 >
                   <option value="AND">AND</option>
                   <option value="OR">OR</option>
@@ -229,7 +274,7 @@ export const RuleForm = () => {
                 <select
                   value={condition.attribute}
                   onChange={(e) => updateCondition(idx, 'attribute', e.target.value)}
-                  className="w-1/3 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                  className="w-1/3 border border-slate-200 rounded-lg p-2 text-sm bg-white"
                 >
                   <option value="">Select attribute</option>
                   <option value="surface_type">Surface Type</option>
@@ -243,7 +288,7 @@ export const RuleForm = () => {
                 <select
                   value={condition.operator}
                   onChange={(e) => updateCondition(idx, 'operator', e.target.value)}
-                  className="w-24 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                  className="w-24 border border-slate-200 rounded-lg p-2 text-sm bg-white"
                 >
                   <option value="EQ">=</option>
                   <option value="NE">≠</option>
@@ -257,7 +302,7 @@ export const RuleForm = () => {
                   <select
                     value={condition.value}
                     onChange={(e) => updateCondition(idx, 'value', e.target.value)}
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm bg-white"
                   >
                     <option value="">Select value</option>
                     {surfaceTypes.map(s => <option key={s} value={s}>{s}</option>)}
@@ -266,7 +311,7 @@ export const RuleForm = () => {
                   <select
                     value={condition.value}
                     onChange={(e) => updateCondition(idx, 'value', e.target.value)}
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm bg-white"
                   >
                     <option value="">Select value</option>
                     {dirtTypes.map(d => <option key={d} value={d}>{d}</option>)}
@@ -275,11 +320,21 @@ export const RuleForm = () => {
                   <select
                     value={condition.value}
                     onChange={(e) => updateCondition(idx, 'value', e.target.value)}
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm bg-white"
                   >
                     <option value="">Select value</option>
                     <option value="stable">Stable</option>
                     <option value="unstable">Unstable</option>
+                  </select>
+                ) : condition.attribute === 'eco_preference' ? (
+                  <select
+                    value={condition.value}
+                    onChange={(e) => updateCondition(idx, 'value', e.target.value)}
+                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm bg-white"
+                  >
+                    <option value="">Select value</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
                   </select>
                 ) : (
                   <input
@@ -287,14 +342,14 @@ export const RuleForm = () => {
                     value={condition.value}
                     onChange={(e) => updateCondition(idx, 'value', e.target.value)}
                     placeholder="Value"
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm"
                   />
                 )}
 
                 <button
                   type="button"
                   onClick={() => removeCondition(idx)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -304,7 +359,7 @@ export const RuleForm = () => {
             <button
               type="button"
               onClick={addCondition}
-              className="flex items-center gap-1 text-sm text-cyan-600 hover:text-cyan-700 mt-2"
+              className="inline-flex items-center gap-1 text-sm text-cyan-600 hover:text-cyan-700 mt-2"
             >
               <Plus className="w-4 h-4" /> Add Condition
             </button>
@@ -315,11 +370,11 @@ export const RuleForm = () => {
             <h3 className="text-md font-semibold text-slate-800 mb-3">THEN (Consequent)</h3>
             
             {formData.consequent.actions.map((action, idx) => (
-              <div key={idx} className="flex gap-2 mb-3 items-center">
+              <div key={idx} className="flex gap-2 mb-3 items-center flex-wrap">
                 <select
                   value={action.type}
                   onChange={(e) => updateAction(idx, 'type', e.target.value)}
-                  className="w-48 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                  className="w-48 border border-slate-200 rounded-lg p-2 text-sm bg-white"
                 >
                   {actionTypes.map(at => (
                     <option key={at} value={at}>{at.replace(/_/g, ' ')}</option>
@@ -332,7 +387,7 @@ export const RuleForm = () => {
                     placeholder="Equipment ID or category"
                     value={action.target || ''}
                     onChange={(e) => updateAction(idx, 'target', e.target.value)}
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm"
                   />
                 )}
 
@@ -342,7 +397,7 @@ export const RuleForm = () => {
                     placeholder="Detergent ID or category"
                     value={action.target || ''}
                     onChange={(e) => updateAction(idx, 'target', e.target.value)}
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm"
                   />
                 )}
 
@@ -351,8 +406,8 @@ export const RuleForm = () => {
                     type="text"
                     placeholder="Alert message"
                     value={action.parameters?.message || ''}
-                    onChange={(e) => updateAction(idx, 'parameters', { message: e.target.value })}
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                    onChange={(e) => updateActionParams(idx, 'message', e.target.value)}
+                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm"
                   />
                 )}
 
@@ -360,17 +415,17 @@ export const RuleForm = () => {
                   <input
                     type="number"
                     step="0.1"
-                    placeholder="Score factor"
-                    value={action.parameters?.factor || ''}
-                    onChange={(e) => updateAction(idx, 'parameters', { factor: parseFloat(e.target.value) })}
-                    className="w-32 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+                    placeholder="Score factor (0.1-2.0)"
+                    value={action.parameters?.factor || 1.0}
+                    onChange={(e) => updateActionParams(idx, 'factor', parseFloat(e.target.value))}
+                    className="w-32 border border-slate-200 rounded-lg p-2 text-sm"
                   />
                 )}
 
                 <button
                   type="button"
                   onClick={() => removeAction(idx)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -380,7 +435,7 @@ export const RuleForm = () => {
             <button
               type="button"
               onClick={addAction}
-              className="flex items-center gap-1 text-sm text-cyan-600 hover:text-cyan-700 mt-2"
+              className="inline-flex items-center gap-1 text-sm text-cyan-600 hover:text-cyan-700 mt-2"
             >
               <Plus className="w-4 h-4" /> Add Action
             </button>
@@ -398,8 +453,9 @@ export const RuleForm = () => {
                 max="100"
                 value={formData.priority}
                 onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
+                className="w-full border border-slate-200 rounded-lg p-2.5"
               />
+              <p className="text-xs text-slate-400 mt-1">Higher = fires first</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1">
@@ -412,8 +468,9 @@ export const RuleForm = () => {
                 max="1"
                 value={formData.certainty_factor}
                 onChange={(e) => setFormData({ ...formData, certainty_factor: parseFloat(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
+                className="w-full border border-slate-200 rounded-lg p-2.5"
               />
+              <p className="text-xs text-slate-400 mt-1">Closer to 1 = more confident</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Salience</label>
@@ -421,12 +478,13 @@ export const RuleForm = () => {
                 type="number"
                 value={formData.salience}
                 onChange={(e) => setFormData({ ...formData, salience: parseInt(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
+                className="w-full border border-slate-200 rounded-lg p-2.5"
               />
+              <p className="text-xs text-slate-400 mt-1">Tie-breaker when priority equal</p>
             </div>
           </div>
 
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={formData.active}
@@ -436,18 +494,18 @@ export const RuleForm = () => {
             <span className="text-sm text-slate-700">Active (rule will be used by inference engine)</span>
           </label>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
             <button
               type="button"
               onClick={() => navigate('/admin/rules')}
-              className="px-6 py-2 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition"
+              className="px-6 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition disabled:opacity-70"
+              className="px-6 py-2 bg-cyan-600 text-white rounded-lg font-medium flex items-center gap-2 hover:bg-cyan-700 transition disabled:opacity-70"
             >
               {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
               {saving ? 'Saving...' : 'Save Rule'}

@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { login as loginApi, getMe } from '../services/authService';
+import { login as loginApi, register as registerApi, getMe, logout as logoutApi, getStoredUser, isAuthenticated as checkAuth } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -23,41 +23,34 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  const tokenKey = import.meta.env.VITE_APP_TOKEN_KEY || 'token';
-  const userKey = import.meta.env.VITE_APP_USER_KEY || 'user';
-
-  const clearStorage = useCallback(() => {
-    localStorage.removeItem(tokenKey);
-    localStorage.removeItem(userKey);
-  }, [tokenKey, userKey]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const loadStoredUser = useCallback(async () => {
-    const token = localStorage.getItem(tokenKey);
-    const storedUser = localStorage.getItem(userKey);
+    const storedUser = getStoredUser();
+    const hasToken = checkAuth();
 
-    if (!token || !storedUser) {
+    if (!hasToken || !storedUser) {
       setLoading(false);
-      setIsInitialized(true);
+      setIsAuthenticated(false);
       return;
     }
 
     try {
+      // Validate token by fetching user profile
       const response = await getMe();
-      const userData = response.data.data;
+      const userData = response.data.data || response.data.user;
       setUser(userData);
-      localStorage.setItem(userKey, JSON.stringify(userData));
+      setIsAuthenticated(true);
       setError(null);
     } catch (err) {
       console.error('Failed to validate stored user:', err);
-      clearStorage();
+      logoutApi();
       setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setLoading(false);
-      setIsInitialized(true);
     }
-  }, [tokenKey, userKey, clearStorage]);
+  }, []);
 
   useEffect(() => {
     loadStoredUser();
@@ -67,67 +60,77 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await loginApi(credentials);
-      const { token, user: userData } = response.data.data;
+      const { token, user: userData } = response.data.data || response.data;
       
-      localStorage.setItem(tokenKey, token);
-      localStorage.setItem(userKey, JSON.stringify(userData));
       setUser(userData);
+      setIsAuthenticated(true);
       
       return userData;
     } catch (err) {
-      const errorMsg = err.response?.data?.error || 'Login failed. Please check your credentials.';
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || 'Login failed. Please check your credentials.';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
+  };
+
+  const register = async (userData) => {
+    setError(null);
+    try {
+      const response = await registerApi(userData);
+      return response.data;
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || 'Registration failed. Please try again.';
       setError(errorMsg);
       throw new Error(errorMsg);
     }
   };
 
   const logout = useCallback(() => {
-    clearStorage();
+    logoutApi();
     setUser(null);
+    setIsAuthenticated(false);
     setError(null);
-  }, [clearStorage]);
+  }, []);
 
   const updateUser = useCallback((updatedUser) => {
     setUser((prev) => {
       const newUser = { ...prev, ...updatedUser };
-      localStorage.setItem(userKey, JSON.stringify(newUser));
+      localStorage.setItem('user', JSON.stringify(newUser));
       return newUser;
     });
-  }, [userKey]);
+  }, []);
 
   const refreshUser = useCallback(async () => {
     try {
       const response = await getMe();
-      const userData = response.data.data;
-      localStorage.setItem(userKey, JSON.stringify(userData));
+      const userData = response.data.data || response.data.user;
       setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
       return userData;
     } catch (err) {
       console.error('Failed to refresh user:', err);
       throw err;
     }
-  }, [userKey]);
+  }, []);
 
   // Role-based helpers
-  const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   const isSuperAdmin = user?.role === 'super_admin';
-  const isStandardUser = user?.role === 'standard';
+  const isStandardUser = user?.role === 'standard' || user?.role === 'company_owner';
 
   const value = {
     // State
     user,
     loading,
     error,
-    isInitialized,
     isAuthenticated,
     
     // User details
     userId: user?._id,
-    userName: user?.username,
+    userName: user?.username || user?.fullName,
     userEmail: user?.email,
     userRole: user?.role,
-    userOrganization: user?.organization,
+    userOrganization: user?.companyName || user?.organization,
     
     // Role helpers
     isAdmin,
@@ -136,10 +139,10 @@ export const AuthProvider = ({ children }) => {
     
     // Actions
     login,
+    register,
     logout,
     updateUser,
     refreshUser,
-    clearStorage,
   };
 
   return (

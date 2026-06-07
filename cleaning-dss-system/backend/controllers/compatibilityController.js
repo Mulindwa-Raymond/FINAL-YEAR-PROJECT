@@ -5,8 +5,8 @@
  */
 
 const Compatibility = require('../models/EquipmentDetergentCompatibilty');
-const Equipment = require('../models/Equipment');
-const Detergent = require('../models/Detergent');
+const { Equipment } = require('../models/Equipment');
+const { Detergent } = require('../models/Detergent');
 const { success, error } = require('../utils/apiResponse');
 
 /**

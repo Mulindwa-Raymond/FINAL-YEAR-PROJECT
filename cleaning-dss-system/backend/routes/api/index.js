@@ -4,7 +4,7 @@
  */
 
 const express = require('express');
-const recommendationRoutes = require('./v1/recommendationRoutes');
+const { inferenceRouter, historyRouter } = require('./v1/recommendationRoutes');
 const equipmentRoutes = require('./v1/equipmentRoutes');
 const equipmentSpecsRoutes = require('./v1/equipmentSpecsRoutes');
 const detergentRoutes = require('./v1/detergentRoutes');
@@ -15,12 +15,14 @@ const tcoRoutes = require('./v1/tcoRoutes');
 const authRoutes = require('./v1/authRoutes');
 const adminRoutes = require('./v1/adminRoutes');
 const metricRoutes = require('./v1/metricRoutes');
+const trainingRoutes = require('./v1/trainingRoutes'); 
 
 const router = express.Router();
 const v1Router = express.Router();
 
 // Core recommendation
-v1Router.use('/recommend', recommendationRoutes);
+v1Router.use('/recommend', inferenceRouter);
+v1Router.use('/recommendations', historyRouter);
 
 // Equipment management
 v1Router.use('/equipment', equipmentRoutes);
@@ -44,9 +46,13 @@ v1Router.use('/tco', tcoRoutes);
 // Authentication
 v1Router.use('/auth', authRoutes);
 
-// Admin only routes
+// Admin only routes (including training)
 v1Router.use('/admin', adminRoutes);
+v1Router.use('/admin/trainings', trainingRoutes); 
 
+const publicTrainingRoutes = require('./v1/publicTrainingRoutes');
+// ...
+v1Router.use('/training/public', publicTrainingRoutes);
 // Public metrics
 v1Router.use('/metrics', metricRoutes);
 

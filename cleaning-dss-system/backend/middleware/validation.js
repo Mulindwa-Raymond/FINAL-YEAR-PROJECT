@@ -7,18 +7,33 @@ const Joi = require('joi');
 
 // ---- Schemas ----
 
+const stringOrArrayOfString = Joi.alternatives().try(
+  Joi.string(),
+  Joi.array().items(Joi.string())
+).optional();
+
 // Recommendation request schema (POST /api/v1/recommend)
 const recommendationSchema = Joi.object({
-  surfaceType: Joi.string().valid('tile', 'concrete', 'vinyl', 'wood', 'marble', 'carpet', 'glass', 'stainless_steel').required(),
-  dirtType: Joi.string().valid('grease', 'red laterite soil', 'dust', 'oil', 'organic', 'heavy soil', 'light dust', 'spills', 'lime scale', 'rust').required(),
-  domain: Joi.string().valid('domestic', 'industrial').required(),
+  surface_type: stringOrArrayOfString,
+  surfaceType: stringOrArrayOfString,
+  dirt_type: stringOrArrayOfString,
+  dirtType: stringOrArrayOfString,
+  debris_type: stringOrArrayOfString,
+  domain: Joi.string().optional(),
   usageHoursPerWeek: Joi.number().min(0).default(0),
   areaSizeM2: Joi.number().min(0).default(0),
+  area_size: Joi.number().min(0).default(0),
   budgetUgx: Joi.number().min(0).allow(null),
+  budget_ugx: Joi.number().min(0).allow(null),
   powerStability: Joi.string().valid('stable', 'unstable').default('stable'),
+  power_stability: Joi.string().valid('stable', 'unstable').default('stable'),
   ecoRequired: Joi.boolean().default(false),
-  noiseSensitive: Joi.boolean().default(false)
-});
+  eco_preference: Joi.boolean().default(false),
+  noiseSensitive: Joi.boolean().default(false),
+  noise_sensitivity: Joi.string().optional(),
+  operation_mode: Joi.string().optional(),
+  special_requirements: stringOrArrayOfString,
+}).unknown();
 
 // User registration schema
 const registerSchema = Joi.object({

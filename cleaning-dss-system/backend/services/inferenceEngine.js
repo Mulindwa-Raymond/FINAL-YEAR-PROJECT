@@ -7,10 +7,12 @@
  * - Certainty factor propagation
  * - Explanation generation
  * - Working memory management
+ * - Category-specific filtering
  */
 
-const Rule = require('../models/Rule');
+const { Rule } = require('../models/Rule');
 const WorkingMemory = require('../models/WorkingMemory');
+const { Equipment } = require('../models/Equipment');
 
 class InferenceEngine {
   constructor(sessionId = null) {
@@ -20,6 +22,7 @@ class InferenceEngine {
     this.sessionId = sessionId;
     this.workingMemory = null;
     this.explanations = [];
+    this.equipmentCache = new Map(); // Cache for equipment lookups
   }
 
   /**
@@ -74,6 +77,14 @@ class InferenceEngine {
     const initial = this.workingMemory.initial_facts || [];
     const derived = this.workingMemory.derived_facts || [];
     return [...initial, ...derived];
+  }
+
+  /**
+   * Get fact by attribute name
+   */
+  getFact(attribute) {
+    const facts = this.getAllFacts();
+    return facts.find(f => f.attribute === attribute);
   }
 
   /**
@@ -228,25 +239,31 @@ class InferenceEngine {
     switch (action.type) {
       case 'recommend_equipment':
         // Add to working memory
-        this.workingMemory.recommendations.equipment_ids.push(action.target);
+        if (action.target && !this.workingMemory.recommendations.equipment_ids.includes(action.target)) {
+          this.workingMemory.recommendations.equipment_ids.push(action.target);
+        }
         // Add derived fact
         this.workingMemory.derived_facts.push({
           attribute: 'recommended_equipment',
           value: action.target,
           certainty: rule.certainty_factor,
           source: 'rule_inference',
-          rule_id: rule.rule_id
+          rule_id: rule.rule_id,
+          timestamp: new Date()
         });
         break;
         
       case 'recommend_detergent':
-        this.workingMemory.recommendations.detergent_ids.push(action.target);
+        if (action.target && !this.workingMemory.recommendations.detergent_ids.includes(action.target)) {
+          this.workingMemory.recommendations.detergent_ids.push(action.target);
+        }
         this.workingMemory.derived_facts.push({
           attribute: 'recommended_detergent',
           value: action.target,
           certainty: rule.certainty_factor,
           source: 'rule_inference',
-          rule_id: rule.rule_id
+          rule_id: rule.rule_id,
+          timestamp: new Date()
         });
         break;
         
@@ -260,7 +277,8 @@ class InferenceEngine {
           value: action.parameters.value,
           certainty: rule.certainty_factor * (action.parameters.certainty || 1),
           source: 'rule_inference',
-          rule_id: rule.rule_id
+          rule_id: rule.rule_id,
+          timestamp: new Date()
         });
         break;
         
@@ -279,7 +297,8 @@ class InferenceEngine {
           value: action.target,
           certainty: rule.certainty_factor,
           source: 'rule_inference',
-          rule_id: rule.rule_id
+          rule_id: rule.rule_id,
+          timestamp: new Date()
         });
         break;
         
@@ -287,6 +306,8 @@ class InferenceEngine {
         this.workingMemory.status = 'completed';
         break;
     }
+    
+    await this.workingMemory.save();
   }
 
   /**
@@ -308,7 +329,7 @@ class InferenceEngine {
       }
     }
     
-    // Check for conflicts (multiple rules recommending different things)
+    // Check for conflicts (multiple rules recommending the same thing)
     for (const [target, rules] of recommendations) {
       if (rules.length > 1) {
         // Conflict: multiple rules want to recommend the same thing
@@ -335,6 +356,15 @@ class InferenceEngine {
   select() {
     if (this.agenda.length === 0) return null;
     return this.agenda.shift(); // Already sorted by priority
+  }
+
+  /**
+   * Get category from user input
+   */
+  getTargetCategory() {
+    const facts = this.getAllFacts();
+    const categoryFact = facts.find(f => f.attribute === 'machine_category');
+    return categoryFact?.value;
   }
 
   /**
@@ -385,29 +415,186 @@ class InferenceEngine {
   }
 
   /**
-   * Generate final recommendations from working memory
+   * Derive intensity from area_size fact
    */
-  generateRecommendations() {
+  _deriveIntensityFromArea(areaSize, category) {
+    const area = parseFloat(areaSize) || 0;
+    if (category === 'sweeper') {
+      if (area > 5000) return 'heavy';
+      if (area > 1000) return 'medium';
+      return 'light';
+    }
+    if (category === 'scrubber_drier') {
+      if (area > 3000) return 'heavy';
+      if (area > 500) return 'medium';
+      return 'light';
+    }
+    if (area > 1500) return 'heavy';
+    if (area > 300) return 'medium';
+    return 'light';
+  }
+
+  /**
+   * Generate final recommendations from working memory with category filtering and equipment details.
+   * Falls back to direct DB query when rules don't recommend specific equipment IDs.
+   */
+  async generateRecommendations() {
     const equipmentIds = this.workingMemory.recommendations.equipment_ids || [];
     const detergentIds = this.workingMemory.recommendations.detergent_ids || [];
     const alerts = this.workingMemory.recommendations.alerts || [];
     const scores = this.workingMemory.recommendations.scores || {};
     
-    // Apply score modifications from working memory
-    const scoredEquipment = equipmentIds.map(id => ({
+    const targetCategory = this.getTargetCategory();
+    const facts = this.getAllFacts();
+    
+    const getValue = (attr) => facts.find(f => f.attribute === attr)?.value;
+    const surfaceTypeValue = getValue('surface_type');
+    const dirtTypeValue = getValue('dirt_type');
+    const areaSize = getValue('area_size');
+    const powerSource = getValue('power_source');
+    const environment = getValue('environment');
+    const domain = getValue('domain');
+    const soilLevel = getValue('soil_level');
+    const useCase = getValue('use_case');
+    
+    const surfaceArr = Array.isArray(surfaceTypeValue) ? surfaceTypeValue : (surfaceTypeValue ? [surfaceTypeValue] : []);
+    const dirtArr = Array.isArray(dirtTypeValue) ? dirtTypeValue : (dirtTypeValue ? [dirtTypeValue] : []);
+    
+    console.log(`🎯 Generating recommendations for category: ${targetCategory}`);
+    console.log(`📊 Surface: ${surfaceArr.join(',')}, Dirt: ${dirtArr.join(',')}, Area: ${areaSize}`);
+    
+    let validEquipmentIds = [...equipmentIds];
+    
+    if (validEquipmentIds.length > 0) {
+      const equipmentList = await Equipment.find({ _id: { $in: validEquipmentIds } });
+      for (const eq of equipmentList) {
+        this.equipmentCache.set(eq._id.toString(), eq);
+      }
+      if (targetCategory) {
+        validEquipmentIds = equipmentList
+          .filter(eq => eq.machine_category === targetCategory)
+          .map(eq => eq._id.toString());
+      }
+    }
+
+    if (validEquipmentIds.length === 0) {
+      console.log(`🔄 No rules matched equipment — running direct DB query fallback`);
+      
+      const dbQuery = { active: true, in_stock: true };
+      
+      if (targetCategory) dbQuery.machine_category = targetCategory;
+
+      let derivedIntensity = null;
+      if (useCase === 'domestic') derivedIntensity = 'light';
+      else if (useCase === 'commercial') derivedIntensity = 'medium';
+      else if (useCase === 'industrial' || useCase === 'food_beverage' || useCase === 'construction' || useCase === 'hazardous') derivedIntensity = 'heavy';
+      
+      if (!derivedIntensity && areaSize) {
+        derivedIntensity = this._deriveIntensityFromArea(areaSize, targetCategory);
+      }
+      
+      if (derivedIntensity) dbQuery.intensity = derivedIntensity;
+      
+      if (environment && environment !== 'any') dbQuery.environment = { $in: [environment, 'any'] };
+      
+      if (powerSource && powerSource !== 'any') dbQuery.power_source = powerSource;
+      
+      let fallbackEquipment = await Equipment.find(dbQuery).limit(30);
+      
+      if (fallbackEquipment.length === 0 && targetCategory) {
+        const relaxed = { active: true, in_stock: true, machine_category: targetCategory };
+        fallbackEquipment = await Equipment.find(relaxed).limit(30);
+      }
+      
+      if (fallbackEquipment.length === 0 && targetCategory) {
+        fallbackEquipment = await Equipment.find({ machine_category: targetCategory }).limit(30);
+      }
+      
+      for (const eq of fallbackEquipment) {
+        const id = eq._id.toString();
+        this.equipmentCache.set(id, eq);
+        validEquipmentIds.push(id);
+      }
+      
+      console.log(`🔍 DB fallback returned ${validEquipmentIds.length} equipment`);
+    }
+    
+    const scoredEquipment = validEquipmentIds.map(id => ({
       equipment_id: id,
-      score: scores[id] || 0
+      score: scores[id] || 50
     }));
+    
+    for (const item of scoredEquipment) {
+      const eq = this.equipmentCache.get(item.equipment_id);
+      if (!eq) continue;
+
+      for (const sv of surfaceArr) {
+        if (eq.surface_compatibility?.includes(sv)) item.score += 15;
+      }
+      for (const dv of dirtArr) {
+        if (eq.dirt_compatibility?.includes(dv)) item.score += 15;
+      }
+      if (eq.in_stock) item.score += 5;
+      
+      if (soilLevel === 'light' && eq.intensity === 'light') item.score += 10;
+      if (soilLevel === 'medium' && eq.intensity === 'medium') item.score += 10;
+      if (soilLevel === 'heavy' && eq.intensity === 'heavy') item.score += 10;
+      
+      if (domain && eq.domain === domain) item.score += 8;
+      if (environment && (eq.environment === environment || eq.environment === 'any')) item.score += 5;
+      if (powerSource && eq.power_source === powerSource) item.score += 8;
+    }
     
     scoredEquipment.sort((a, b) => b.score - a.score);
     
+    const maxScore = scoredEquipment[0]?.score || 100;
+    for (const item of scoredEquipment) {
+      item.match_score = Math.min(100, Math.round((item.score / Math.max(maxScore, 1)) * 100));
+    }
+    
+    const selectedEquipment = [];
+    const brandsSeen = new Set();
+    
+    for (const item of scoredEquipment) {
+      const eq = this.equipmentCache.get(item.equipment_id);
+      if (eq && !brandsSeen.has(eq.brand_name)) {
+        brandsSeen.add(eq.brand_name);
+        selectedEquipment.push(item);
+        if (selectedEquipment.length >= 3) break;
+      }
+    }
+    
+    if (selectedEquipment.length < 3) {
+      for (const item of scoredEquipment) {
+        if (!selectedEquipment.find(s => s.equipment_id === item.equipment_id)) {
+          selectedEquipment.push(item);
+          if (selectedEquipment.length >= 3) break;
+        }
+      }
+    }
+    
+    let primaryEquipmentTCO = null;
+    if (selectedEquipment[0]?.equipment_id) {
+      const primaryEq = this.equipmentCache.get(selectedEquipment[0].equipment_id);
+      if (primaryEq) primaryEquipmentTCO = primaryEq.estimated_tco_per_year_ugx;
+    }
+    
+    const matchScores = {};
+    for (const item of scoredEquipment) {
+      matchScores[item.equipment_id] = item.match_score;
+    }
+    
+    console.log(`✅ Final recommendations: ${selectedEquipment.length} equipment selected`);
+    
     return {
-      primary_equipment_id: scoredEquipment[0]?.equipment_id || null,
-      alternative_equipment_ids: scoredEquipment.slice(1, 4).map(e => e.equipment_id),
+      primary_equipment_id: selectedEquipment[0]?.equipment_id || null,
+      alternative_equipment_ids: selectedEquipment.slice(1).map(e => e.equipment_id),
       primary_detergent_id: detergentIds[0] || null,
       alternative_detergent_ids: detergentIds.slice(1, 3),
       alerts,
-      reasoningTrace: this.explanations
+      scores: matchScores,
+      reasoningTrace: this.explanations,
+      tco_primary: primaryEquipmentTCO
     };
   }
 }

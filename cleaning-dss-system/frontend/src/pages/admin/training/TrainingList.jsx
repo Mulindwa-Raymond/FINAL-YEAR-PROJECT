@@ -2,29 +2,24 @@
  * TrainingList.jsx
  * 
  * Admin page for managing training materials.
- * Features:
- * - List all training items with search and filter by type
- * - Edit and delete actions
- * - Add new training button
- * - YouTube video preview integration
- * - Fetches data from adminService
+ * Uses `id` from backend (model transforms _id to id).
  */
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Filter, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
   X,
   Youtube,
   FileText,
   BookOpen,
-  Play,
   Eye,
-  Video
+  Video,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { getAllTrainings, deleteTraining } from '../../../services/adminService';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
@@ -33,6 +28,7 @@ import { ConfirmModal } from '../../../components/common/ConfirmModal';
 export const TrainingList = () => {
   const [trainings, setTrainings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -73,12 +69,21 @@ export const TrainingList = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    const trainingId = deleteTarget.id; // ✅ use id, not _id
+    if (!trainingId) {
+      console.error('No training ID found', deleteTarget);
+      alert('Cannot delete: missing training ID');
+      return;
+    }
+    setDeletingId(trainingId);
     try {
-      await deleteTraining(deleteTarget._id);
+      await deleteTraining(trainingId);
       fetchTrainings();
     } catch (err) {
       console.error('Delete failed:', err);
+      alert('Failed to delete training. Please try again.');
     } finally {
+      setDeletingId(null);
       setDeleteTarget(null);
     }
   };
@@ -95,41 +100,53 @@ export const TrainingList = () => {
   if (loading && page === 1) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="pb-8 px-4 lg:px-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
         <div>
-          <h1 className="text-2xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Training Materials
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">Manage videos, PDFs, and articles for users</p>
+          <div className="flex items-center gap-2">
+            <Video className="w-5 h-5 text-cyan-600" />
+            <h1 className="text-xl font-semibold text-slate-800">Training Materials</h1>
+          </div>
+          <p className="text-slate-500 text-sm mt-0.5">Manage videos, PDFs, and articles for users</p>
         </div>
         <Link
           to="/admin/training/new"
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold text-sm hover:shadow-lg transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Training
         </Link>
       </div>
 
-      {/* Search and filter bar */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl p-4">
+      {/* Stats bar */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="text-sm text-slate-500">
+          Showing <span className="font-medium text-slate-700">{trainings.length}</span> of{' '}
+          <span className="font-medium text-slate-700">{total}</span> items
+        </div>
+        <div className="text-sm text-slate-400">
+          Last updated: {new Date().toLocaleDateString()}
+        </div>
+      </div>
+
+      {/* Search and filters */}
+      <div className="mb-6">
         <div className="flex flex-wrap gap-3 items-center">
-          <div className="flex-1 min-w-[200px] relative">
+          <div className="flex-1 min-w-[240px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search by title, description..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none"
+              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-sm"
             />
           </div>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm"
+            className="border border-slate-200 rounded-lg p-2 text-sm bg-white"
           >
             <option value="">All Types</option>
             <option value="video">Video</option>
@@ -138,8 +155,12 @@ export const TrainingList = () => {
           </select>
           {(search || filterType) && (
             <button
-              onClick={() => { setSearch(''); setFilterType(''); }}
-              className="flex items-center gap-1 px-3 py-2 text-sm text-slate-500 hover:text-red-600"
+              onClick={() => {
+                setSearch('');
+                setFilterType('');
+                setPage(1);
+              }}
+              className="inline-flex items-center gap-1 px-3 py-2 text-sm text-slate-500 hover:text-red-600 transition-colors"
             >
               <X className="w-3 h-3" /> Clear
             </button>
@@ -150,7 +171,7 @@ export const TrainingList = () => {
       {/* Training Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {trainings.length === 0 ? (
-          <div className="col-span-full bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl p-12 text-center">
+          <div className="col-span-full border border-slate-200 rounded-lg bg-white p-12 text-center">
             <Video className="w-12 h-12 text-slate-400 mx-auto mb-4" />
             <p className="text-slate-500">No training materials found.</p>
           </div>
@@ -158,8 +179,11 @@ export const TrainingList = () => {
           trainings.map((training) => {
             const embedUrl = training.type === 'video' ? getYouTubeEmbedUrl(training.youtubeUrl) : null;
             return (
-              <div key={training._id} className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl overflow-hidden hover:shadow-2xl transition-all group">
-                {/* Preview */}
+              <div
+                key={training.id}
+                className="bg-white border border-slate-200 rounded-lg overflow-hidden hover:shadow-lg hover:border-cyan-200 transition-all group"
+              >
+                {/* Preview Image / Placeholder */}
                 <div className="h-48 bg-slate-100 overflow-hidden relative">
                   {embedUrl ? (
                     <iframe
@@ -180,39 +204,48 @@ export const TrainingList = () => {
                       <span className="text-xs text-slate-500">Article / Webpage</span>
                     </div>
                   )}
+                  {/* Type Badge */}
                   <div className="absolute top-3 right-3">
-                    <span className={`px-2 py-1 rounded-full text-xs flex items-center gap-1 ${
-                      training.type === 'video' ? 'bg-red-500 text-white' :
-                      training.type === 'pdf' ? 'bg-orange-500 text-white' : 'bg-blue-500 text-white'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs flex items-center gap-1 ${
+                        training.type === 'video'
+                          ? 'bg-red-500 text-white'
+                          : training.type === 'pdf'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-blue-500 text-white'
+                      }`}
+                    >
                       {training.type === 'video' && <Youtube className="w-3 h-3" />}
                       {training.type === 'pdf' && <FileText className="w-3 h-3" />}
                       {training.type === 'article' && <BookOpen className="w-3 h-3" />}
                       {training.type.toUpperCase()}
                     </span>
                   </div>
+                  {/* Inactive Overlay */}
                   {!training.active && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                       <span className="px-3 py-1 bg-red-500 text-white rounded-full text-xs">Inactive</span>
                     </div>
                   )}
                 </div>
-                
+
                 {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-lg font-bold text-slate-800 mb-2 line-clamp-1">{training.title}</h3>
-                  <p className="text-sm text-slate-500 mb-4 line-clamp-2">{training.description || 'No description provided.'}</p>
-                  
+                <div className="p-4">
+                  <h3 className="font-semibold text-slate-800 mb-1 line-clamp-1">{training.title}</h3>
+                  <p className="text-sm text-slate-500 mb-3 line-clamp-2">
+                    {training.description || 'No description provided.'}
+                  </p>
+
                   {/* Actions */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-2">
                     {training.type === 'video' && training.youtubeUrl && (
                       <a
                         href={training.youtubeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 py-2 bg-red-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-red-700 transition flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 bg-red-600 text-white rounded-md text-[10px] font-bold uppercase tracking-wider hover:bg-red-700 transition flex items-center justify-center gap-1"
                       >
-                        <Youtube className="w-3 h-3" /> Watch on YouTube
+                        <Youtube className="w-3 h-3" /> Watch
                       </a>
                     )}
                     {training.type !== 'video' && training.url && (
@@ -220,22 +253,29 @@ export const TrainingList = () => {
                         href={training.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 py-2 bg-cyan-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-cyan-700 transition flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 bg-cyan-600 text-white rounded-md text-[10px] font-bold uppercase tracking-wider hover:bg-cyan-700 transition flex items-center justify-center gap-1"
                       >
-                        <Eye className="w-3 h-3" /> Open Resource
+                        <Eye className="w-3 h-3" /> Open
                       </a>
                     )}
                     <Link
-                      to={`/admin/training/${training._id}/edit`}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                      to={`/admin/training/${training.id}/edit`}
+                      className="p-1.5 text-slate-500 hover:text-blue-600 rounded transition-colors"
+                      title="Edit"
                     >
                       <Edit className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => setDeleteTarget(training)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                      disabled={deletingId === training.id}
+                      className="p-1.5 text-slate-500 hover:text-red-600 rounded transition-colors disabled:opacity-50"
+                      title="Delete"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {deletingId === training.id ? (
+                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -247,21 +287,23 @@ export const TrainingList = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
+        <div className="mt-6 flex justify-between items-center border-t border-slate-200 pt-4">
           <button
-            onClick={() => setPage(p => Math.max(1, p-1))}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-3 py-1 border rounded-lg disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-slate-600 hover:text-cyan-600 disabled:opacity-50 transition-colors"
           >
-            Previous
+            <ChevronLeft className="w-4 h-4" /> Previous
           </button>
-          <span className="px-3 py-1 text-sm text-slate-500">Page {page} of {totalPages}</span>
+          <span className="text-sm text-slate-500">
+            Page {page} of {totalPages}
+          </span>
           <button
-            onClick={() => setPage(p => Math.min(totalPages, p+1))}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-3 py-1 border rounded-lg disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-slate-600 hover:text-cyan-600 disabled:opacity-50 transition-colors"
           >
-            Next
+            Next <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}

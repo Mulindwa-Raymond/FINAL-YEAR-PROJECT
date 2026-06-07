@@ -4,8 +4,9 @@
  * Handles rules with antecedents, consequents, certainty factors.
  */
 
-const Rule = require('../models/Rule');
+const { Rule } = require('../models/Rule');
 const { success, error } = require('../utils/apiResponse');
+const AuditLog = require('../models/AuditLog');
 
 /**
  * Get all rules with optional filters

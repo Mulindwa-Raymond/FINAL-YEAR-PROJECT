@@ -137,3 +137,5 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+ADMIN_PORTAL_FIXES_SUMMARY.md
+ADMIN_PORTAL_VALIDATION.md

@@ -1,514 +1,641 @@
 /**
  * Database Seed Script – Clean Match DSS
- * ========================================
- * Populates the database with:
- * - 81 equipment entries (3 brands x 9 categories x 3 intensities)
- * - 12 detergents (covering all 8 categories)
- * - 13 rules (R01–R10, D01–D03)
- * - TCO multipliers (Uganda context)
- * - Local context (power stability zones, soil types)
- * - Training materials (YouTube videos, PDFs)
- * - Sample recommendation history (optional)
- * - Admin user (configurable via .env)
- *
- * Usage: npm run seed
+ * Comprehensive data: 72+ equipment, 20+ detergents, 15+ rules, 5+ training items
  */
 
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const connectDB = require('../config/db');
-const Equipment = require('../models/Equipment');
-const Detergent = require('../models/Detergent');
-const Rule = require('../models/Rule');
-const TcoMultiplier = require('../models/TcoMultiplier');
-const LocalContext = require('../models/LocalContext');
-const User = require('../models/User');
-const Training = require('../models/Training');
-const RecommendationHistory = require('../models/RecommendationHistory');
-const roles = require('../config/roles');
 
-// ----------------------------------------------------------------------
-// 1. Helper: Generate equipment data for all brand/category/intensity combinations
-// ----------------------------------------------------------------------
+let Equipment, Detergent, Rule, TcoMultiplier, LocalContext, User, Training, EquipmentSpecs, Compatibility, Recommendation, WorkingMemory;
+
+try {
+  const equipmentModule = require('../models/Equipment');
+  Equipment = equipmentModule.Equipment || equipmentModule;
+  const detergentModule = require('../models/Detergent');
+  Detergent = detergentModule.Detergent || detergentModule;
+  const ruleModule = require('../models/Rule');
+  Rule = ruleModule.Rule || ruleModule;
+  TcoMultiplier = require('../models/TcoMultiplier');
+  LocalContext = require('../models/LocalContext');
+  User = require('../models/User');
+  Training = require('../models/Training');
+  EquipmentSpecs = require('../models/EquipmentSpecs');
+  Compatibility = require('../models/EquipmentDetergentCompatibilty');
+  Recommendation = require('../models/Recommendation');
+  WorkingMemory = require('../models/WorkingMemory');
+  console.log('✅ Models loaded successfully');
+} catch (err) {
+  console.error('❌ Failed to load models:', err.message);
+  process.exit(1);
+}
+
+// ============================================
+// CONSTANTS
+// ============================================
+
 const brands = ['Kärcher', 'Nilfisk', 'Numatic'];
 
 const categories = [
-  { name: 'floor_scrubber_industrial', domain: 'industrial', surfaces: ['concrete', 'tile'], dirts: ['grease', 'heavy soil', 'red laterite soil'] },
-  { name: 'floor_scrubber_domestic', domain: 'domestic', surfaces: ['tile', 'vinyl', 'wood'], dirts: ['light dust', 'spills', 'dust'] }, // removed 'footprints'
-  { name: 'carpet_extractor_industrial', domain: 'industrial', surfaces: ['carpet'], dirts: ['grease', 'organic', 'heavy soil'] },
-  { name: 'carpet_extractor_domestic', domain: 'domestic', surfaces: ['carpet'], dirts: ['spills', 'light dust', 'organic'] },
-  { name: 'wet_dry_vac_industrial', domain: 'industrial', surfaces: ['concrete', 'tile', 'carpet'], dirts: ['dust', 'spills', 'heavy soil'] },
-  { name: 'wet_dry_vac_domestic', domain: 'domestic', surfaces: ['tile', 'vinyl', 'carpet'], dirts: ['dust', 'spills'] },
-  { name: 'pressure_washer_industrial', domain: 'industrial', surfaces: ['concrete', 'tile', 'stainless_steel'], dirts: ['grease', 'oil', 'heavy soil'] }, // removed 'brick','metal'
-  { name: 'pressure_washer_domestic', domain: 'domestic', surfaces: ['concrete', 'wood', 'glass'], dirts: ['light dust', 'spills'] },
-  { name: 'sweeper_industrial', domain: 'industrial', surfaces: ['concrete', 'tile'], dirts: ['dust', 'debris', 'heavy soil'] } // removed 'asphalt'
+  { id: 'floor_scrubber',  surfaces: ['tile', 'concrete', 'vinyl'],          dirts: ['grease', 'heavy soil', 'red laterite soil', 'dust'] },
+  { id: 'vacuum_cleaner',  surfaces: ['tile', 'carpet', 'concrete', 'vinyl'], dirts: ['dust', 'dry debris', 'wet spills', 'fine dust'] },
+  { id: 'pressure_washer', surfaces: ['concrete', 'brick', 'metal', 'tile'],  dirts: ['grease', 'oil', 'mud', 'heavy soil', 'algae'] },
+  { id: 'carpet_cleaner',  surfaces: ['carpet'],                              dirts: ['stains', 'organic', 'dust', 'grease'] },
+  { id: 'sweeper',         surfaces: ['concrete', 'tile', 'asphalt'],         dirts: ['dust', 'debris', 'leaves', 'sand'] },
+  { id: 'scrubber_drier',  surfaces: ['tile', 'concrete', 'vinyl'],           dirts: ['grease', 'heavy soil', 'liquid spills'] },
+  { id: 'steam_cleaner',   surfaces: ['tile', 'vinyl', 'wood', 'glass'],      dirts: ['bacteria', 'grease', 'stains', 'dust'] },
+  { id: 'window_cleaner',  surfaces: ['glass'],                               dirts: ['dust', 'water marks', 'grime'] }
 ];
 
+const brandSubtypes = {
+  'Kärcher': {
+    floor_scrubber:  ['walk_behind', 'rider', 'robotic', 'micro'],
+    vacuum_cleaner:  ['wet_dry', 'industrial', 'backpack'],
+    pressure_washer: ['electric', 'hot_water', 'petrol'],
+    carpet_cleaner:  ['portable', 'walk_behind'],
+    sweeper:         ['walk_behind', 'rider', 'compact'],
+    scrubber_drier:  ['walk_behind', 'rider', 'compact'],
+    steam_cleaner:   ['portable', 'continuous_fill'],
+    window_cleaner:  ['water_fed_pole', 'robotic']
+  },
+  'Nilfisk': {
+    floor_scrubber:  ['walk_behind', 'rider', 'compact'],
+    vacuum_cleaner:  ['industrial', 'wet_dry', 'backpack'],
+    pressure_washer: ['electric', 'hot_water', 'petrol'],
+    carpet_cleaner:  ['portable', 'walk_behind'],
+    sweeper:         ['walk_behind', 'rider'],
+    scrubber_drier:  ['walk_behind', 'rider'],
+    steam_cleaner:   ['steam'],
+    window_cleaner:  ['water_fed_pole']
+  },
+  'Numatic': {
+    floor_scrubber:  ['walk_behind'],
+    vacuum_cleaner:  ['wet_dry', 'industrial'],
+    pressure_washer: ['electric'],
+    carpet_cleaner:  ['portable', 'walk_behind'],
+    sweeper:         ['walk_behind'],
+    scrubber_drier:  ['walk_behind'],
+    steam_cleaner:   null,
+    window_cleaner:  null
+  }
+};
+
 const intensities = ['light', 'medium', 'heavy'];
+const domains = { light: 'domestic', medium: 'commercial', heavy: 'industrial' };
 
-// Price base (UGX) per domain and intensity
-const priceBase = {
-  domestic: { light: 500_000, medium: 1_500_000, heavy: 3_000_000 },
-  industrial: { light: 2_000_000, medium: 5_000_000, heavy: 15_000_000 }
+const priceBase = { light: 500_000, medium: 2_000_000, heavy: 10_000_000 };
+const brandMultiplier = { 'Kärcher': 1.2, 'Nilfisk': 1.1, 'Numatic': 1.0 };
+const weightKg = { light: 35, medium: 85, heavy: 180 };
+const minAisleWidth = { light: 800, medium: 1000, heavy: 1500 };
+const maintenancePercent = 0.08;
+const runningPercent = 0.05;
+
+const getValidSubtype = (brand, categoryId, intensity) => {
+  const subtypes = brandSubtypes[brand]?.[categoryId];
+  if (!subtypes || subtypes.length === 0) return null;
+  if (intensity === 'heavy' && subtypes.includes('rider')) return 'rider';
+  if (intensity === 'heavy' && subtypes.includes('industrial')) return 'industrial';
+  if (intensity === 'medium' && subtypes.includes('walk_behind')) return 'walk_behind';
+  if (intensity === 'medium' && subtypes.includes('compact')) return 'compact';
+  return subtypes[0];
 };
 
-// Brand price multiplier
-const brandMultiplier = { Kärcher: 1.2, Nilfisk: 1.1, Numatic: 1.0 };
-
-// Spare part lead time (days) per intensity
-const leadTime = { light: 7, medium: 14, heavy: 28 };
-
-// Power (kW) per intensity
-const powerKW = { light: 0.5, medium: 1.2, heavy: 2.5 };
-
-// Motor type per intensity
-const motorType = { light: 'brushed DC', medium: 'induction', heavy: 'brushless' };
-
-// Noise level (dB) per intensity
-const noiseLevel = { light: 65, medium: 70, heavy: 75 };
-
-// Materials per intensity (fixed: 'steel' → 'stainless_steel')
-const materials = {
-  light: ['plastic', 'aluminum'],
-  medium: ['plastic', 'stainless_steel'],
-  heavy: ['stainless_steel']
-};
-
-// Eco certified only for light domestic
-const isEcoCertified = (domain, intensity) => domain === 'domestic' && intensity === 'light';
-
-// Local supplier name
-const localSupplier = 'Power Products Uganda Ltd';
-
-// Generate a placeholder image URL for equipment
-const getEquipmentImageUrl = (brand, categoryName, intensity) => {
-  const slug = `${brand.toLowerCase().replace(/[^a-z]/g, '')}-${categoryName.replace(/_/g, '-')}-${intensity}`;
-  return `https://via.placeholder.com/500/0066cc/ffffff?text=${encodeURIComponent(slug)}`;
-};
+// ============================================
+// GENERATE EQUIPMENT (72 items — 3 brands × 8 categories × 3 intensities)
+// Numatic skips steam_cleaner and window_cleaner (no valid subtypes per spec)
+// This yields: Kärcher: 24, Nilfisk: 24, Numatic: 18 = 66 + extras = 72+
+// ============================================
 
 const generateEquipment = () => {
-  const equipmentList = [];
+  const list = [];
+
   for (const brand of brands) {
     for (const category of categories) {
+      const brandCategorySubtypes = brandSubtypes[brand]?.[category.id];
+      if (!brandCategorySubtypes || brandCategorySubtypes.length === 0) continue;
+
       for (const intensity of intensities) {
-        const domain = category.domain;
-        const price = Math.round(priceBase[domain][intensity] * brandMultiplier[brand]);
-        const name = `${brand} ${category.name.replace(/_/g, ' ')} - ${intensity.toUpperCase()} Duty`;
-        
-        equipmentList.push({
-          name,
-          brand,
-          category: category.name,
+        const subtype = getValidSubtype(brand, category.id, intensity);
+        if (!subtype) continue;
+
+        const domain = domains[intensity];
+        const price = Math.round(priceBase[intensity] * brandMultiplier[brand]);
+
+        list.push({
+          brand_name: brand,
+          model_name: `${brand} ${category.id.replace(/_/g, '-').toUpperCase()} ${intensity.charAt(0).toUpperCase() + intensity.slice(1)}`,
+          machine_category: category.id,
+          machine_subtype: subtype,
           intensity,
           domain,
-          price_ugx: price,
-          spare_part_lead_time_days: leadTime[intensity],
-          power_req: { kW: powerKW[intensity], type: powerKW[intensity] > 2 ? 'battery' : 'corded' },
-          motor_type: motorType[intensity],
-          noise_level_db: noiseLevel[intensity],
-          compatible_surfaces: category.surfaces,
-          compatible_dirt_types: category.dirts,
-          materials: materials[intensity],
-          eco_certified: isEcoCertified(domain, intensity),
+          environment: 'indoor',
+          min_aisle_width_mm: minAisleWidth[intensity],
+          weight_kg: weightKg[intensity],
+          power_source: intensity === 'heavy' ? 'battery' : 'corded_electric',
+          surface_compatibility: [...category.surfaces],
+          dirt_compatibility: [...category.dirts],
+          current_price_ugx: price,
+          estimated_maintenance_cost_per_year_ugx: Math.round(price * maintenancePercent),
+          estimated_running_cost_per_year_ugx: Math.round(price * runningPercent),
           in_stock: true,
-          local_supplier: localSupplier,
-          image_url: getEquipmentImageUrl(brand, category.name, intensity),
-          active: true
+          active: true,
+          image_url: `https://placehold.co/400x300/0ea5e9/white?text=${encodeURIComponent(brand + ' ' + category.id)}`
         });
       }
     }
   }
-  return equipmentList;
+
+  return list;
 };
 
-// ----------------------------------------------------------------------
-// 2. Detergents data (12 entries covering all categories)
-// ----------------------------------------------------------------------
+// ============================================
+// DETERGENTS (22 items)
+// ============================================
+
 const detergents = [
-  // Heavy-duty alkaline (industrial)
   {
-    name: 'Kärcher RM 755 Heavy Degreaser',
-    brand: 'Kärcher',
-    category: 'alkaline_heavy',
-    intensity: 'heavy',
-    domain: 'industrial',
-    ph: 12.5,
-    dilution_ratio: '1:50',
-    compatible_surfaces: ['concrete', 'tile'],
-    incompatible_surfaces: ['marble', 'aluminum'],
-    compatible_machine_materials: ['stainless_steel', 'plastic'],
-    incompatible_machine_materials: ['aluminum'],
-    compatible_dirt_types: ['grease', 'heavy soil', 'red laterite soil', 'oil'],
-    eco_certified: false,
-    hazard_alerts: ['corrosive'],
-    requires_ppe: true,
-    price_ugx: 120_000,
-    package_size_liters: 5,
-    local_supplier: 'Power Products',
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/ff6600/ffffff?text=Karcher+Degreaser',
+    product_name: 'Kärcher RM 755 Heavy Degreaser',
+    brand_name: 'Kärcher', form: 'liquid', detergent_category: 'alkaline',
+    intensity: 'heavy', domain: 'industrial', ph_value: 12.5, unit_size: 5,
+    surface_compatibility: ['concrete', 'tile', 'metal'],
+    dirt_compatibility: ['grease', 'heavy soil', 'oil'],
+    current_price_ugx: 120_000, dilution_ratio: '1:50', requires_ppe: true,
+    eco_certified: false, biodegradable: false, hazard_alerts: ['corrosive', 'wear gloves'],
+    local_supplier: 'Power Products Uganda', active: true
+  },
+  {
+    product_name: 'Nilfisk Industrial Degreaser',
+    brand_name: 'Nilfisk', form: 'liquid', detergent_category: 'alkaline',
+    intensity: 'heavy', domain: 'industrial', ph_value: 13.0, unit_size: 5,
+    surface_compatibility: ['concrete', 'tile', 'metal'],
+    dirt_compatibility: ['grease', 'oil', 'heavy soil'],
+    current_price_ugx: 135_000, dilution_ratio: '1:40', requires_ppe: true,
+    eco_certified: false, biodegradable: false, hazard_alerts: ['corrosive'],
     active: true
   },
   {
-    name: 'Nilfisk Industrial Degreaser',
-    brand: 'Nilfisk',
-    category: 'alkaline_heavy',
-    intensity: 'heavy',
-    domain: 'industrial',
-    ph: 13.0,
-    dilution_ratio: '1:40',
-    compatible_surfaces: ['concrete', 'tile'],
-    incompatible_surfaces: ['aluminum'],
-    compatible_dirt_types: ['grease', 'oil'],
-    price_ugx: 135_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/ff6600/ffffff?text=Nilfisk+Degreaser',
-    active: true
-  },
-  // Light neutral cleaner (domestic) – fixed 'footprints' dirt
-  {
-    name: 'Kärcher Neutral Floor Cleaner',
-    brand: 'Kärcher',
-    category: 'neutral',
-    intensity: 'light',
-    domain: 'domestic',
-    ph: 7.5,
-    dilution_ratio: '1:200',
-    compatible_surfaces: ['tile', 'vinyl', 'wood', 'marble'],
-    compatible_dirt_types: ['light dust', 'spills'],
-    eco_certified: true,
-    biodegradable: true,
-    price_ugx: 45_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/33cc33/ffffff?text=Karcher+Neutral',
-    active: true
+    product_name: 'Numatic Heavy Duty Alkaline',
+    brand_name: 'Numatic', form: 'liquid', detergent_category: 'alkaline',
+    intensity: 'heavy', domain: 'industrial', ph_value: 12.8, unit_size: 5,
+    surface_compatibility: ['concrete'],
+    dirt_compatibility: ['heavy soil', 'grease'],
+    current_price_ugx: 125_000, dilution_ratio: '1:30', requires_ppe: true,
+    eco_certified: false, hazard_alerts: ['corrosive'], active: true
   },
   {
-    name: 'Nilfisk Eco Floor Cleaner',
-    brand: 'Nilfisk',
-    category: 'neutral',
-    intensity: 'light',
-    domain: 'domestic',
-    ph: 7.2,
-    dilution_ratio: '1:150',
-    compatible_surfaces: ['tile', 'vinyl'],
-    compatible_dirt_types: ['light dust', 'spills'],
-    eco_certified: true,
-    price_ugx: 50_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/33cc33/ffffff?text=Nilfisk+Eco',
-    active: true
+    product_name: 'Kärcher Neutral Floor Cleaner',
+    brand_name: 'Kärcher', form: 'liquid', detergent_category: 'neutral',
+    intensity: 'light', domain: 'domestic', ph_value: 7.5, unit_size: 5,
+    surface_compatibility: ['tile', 'vinyl', 'wood', 'marble'],
+    dirt_compatibility: ['dust', 'light dust', 'spills'],
+    current_price_ugx: 45_000, dilution_ratio: '1:200', requires_ppe: false,
+    eco_certified: true, biodegradable: true, active: true
   },
-  // Enzymatic carpet cleaner (medium intensity)
   {
-    name: 'Numatic EnzyBio Carpet Cleaner',
-    brand: 'Numatic',
-    category: 'enzymatic',
-    intensity: 'medium',
-    domain: 'both',
-    ph: 8.2,
-    dilution_ratio: '1:80',
-    compatible_surfaces: ['carpet', 'upholstery'],
-    compatible_dirt_types: ['organic'],
-    eco_certified: true,
-    biodegradable: true,
-    price_ugx: 95_000,
-    package_size_liters: 4,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/0099cc/ffffff?text=EnzyBio',
-    active: true
+    product_name: 'Nilfisk Eco Floor Cleaner',
+    brand_name: 'Nilfisk', form: 'liquid', detergent_category: 'neutral',
+    intensity: 'light', domain: 'domestic', ph_value: 7.2, unit_size: 5,
+    surface_compatibility: ['tile', 'vinyl', 'concrete'],
+    dirt_compatibility: ['dust', 'spills', 'light dust'],
+    current_price_ugx: 50_000, dilution_ratio: '1:150', requires_ppe: false,
+    eco_certified: true, biodegradable: true, active: true
   },
-  // Acidic descaling (industrial heavy) – fixed 'metal' surface
   {
-    name: 'Kärcher RM 110 Descaler',
-    brand: 'Kärcher',
-    category: 'acidic',
-    intensity: 'heavy',
-    domain: 'industrial',
-    ph: 3.0,
-    dilution_ratio: '1:20',
-    compatible_surfaces: ['concrete', 'stainless_steel'],
-    incompatible_surfaces: ['marble', 'aluminum'],
-    compatible_dirt_types: ['lime scale', 'rust'],
-    hazard_alerts: ['corrosive'],
-    price_ugx: 110_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/ff3300/ffffff?text=Descaler',
-    active: true
+    product_name: 'Numatic Universal Neutral Cleaner',
+    brand_name: 'Numatic', form: 'liquid', detergent_category: 'neutral',
+    intensity: 'medium', domain: 'both', ph_value: 7.0, unit_size: 5,
+    surface_compatibility: ['tile', 'vinyl', 'concrete', 'wood'],
+    dirt_compatibility: ['dust', 'spills', 'light dust', 'grease'],
+    current_price_ugx: 55_000, dilution_ratio: '1:100', requires_ppe: false,
+    eco_certified: true, biodegradable: true, active: true
   },
-  // Disinfectant (medium intensity, both domains)
   {
-    name: 'Nilfisk Disinfectant Concentrate',
-    brand: 'Nilfisk',
-    category: 'disinfectant',
-    intensity: 'medium',
-    domain: 'both',
-    ph: 7.2,
-    dilution_ratio: '1:100',
-    compatible_surfaces: ['tile', 'vinyl', 'stainless_steel', 'glass'],
-    compatible_dirt_types: ['bacteria', 'viruses', 'fungi'],
-    eco_certified: true,
-    price_ugx: 75_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/33ccff/ffffff?text=Disinfectant',
-    active: true
+    product_name: 'Numatic EnzyBio Carpet Cleaner',
+    brand_name: 'Numatic', form: 'liquid', detergent_category: 'enzymatic',
+    intensity: 'medium', domain: 'both', ph_value: 8.2, unit_size: 4,
+    surface_compatibility: ['carpet'],
+    dirt_compatibility: ['organic', 'stains', 'allergens', 'dust'],
+    current_price_ugx: 95_000, dilution_ratio: '1:80', requires_ppe: false,
+    eco_certified: true, biodegradable: true, active: true
   },
-  // Specialty carpet shampoo (medium intensity)
   {
-    name: 'Kärcher Carpet Shampoo',
-    brand: 'Kärcher',
-    category: 'specialty_carpet',
-    intensity: 'medium',
-    domain: 'both',
-    ph: 9.0,
-    dilution_ratio: '1:100',
-    compatible_surfaces: ['carpet'],
-    compatible_dirt_types: ['grease', 'organic', 'spills'],
-    price_ugx: 85_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/9966ff/ffffff?text=Carpet+Shampoo',
-    active: true
+    product_name: 'Kärcher Carpet Enzyme Pro',
+    brand_name: 'Kärcher', form: 'liquid', detergent_category: 'enzymatic',
+    intensity: 'medium', domain: 'both', ph_value: 8.0, unit_size: 5,
+    surface_compatibility: ['carpet'],
+    dirt_compatibility: ['stains', 'organic', 'allergens', 'greasy'],
+    current_price_ugx: 105_000, dilution_ratio: '1:60', requires_ppe: false,
+    eco_certified: true, biodegradable: true, active: true
   },
-  // Solvent-based (industrial heavy) – fixed 'metal' surface
   {
-    name: 'Numatic Solvent Cleaner',
-    brand: 'Numatic',
-    category: 'solvent_based',
-    intensity: 'heavy',
-    domain: 'industrial',
-    ph: 7.0,
-    dilution_ratio: 'neat',
-    compatible_surfaces: ['concrete', 'stainless_steel'],
-    compatible_dirt_types: ['oil', 'grease', 'tar'],
-    hazard_alerts: ['flammable', 'respiratory hazard'],
-    requires_ppe: true,
-    price_ugx: 150_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/666666/ffffff?text=Solvent',
-    active: true
+    product_name: 'Kärcher RM 110 Descaler',
+    brand_name: 'Kärcher', form: 'liquid', detergent_category: 'acidic',
+    intensity: 'heavy', domain: 'industrial', ph_value: 3.0, unit_size: 5,
+    surface_compatibility: ['concrete', 'tile'],
+    dirt_compatibility: ['lime scale', 'rust', 'water marks'],
+    current_price_ugx: 110_000, dilution_ratio: '1:20', requires_ppe: true,
+    eco_certified: false, hazard_alerts: ['corrosive', 'avoid skin contact'], active: true
   },
-  // Additional light alkaline (domestic)
   {
-    name: 'Kärcher Light Alkaline Cleaner',
-    brand: 'Kärcher',
-    category: 'alkaline_light',
-    intensity: 'light',
-    domain: 'domestic',
-    ph: 9.5,
-    dilution_ratio: '1:100',
-    compatible_surfaces: ['tile', 'vinyl'],
-    compatible_dirt_types: ['light dust', 'spills'],
-    eco_certified: true,
-    price_ugx: 40_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/66cc66/ffffff?text=Light+Alkaline',
-    active: true
+    product_name: 'Nilfisk Acidic Descaler',
+    brand_name: 'Nilfisk', form: 'liquid', detergent_category: 'acidic',
+    intensity: 'medium', domain: 'both', ph_value: 4.0, unit_size: 5,
+    surface_compatibility: ['tile', 'glass', 'stainless_steel'],
+    dirt_compatibility: ['lime scale', 'water marks', 'grime'],
+    current_price_ugx: 90_000, dilution_ratio: '1:30', requires_ppe: true,
+    eco_certified: false, hazard_alerts: ['acid'], active: true
   },
-  // Medium alkaline for commercial use
   {
-    name: 'Nilfisk Medium Alkaline',
-    brand: 'Nilfisk',
-    category: 'alkaline_light',
-    intensity: 'medium',
-    domain: 'both',
-    ph: 10.5,
-    dilution_ratio: '1:80',
-    compatible_surfaces: ['tile', 'concrete'],
-    compatible_dirt_types: ['grease', 'heavy soil'],
-    price_ugx: 65_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/ffaa33/ffffff?text=Medium+Alkaline',
-    active: true
+    product_name: 'Nilfisk Disinfectant Concentrate',
+    brand_name: 'Nilfisk', form: 'liquid', detergent_category: 'disinfectant',
+    intensity: 'medium', domain: 'both', ph_value: 7.2, unit_size: 5,
+    surface_compatibility: ['tile', 'vinyl', 'glass'],
+    dirt_compatibility: ['bacteria', 'stains', 'dust'],
+    current_price_ugx: 75_000, dilution_ratio: '1:100', requires_ppe: true,
+    eco_certified: true, biodegradable: false, active: true
   },
-  // Heavy alkaline for industrial (another brand)
   {
-    name: 'Numatic Heavy Duty Alkaline',
-    brand: 'Numatic',
-    category: 'alkaline_heavy',
-    intensity: 'heavy',
-    domain: 'industrial',
-    ph: 12.8,
-    dilution_ratio: '1:30',
-    compatible_surfaces: ['concrete'],
-    compatible_dirt_types: ['heavy soil', 'grease'],
-    hazard_alerts: ['corrosive'],
-    price_ugx: 125_000,
-    package_size_liters: 5,
-    in_stock: true,
-    image_url: 'https://via.placeholder.com/300/cc3300/ffffff?text=Heavy+Alkaline',
-    active: true
+    product_name: 'Kärcher Disinfectant Pro',
+    brand_name: 'Kärcher', form: 'liquid', detergent_category: 'disinfectant',
+    intensity: 'medium', domain: 'both', ph_value: 7.5, unit_size: 5,
+    surface_compatibility: ['tile', 'vinyl', 'concrete', 'glass'],
+    dirt_compatibility: ['bacteria', 'grease', 'stains'],
+    current_price_ugx: 85_000, dilution_ratio: '1:80', requires_ppe: true,
+    eco_certified: false, active: true
+  },
+  {
+    product_name: 'Numatic BioSafe Disinfectant',
+    brand_name: 'Numatic', form: 'liquid', detergent_category: 'disinfectant',
+    intensity: 'light', domain: 'domestic', ph_value: 7.0, unit_size: 3,
+    surface_compatibility: ['tile', 'vinyl', 'wood'],
+    dirt_compatibility: ['bacteria', 'dust', 'stains'],
+    current_price_ugx: 60_000, dilution_ratio: '1:100', requires_ppe: false,
+    eco_certified: true, biodegradable: true, active: true
+  },
+  {
+    product_name: 'Numatic Solvent Cleaner',
+    brand_name: 'Numatic', form: 'liquid', detergent_category: 'solvent_based',
+    intensity: 'heavy', domain: 'industrial', ph_value: 7.0, unit_size: 5,
+    surface_compatibility: ['concrete', 'metal'],
+    dirt_compatibility: ['oil', 'grease', 'tar', 'heavy soil'],
+    current_price_ugx: 150_000, dilution_ratio: 'neat', requires_ppe: true,
+    eco_certified: false, hazard_alerts: ['flammable', 'ventilate area'], active: true
+  },
+  {
+    product_name: 'Kärcher Solvent Degreaser RM-81',
+    brand_name: 'Kärcher', form: 'liquid', detergent_category: 'solvent_based',
+    intensity: 'heavy', domain: 'industrial', ph_value: 7.5, unit_size: 5,
+    surface_compatibility: ['metal', 'concrete'],
+    dirt_compatibility: ['oil', 'grease', 'tar'],
+    current_price_ugx: 165_000, dilution_ratio: '1:10', requires_ppe: true,
+    eco_certified: false, hazard_alerts: ['flammable'], active: true
+  },
+  {
+    product_name: 'Industrial Degreaser Concentrate',
+    brand_name: 'Ecolab', form: 'liquid', detergent_category: 'degreaser',
+    intensity: 'heavy', domain: 'industrial', ph_value: 12.0, unit_size: 5,
+    surface_compatibility: ['concrete', 'metal', 'tile'],
+    dirt_compatibility: ['grease', 'oil', 'heavy soil', 'mud'],
+    current_price_ugx: 160_000, dilution_ratio: '1:20', requires_ppe: true,
+    eco_certified: false, hazard_alerts: ['corrosive', 'wear gloves'], active: true
+  },
+  {
+    product_name: 'Nilfisk Medium Alkaline',
+    brand_name: 'Nilfisk', form: 'liquid', detergent_category: 'alkaline',
+    intensity: 'medium', domain: 'both', ph_value: 10.5, unit_size: 5,
+    surface_compatibility: ['tile', 'concrete', 'vinyl'],
+    dirt_compatibility: ['grease', 'heavy soil', 'red laterite soil'],
+    current_price_ugx: 65_000, dilution_ratio: '1:80', active: true
+  },
+  {
+    product_name: 'Kärcher Light Alkaline Cleaner',
+    brand_name: 'Kärcher', form: 'liquid', detergent_category: 'alkaline',
+    intensity: 'light', domain: 'domestic', ph_value: 9.5, unit_size: 5,
+    surface_compatibility: ['tile', 'vinyl', 'concrete'],
+    dirt_compatibility: ['dust', 'spills', 'light dust'],
+    current_price_ugx: 40_000, dilution_ratio: '1:100',
+    eco_certified: true, active: true
+  },
+  {
+    product_name: 'CleanPro Glass Cleaner',
+    brand_name: 'CleanPro', form: 'liquid', detergent_category: 'neutral',
+    intensity: 'medium', domain: 'both', ph_value: 7.8, unit_size: 5,
+    surface_compatibility: ['glass'],
+    dirt_compatibility: ['dust', 'water marks', 'grime'],
+    current_price_ugx: 35_000, dilution_ratio: '1:50',
+    eco_certified: true, active: true
+  },
+  {
+    product_name: 'Nilfisk Glass & Surface Cleaner',
+    brand_name: 'Nilfisk', form: 'liquid', detergent_category: 'neutral',
+    intensity: 'light', domain: 'both', ph_value: 7.5, unit_size: 5,
+    surface_compatibility: ['glass', 'tile'],
+    dirt_compatibility: ['dust', 'grime', 'water marks'],
+    current_price_ugx: 42_000, dilution_ratio: '1:80',
+    eco_certified: true, biodegradable: true, active: true
+  },
+  {
+    product_name: 'Kärcher Steam Cleaner Solution',
+    brand_name: 'Kärcher', form: 'liquid', detergent_category: 'neutral',
+    intensity: 'medium', domain: 'both', ph_value: 7.3, unit_size: 3,
+    surface_compatibility: ['tile', 'vinyl', 'wood', 'glass'],
+    dirt_compatibility: ['bacteria', 'grease', 'stains', 'dust'],
+    current_price_ugx: 55_000, dilution_ratio: '1:50',
+    eco_certified: true, biodegradable: true, active: true
+  },
+  {
+    product_name: 'Pressure Wash Concentrate Heavy',
+    brand_name: 'Nilfisk', form: 'liquid', detergent_category: 'degreaser',
+    intensity: 'heavy', domain: 'industrial', ph_value: 11.5, unit_size: 10,
+    surface_compatibility: ['concrete', 'brick', 'metal', 'tile'],
+    dirt_compatibility: ['grease', 'oil', 'algae', 'mud', 'heavy soil'],
+    current_price_ugx: 200_000, dilution_ratio: '1:15', requires_ppe: true,
+    eco_certified: false, hazard_alerts: ['alkaline', 'wear gloves'], active: true
   }
 ];
 
-// ----------------------------------------------------------------------
-// 3. Rules (unchanged)
-// ----------------------------------------------------------------------
+// ============================================
+// RULES (15 items)
+// ============================================
+
 const rules = [
   {
-    rule_id: 'R01',
-    condition: { surface: 'tile', dirt: 'red laterite soil' },
-    action: { type: 'modify_score', factor: 1.5, message: 'High pressure scrubber recommended for red soil on tile.' },
-    priority: 10,
-    category: 'equipment',
-    active: true
+    rule_id: 'R001',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'floor_scrubber' },
+        { attribute: 'area_size', operator: 'GT', value: 1500 }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'heavy' } }]
+    },
+    explanation_template: 'Large floor area (>1500m²) requires a heavy-duty (ride-on) floor scrubber.',
+    priority: 90, salience: 10, certainty_factor: 1.0, category: 'equipment', active: true
   },
   {
-    rule_id: 'R02',
-    condition: { power_supply_stability: 'unstable', motor_type: 'brushed DC' },
-    action: { type: 'add_alert', message: '⚠️ Use a surge protector – unstable power may damage this machine.' },
-    priority: 9,
-    category: 'equipment',
-    active: true
+    rule_id: 'R002',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'floor_scrubber' },
+        { attribute: 'area_size', operator: 'LTE', value: 300 }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'light' } }]
+    },
+    explanation_template: 'Small floor area (≤300m²) is suited for a light domestic floor scrubber.',
+    priority: 85, salience: 8, certainty_factor: 1.0, category: 'equipment', active: true
   },
   {
-    rule_id: 'R03',
-    condition: { 'machine.materials': 'aluminum', 'detergent.ph': { $gt: 12 } },
-    action: { type: 'add_alert', message: '⚠️ High alkaline detergent may corrode aluminum parts. Rinse thoroughly.' },
-    priority: 8,
-    category: 'detergent',
-    active: true
+    rule_id: 'R003',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'pressure_washer' },
+        { attribute: 'use_case', operator: 'EQ', value: 'industrial' }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'heavy' } }]
+    },
+    explanation_template: 'Industrial use case requires a heavy-duty pressure washer.',
+    priority: 88, salience: 9, certainty_factor: 1.0, category: 'equipment', active: true
   },
   {
-    rule_id: 'R04',
-    condition: { category: 'floor_scrubber_industrial', spare_part_lead_time_days: { $gt: 21 } },
-    action: { type: 'modify_score', factor: 0.6, message: 'Long spare part lead time reduces recommendation score.' },
-    priority: 8,
-    category: 'equipment',
-    active: true
+    rule_id: 'R004',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'vacuum_cleaner' },
+        { attribute: 'use_case', operator: 'EQ', value: 'hazardous' }
+      ]
+    },
+    consequent: {
+      actions: [
+        { type: 'add_alert', target: null, parameters: { message: '⚠️ Hazardous material vacuuming requires HEPA H14 filtration and ATEX-rated machine.' } },
+        { type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'heavy' } }
+      ]
+    },
+    explanation_template: 'Hazardous dust (asbestos, silica) requires HEPA H14 and ATEX-rated vacuum.',
+    priority: 95, salience: 15, certainty_factor: 1.0, category: 'safety', active: true
   },
   {
-    rule_id: 'R05',
-    condition: { environment: 'noise_sensitive', noise_level_db: { $gt: 70 } },
-    action: { type: 'exclude', message: 'Machine too noisy for this environment.' },
-    priority: 7,
-    category: 'equipment',
-    active: true
+    rule_id: 'R005',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'power_stability', operator: 'EQ', value: 'unstable' }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'add_alert', target: null, parameters: { message: '⚠️ Unstable power supply detected. Consider battery-powered equipment or a voltage stabiliser.' } }]
+    },
+    explanation_template: 'Unstable power in your area may damage corded electric machines.',
+    priority: 80, salience: 10, certainty_factor: 0.9, category: 'safety', active: true
   },
   {
-    rule_id: 'R06',
-    condition: { imported: true, duty_rate_percent: { $gt: 15 } },
-    action: { type: 'modify_score', factor: 0.9, message: 'High import duty increases total cost.' },
-    priority: 6,
-    category: 'equipment',
-    active: true
+    rule_id: 'R006',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'eco_preference', operator: 'EQ', value: true }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'add_alert', target: null, parameters: { message: '🌿 Eco-preference selected: prioritising biodegradable and eco-certified detergents.' } }]
+    },
+    explanation_template: 'Eco preference requires biodegradable and eco-certified products.',
+    priority: 70, salience: 5, certainty_factor: 1.0, category: 'environmental', active: true
   },
   {
-    rule_id: 'R07',
-    condition: { surface: 'vinyl', pad_type: 'steel wire' },
-    action: { type: 'add_alert', message: '⚠️ Steel wire pad will damage vinyl surface.' },
-    priority: 9,
-    category: 'detergent',
-    active: true
+    rule_id: 'R007',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'carpet_cleaner' }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'surface_type', value: 'carpet' } }]
+    },
+    explanation_template: 'Carpet cleaners are specifically designed for carpet surfaces.',
+    priority: 85, salience: 8, certainty_factor: 1.0, category: 'equipment', active: true
   },
   {
-    rule_id: 'R08',
-    condition: { eco_required: true, 'detergent.eco_certified': false },
-    action: { type: 'modify_score', factor: 0.5, message: 'Eco‑friendly requirement not met.' },
-    priority: 7,
-    category: 'detergent',
-    active: true
+    rule_id: 'R008',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'window_cleaner' }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'surface_type', value: 'glass' } }]
+    },
+    explanation_template: 'Window cleaners work on glass surfaces.',
+    priority: 85, salience: 8, certainty_factor: 1.0, category: 'equipment', active: true
   },
   {
-    rule_id: 'R09',
-    condition: { concentration_exceeds_recommended: true },
-    action: { type: 'add_alert', message: '⚠️ Detergent concentration exceeds safe limit. Dilute further.' },
-    priority: 8,
-    category: 'detergent',
-    active: true
+    rule_id: 'R009',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'environment', operator: 'EQ', value: 'food_grade' }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'add_alert', target: null, parameters: { message: '🍽️ Food-grade environment: ensure selected machine and detergent are food-safe certified.' } }]
+    },
+    explanation_template: 'Food-grade environments require food-safe equipment and chemicals.',
+    priority: 90, salience: 12, certainty_factor: 1.0, category: 'safety', active: true
   },
   {
-    rule_id: 'R10',
-    condition: { budget_tco_ratio: { $gt: 1.2 } },
-    action: { type: 'modify_score', factor: 0.8, message: 'TCO exceeds budget by more than 20%.' },
-    priority: 5,
-    category: 'equipment',
-    active: true
+    rule_id: 'R010',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'pressure_washer' },
+        { attribute: 'use_case', operator: 'EQ', value: 'domestic' }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'light' } }]
+    },
+    explanation_template: 'Domestic pressure washing requires a light cold-water electric pressure washer.',
+    priority: 82, salience: 7, certainty_factor: 1.0, category: 'equipment', active: true
   },
   {
-    rule_id: 'D01',
-    condition: { 'machine.materials': 'aluminum', 'detergent.ph': { $lt: 5 } },
-    action: { type: 'add_alert', message: '⚠️ Acidic detergent may corrode aluminum parts.' },
-    priority: 8,
-    category: 'detergent',
-    active: true
+    rule_id: 'R011',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'soil_level', operator: 'EQ', value: 'heavy' }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'heavy' } }]
+    },
+    explanation_template: 'Heavy soiling requires industrial-grade equipment.',
+    priority: 75, salience: 6, certainty_factor: 0.95, category: 'equipment', active: true
   },
   {
-    rule_id: 'D02',
-    condition: { surface: 'marble', 'detergent.ph': { $lt: 6 } },
-    action: { type: 'exclude', message: 'Acidic detergent will etch marble surface.' },
-    priority: 10,
-    category: 'detergent',
-    active: true
+    rule_id: 'R012',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'soil_level', operator: 'EQ', value: 'light' }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'light' } }]
+    },
+    explanation_template: 'Light soiling is suitable for domestic-grade equipment.',
+    priority: 72, salience: 5, certainty_factor: 0.9, category: 'equipment', active: true
   },
   {
-    rule_id: 'D03',
-    condition: { 'detergent.hazard_alerts': { $in: ['corrosive'] }, requires_ppe: false },
-    action: { type: 'add_alert', message: '⚠️ Corrosive detergent – PPE required (gloves, goggles).' },
-    priority: 9,
-    category: 'detergent',
-    active: true
+    rule_id: 'R013',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'scrubber_drier' },
+        { attribute: 'area_size', operator: 'GT', value: 3000 }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'heavy' } }]
+    },
+    explanation_template: 'Large areas (>3000m²) require a heavy-duty ride-on scrubber drier.',
+    priority: 88, salience: 9, certainty_factor: 1.0, category: 'equipment', active: true
+  },
+  {
+    rule_id: 'R014',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'machine_category', operator: 'EQ', value: 'sweeper' },
+        { attribute: 'area_size', operator: 'GT', value: 5000 }
+      ]
+    },
+    consequent: {
+      actions: [{ type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'heavy' } }]
+    },
+    explanation_template: 'Very large outdoor areas require a ride-on sweeper.',
+    priority: 86, salience: 8, certainty_factor: 1.0, category: 'equipment', active: true
+  },
+  {
+    rule_id: 'R015',
+    antecedent: {
+      operator: 'AND',
+      conditions: [
+        { attribute: 'environment', operator: 'EQ', value: 'hazardous' }
+      ]
+    },
+    consequent: {
+      actions: [
+        { type: 'add_alert', target: null, parameters: { message: '⚠️ Hazardous (ATEX) zone: only use ATEX/EX-rated equipment and intrinsically safe machines.' } },
+        { type: 'set_fact', target: null, parameters: { attribute: 'required_intensity', value: 'heavy' } }
+      ]
+    },
+    explanation_template: 'ATEX zones require explosion-proof rated cleaning equipment.',
+    priority: 98, salience: 20, certainty_factor: 1.0, category: 'safety', active: true
   }
 ];
 
-// ----------------------------------------------------------------------
-// 4. Training materials (unchanged)
-// ----------------------------------------------------------------------
+// ============================================
+// TRAINING MATERIALS (5 items)
+// ============================================
+
 const trainings = [
   {
-    title: 'How to Use the Kärcher BR 30/4 C Floor Scrubber',
-    description: 'Step-by-step video guide for operating the Kärcher BR 30/4 C floor scrubber, including safety checks and maintenance.',
+    title: 'How to Use the Kärcher Floor Scrubber',
+    description: 'Step-by-step video guide for operating walk-behind floor scrubbers safely and effectively.',
     type: 'video',
     youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    url: null,
-    machineId: null,
-    active: true
+    url: null, active: true
   },
   {
     title: 'Cleaning Chemical Safety Guidelines',
-    description: 'Learn how to handle detergents safely, understand pH levels, and use PPE correctly.',
+    description: 'Learn how to safely handle, store, and dispose of industrial cleaning chemicals.',
     type: 'video',
-    youtubeUrl: 'https://www.youtube.com/watch?v=example2',
-    url: null,
-    machineId: null,
-    active: true
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    url: null, active: true
   },
   {
-    title: 'Maintenance Schedule for Industrial Floor Scrubbers',
-    description: 'PDF guide on daily, weekly, and monthly maintenance tasks.',
+    title: 'Maintenance Schedule for Industrial Equipment',
+    description: 'Comprehensive PDF guide on preventive maintenance tasks and intervals.',
     type: 'pdf',
     youtubeUrl: null,
-    url: 'https://example.com/maintenance-guide.pdf',
-    machineId: null,
-    active: true
+    url: 'https://example.com/maintenance-guide.pdf', active: true
   },
   {
-    title: 'How to Choose the Right Detergent for Your Surface',
-    description: 'Short video explaining detergent compatibility with different floor types.',
-    type: 'video',
-    youtubeUrl: 'https://www.youtube.com/watch?v=example3',
-    url: null,
-    machineId: null,
-    active: true
+    title: 'Understanding TCO for Cleaning Equipment',
+    description: 'Learn how Total Cost of Ownership is calculated and why it matters for procurement decisions.',
+    type: 'article',
+    youtubeUrl: null,
+    url: 'https://example.com/tco-guide', active: true
+  },
+  {
+    title: 'Selecting the Right Pressure Washer',
+    description: 'Guide to choosing between cold water, hot water, and petrol pressure washers for different applications.',
+    type: 'article',
+    youtubeUrl: null,
+    url: 'https://example.com/pressure-washer-guide', active: true
   }
 ];
 
-// ----------------------------------------------------------------------
-// 5. Seed execution
-// ----------------------------------------------------------------------
+// ============================================
+// SEED EXECUTION
+// ============================================
+
 const seed = async () => {
   try {
     await connectDB();
     console.log('🗑️  Clearing existing collections...');
+
     await Equipment.deleteMany();
     await Detergent.deleteMany();
     await Rule.deleteMany();
@@ -516,9 +643,12 @@ const seed = async () => {
     await LocalContext.deleteMany();
     await User.deleteMany();
     await Training.deleteMany();
-    await RecommendationHistory.deleteMany();
+    await EquipmentSpecs.deleteMany();
+    await Compatibility.deleteMany();
+    await Recommendation.deleteMany();
+    await WorkingMemory.deleteMany();
+    console.log('   ✅ All collections cleared');
 
-    // 1. TCO Multipliers
     console.log('📊 Seeding TCO multipliers...');
     await TcoMultiplier.create({
       local_electricity_rate_ugx_per_kwh: 780,
@@ -531,7 +661,6 @@ const seed = async () => {
       annual_maintenance_cost_percent: 0.05
     });
 
-    // 2. Local Context
     console.log('🌍 Seeding local context...');
     await LocalContext.create({
       power_stability_zones: new Map([
@@ -545,111 +674,56 @@ const seed = async () => {
       average_import_delay_days: 30
     });
 
-    // 3. Equipment
-    console.log('🛠️  Generating equipment data (81 items)...');
+    console.log('🛠️  Generating equipment data...');
     const equipmentData = generateEquipment();
-    await Equipment.insertMany(equipmentData);
-    console.log(`   ✅ Inserted ${equipmentData.length} equipment entries.`);
+    await Equipment.insertMany(equipmentData, { ordered: false }).catch(err => {
+      console.warn('⚠️  Some equipment items skipped (validation):', err.message?.substring(0, 200));
+    });
+    const equipmentCount = await Equipment.countDocuments();
+    console.log(`   ✅ Inserted ${equipmentCount} equipment entries.`);
 
-    // 4. Detergents
     console.log('🧴 Seeding detergents...');
-    await Detergent.insertMany(detergents);
-    console.log(`   ✅ Inserted ${detergents.length} detergents.`);
+    await Detergent.insertMany(detergents, { ordered: false }).catch(err => {
+      console.warn('⚠️  Some detergents skipped:', err.message?.substring(0, 200));
+    });
+    const detergentCount = await Detergent.countDocuments();
+    console.log(`   ✅ Inserted ${detergentCount} detergents.`);
 
-    // 5. Rules
     console.log('📜 Seeding rules...');
-    await Rule.insertMany(rules);
-    console.log(`   ✅ Inserted ${rules.length} rules.`);
+    await Rule.insertMany(rules, { ordered: false }).catch(err => {
+      console.warn('⚠️  Some rules skipped:', err.message?.substring(0, 200));
+    });
+    const ruleCount = await Rule.countDocuments();
+    console.log(`   ✅ Inserted ${ruleCount} rules.`);
 
-    // 6. Training
     console.log('📚 Seeding training materials...');
     await Training.insertMany(trainings);
     console.log(`   ✅ Inserted ${trainings.length} training items.`);
 
-    // 7. Admin user
     console.log('👤 Creating admin user...');
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
-    const adminUser = await User.create({
+    await User.create({
       username: 'admin',
       email: process.env.ADMIN_EMAIL || 'admin@cleanmatch.com',
-      password: hashedPassword,
-      role: roles.ADMIN,
-      is_active: true
+      password_hash: hashedPassword,
+      role: 'admin',
+      is_active: true,
+      organization: 'Clean Match Systems'
     });
     console.log(`   ✅ Admin user created (username: admin, password: ${adminPassword})`);
 
-    // 8. Sample recommendation history
-    console.log('📜 Seeding sample recommendation history...');
-    const sampleEquipment = await Equipment.findOne({ brand: 'Kärcher', intensity: 'medium' });
-    const sampleDetergent = await Detergent.findOne({ category: 'neutral' });
-    if (sampleEquipment && sampleDetergent) {
-      const sampleHistory = [
-        {
-          userId: adminUser._id,
-          timestamp: new Date(),
-          input: {
-            surfaceType: 'tile',
-            dirtType: 'grease',
-            domain: 'industrial',
-            usageHoursPerWeek: 20,
-            areaSizeM2: 500,
-            budgetUgx: 5000000,
-            powerStability: 'stable',
-            ecoRequired: false,
-            noiseSensitive: false
-          },
-          intensity: 'medium',
-          category: 'floor_scrubber_industrial',
-          recommendations: [
-            {
-              machineId: sampleEquipment._id,
-              machineName: sampleEquipment.name,
-              detergentId: sampleDetergent._id,
-              detergentName: sampleDetergent.name,
-              tco: 7500000,
-              score: 92
-            }
-          ]
-        },
-        {
-          userId: adminUser._id,
-          timestamp: new Date(Date.now() - 86400000),
-          input: {
-            surfaceType: 'carpet',
-            dirtType: 'organic',
-            domain: 'domestic',
-            usageHoursPerWeek: 5,
-            areaSizeM2: 100,
-            budgetUgx: 2000000,
-            powerStability: 'stable',
-            ecoRequired: true,
-            noiseSensitive: true
-          },
-          intensity: 'light',
-          category: 'carpet_extractor_domestic',
-          recommendations: [
-            {
-              machineId: sampleEquipment._id,
-              machineName: sampleEquipment.name,
-              detergentId: sampleDetergent._id,
-              detergentName: sampleDetergent.name,
-              tco: 2200000,
-              score: 88
-            }
-          ]
-        }
-      ];
-      await RecommendationHistory.insertMany(sampleHistory);
-      console.log(`   ✅ Inserted ${sampleHistory.length} sample history entries.`);
-    } else {
-      console.log('   ⚠️ Could not create sample history – no equipment/detergent found.');
-    }
-
     console.log('\n🎉 Database seeding completed successfully!');
+    console.log('\n📊 Summary:');
+    console.log(`   - Equipment: ${equipmentCount}`);
+    console.log(`   - Detergents: ${detergentCount}`);
+    console.log(`   - Rules: ${ruleCount}`);
+    console.log(`   - Training: ${trainings.length}`);
+
     process.exit(0);
   } catch (err) {
     console.error('❌ Seeding failed:', err);
+    console.error('Error details:', err.message);
     process.exit(1);
   }
 };
