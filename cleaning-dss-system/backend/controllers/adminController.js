@@ -251,32 +251,150 @@ const updateMyProfile = async (req, res, next) => {
 
 const getSystemMetrics = async (req, res, next) => {
   try {
-    const { date } = req.query;
+    const { date, trend } = req.query;
     
-    // Build default metrics structure
-    const defaultMetrics = {
-      totalRecommendations: 0,
-      activeUsers: 0,
-      avgResponseTime: 0,
-      topCategories: [],
-      topIntensities: [],
-      topSurfaces: [],
-      topDirtTypes: []
-    };
-    
-    let query = {};
-    if (date) query.date = new Date(date);
-    else query.date = { $gte: new Date(new Date().setHours(0,0,0)) };
-    
-    const metrics = await SystemMetric.findOne(query);
-    
-    if (!metrics) {
-      // Return default structure if no metrics exist
-      return success(res, defaultMetrics, 'No metrics for today yet');
+    // Determine date range for query
+    let dateStart, dateEnd;
+    if (date) {
+      // Specific date
+      dateStart = new Date(date);
+      dateStart.setHours(0, 0, 0, 0);
+      dateEnd = new Date(date);
+      dateEnd.setHours(23, 59, 59, 999);
+    } else {
+      // Today
+      dateStart = new Date();
+      dateStart.setHours(0, 0, 0, 0);
+      dateEnd = new Date();
+      dateEnd.setHours(23, 59, 59, 999);
     }
     
-    // Merge with defaults to ensure all expected fields exist
-    const response = { ...defaultMetrics, ...metrics.toObject() };
+    // Calculate metrics from actual recommendation data
+    const recommendations = await RecommendationHistory.find({
+      timestamp: { $gte: dateStart, $lte: dateEnd }
+    }).populate('user_id', 'username email').lean();
+    
+    // Count unique active users
+    const activeUserIds = new Set(recommendations.map(r => r.user_id?._id?.toString()).filter(Boolean));
+    const activeUsers = activeUserIds.size;
+    
+    // Get total counts for system
+    const [totalEquipment, totalDetergents, totalUsers, totalRules] = await Promise.all([
+      Equipment.countDocuments({ is_active: true }),
+      Detergent.countDocuments({ is_active: true }),
+      User.countDocuments({ is_active: true }),
+      Rule.countDocuments({ is_active: true })
+    ]);
+    
+    // Aggregate by category, intensity, surface, dirt type
+    const topCategories = {};
+    const topIntensities = {};
+    const topSurfaces = {};
+    const topDirtTypes = {};
+    
+    recommendations.forEach(rec => {
+      // Categories
+      if (rec.machine_category) {
+        topCategories[rec.machine_category] = (topCategories[rec.machine_category] || 0) + 1;
+      }
+      // Intensities - try to get from working memory or use default
+      const intensity = rec.soil_level || 'medium';
+      topIntensities[intensity] = (topIntensities[intensity] || 0) + 1;
+      
+      // Surfaces
+      if (rec.surface_type) {
+        topSurfaces[rec.surface_type] = (topSurfaces[rec.surface_type] || 0) + 1;
+      }
+      // Dirt types
+      if (rec.dirt_type) {
+        topDirtTypes[rec.dirt_type] = (topDirtTypes[rec.dirt_type] || 0) + 1;
+      }
+    });
+    
+    // Convert aggregates to sorted arrays with proper field names
+    const convertCategories = (obj) => {
+      return Object.entries(obj)
+        .map(([category, count]) => ({ category, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+    };
+    
+    const convertIntensities = (obj) => {
+      return Object.entries(obj)
+        .map(([intensity, count]) => ({ intensity, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+    };
+    
+    const convertSurfaces = (obj) => {
+      return Object.entries(obj)
+        .map(([surface, count]) => ({ surface, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+    };
+    
+    const convertDirtTypes = (obj) => {
+      return Object.entries(obj)
+        .map(([dirtType, count]) => ({ dirtType, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+    };
+    
+    const metrics = {
+      totalRecommendations: recommendations.length,
+      activeUsers,
+      totalEquipment,
+      totalDetergents,
+      totalUsers,
+      activeRules: totalRules,
+      averageResponseTimeMs: 150, // Placeholder - could be calculated from actual response times
+      topCategories: convertCategories(topCategories),
+      topIntensities: convertIntensities(topIntensities),
+      topSurfaces: convertSurfaces(topSurfaces),
+      topDirtTypes: convertDirtTypes(topDirtTypes),
+      date: dateStart
+    };
+    
+    // If trend data is requested (last 7 days)
+    let trendData = null;
+    if (trend === 'true' || trend === '1') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+      
+      const trendRecs = await RecommendationHistory.find({
+        timestamp: { $gte: sevenDaysAgo }
+      }).lean();
+      
+      const trendByDate = {};
+      const dateLabels = [];
+      
+      // Generate last 7 days labels
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        dateLabels.push(dateStr);
+        trendByDate[dateStr] = 0;
+      }
+      
+      // Count recommendations by date
+      trendRecs.forEach(rec => {
+        const dateStr = new Date(rec.timestamp).toISOString().split('T')[0];
+        if (trendByDate.hasOwnProperty(dateStr)) {
+          trendByDate[dateStr]++;
+        }
+      });
+      
+      // Format for chart
+      trendData = dateLabels.map(date => ({
+        date,
+        count: trendByDate[date],
+        fullDate: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      }));
+    }
+    
+    const response = trendData ? { ...metrics, trendData } : metrics;
     return success(res, response, 'System metrics retrieved');
   } catch (err) {
     next(err);
@@ -566,7 +684,13 @@ const getRecommendationHistory = async (req, res, next) => {
     const { userId, startDate, endDate, page = 1, limit = 20 } = req.query;
     const filter = {};
     
-    if (userId) filter.userId = userId;
+    // Support both userId and user_id for backward compatibility
+    if (userId) {
+      filter.$or = [
+        { user_id: userId },
+        { 'user_id.email': userId }
+      ];
+    }
     
     // Date range filter
     if (startDate || endDate) {
@@ -584,7 +708,7 @@ const getRecommendationHistory = async (req, res, next) => {
       .sort({ timestamp: -1 })
       .skip(skip)
       .limit(pageSize)
-      .populate('userId', 'username email organization');
+      .populate('user_id', 'username email organization');
     
     const total = await RecommendationHistory.countDocuments(filter);
     

@@ -113,10 +113,13 @@ export const updateMyProfile = (data) => api.put('/admin/me', data);
 /**
  * Get system metrics
  * @param {string} date - ISO date string (optional)
+ * @param {boolean} includeTrend - Include 7-day trend data (optional)
  * @returns {Promise}
  */
-export const getSystemMetrics = (date = null) => {
-  const params = date ? { date } : {};
+export const getSystemMetrics = (date = null, includeTrend = false) => {
+  const params = {};
+  if (date) params.date = date;
+  if (includeTrend) params.trend = 'true';
   return api.get('/admin/metrics', { params });
 };
 

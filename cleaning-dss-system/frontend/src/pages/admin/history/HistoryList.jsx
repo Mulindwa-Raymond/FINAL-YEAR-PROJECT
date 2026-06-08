@@ -169,13 +169,17 @@ export const HistoryList = () => {
               ) : (
                 history.map((item) => {
                   const firstRec = item.recommendations?.[0] || {};
+                  // Support both user_id and userId field names
+                  const userInfo = item.user_id || item.userId;
+                  const userEmail = userInfo?.email || userInfo || '-';
+                  
                   return (
                     <React.Fragment key={item._id}>
                       <tr className="hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => toggleExpand(item._id)}>
-                        <td className="px-6 py-4 text-slate-800">{item.userId?.email || item.userId || '-'}</td>
+                        <td className="px-6 py-4 text-slate-800">{userEmail}</td>
                         <td className="px-6 py-4 text-slate-600">{formatDate(item.timestamp)}</td>
-                        <td className="px-6 py-4 text-slate-600 capitalize">{item.input?.surfaceType || '-'}</td>
-                        <td className="px-6 py-4 text-slate-600 capitalize">{item.input?.dirtType || '-'}</td>
+                        <td className="px-6 py-4 text-slate-600 capitalize">{item.surface_type || '-'}</td>
+                        <td className="px-6 py-4 text-slate-600 capitalize">{item.dirt_type || '-'}</td>
                         <td className="px-6 py-4 font-medium text-slate-800">{firstRec.machineName || '-'}</td>
                         <td className="px-6 py-4">{expandedRow === item._id ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}</td>
                       </tr>
@@ -186,12 +190,12 @@ export const HistoryList = () => {
                               <div>
                                 <span className="font-semibold text-slate-700">Input Parameters:</span>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1 text-slate-600">
-                                  <div>Intensity: <span className="font-medium">{item.intensity || '-'}</span></div>
-                                  <div>Budget: <span className="font-medium">{item.input?.budgetUgx ? `UGX ${item.input.budgetUgx.toLocaleString()}` : '-'}</span></div>
-                                  <div>Power: <span className="font-medium capitalize">{item.input?.powerStability || '-'}</span></div>
-                                  <div>Eco: <span className="font-medium">{item.input?.ecoRequired ? 'Yes' : 'No'}</span></div>
-                                  <div>Area: <span className="font-medium">{item.input?.areaSizeM2 ? `${item.input.areaSizeM2} m²` : '-'}</span></div>
-                                  <div>Hours/week: <span className="font-medium">{item.input?.usageHoursPerWeek || 0}</span></div>
+                                  <div>Intensity: <span className="font-medium">{item.soil_level || '-'}</span></div>
+                                  <div>Budget: <span className="font-medium">{item.budget_ugx ? `UGX ${item.budget_ugx.toLocaleString()}` : '-'}</span></div>
+                                  <div>Power: <span className="font-medium capitalize">{item.power_stability || '-'}</span></div>
+                                  <div>Eco: <span className="font-medium">{item.eco_preference ? 'Yes' : 'No'}</span></div>
+                                  <div>Area: <span className="font-medium">{item.area_size ? `${item.area_size} m²` : '-'}</span></div>
+                                  <div>Hours/week: <span className="font-medium">{item.usage_hours_per_week || 0}</span></div>
                                 </div>
                               </div>
                               {item.reasoning_trace && item.reasoning_trace.length > 0 && (
