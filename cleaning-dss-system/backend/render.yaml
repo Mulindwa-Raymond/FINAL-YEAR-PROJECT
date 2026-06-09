@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: clean-match-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://cleanmatch-ten.vercel.app
+      - key: ADMIN_EMAIL
+        value: admin@cleanmatch.com
+      - key: ADMIN_PASSWORD
+        value: admin123
