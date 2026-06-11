@@ -25,7 +25,7 @@ export const getDetergentsByPhRange = (min = 0, max = 14) => api.get('/detergent
 export const getDetergentsByCategory = (category) => api.get(`/detergents/category/${category}`);
 
 // ============================================
-// ADMIN WRITE ROUTES
+// ADMIN WRITE ROUTES 
 // ============================================
 
 export const createDetergent = (data) => {
