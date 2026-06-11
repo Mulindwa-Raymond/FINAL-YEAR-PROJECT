@@ -13,7 +13,7 @@
 const { Rule } = require('../models/Rule');
 const WorkingMemory = require('../models/WorkingMemory');
 const { Equipment } = require('../models/Equipment');
-
+ 
 class InferenceEngine {
   constructor(sessionId = null) {
     this.rules = [];
