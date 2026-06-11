@@ -34,6 +34,11 @@ export const getRecommendations = (scenario) => {
     soil_level: scenario.soil_level,
     use_case: scenario.use_case,
     pressure_required: scenario.pressure_required,
+    debris_type: scenario.debris_type,
+    weight_tolerance: scenario.weight_tolerance,
+    power_available_kw: scenario.power_available_kw,
+    downtime_criticality: scenario.downtime_criticality,
+    working_width_preference: scenario.working_width_preference,
     filtration: scenario.filtration,
     tank_capacity: scenario.tank_capacity,
     noise_sensitivity: scenario.noise_sensitivity,
@@ -42,13 +47,19 @@ export const getRecommendations = (scenario) => {
     location: scenario.location,
   };
   
+  console.group('🔄 Recommendation Service Processing');
+  console.log('Input Scenario:', scenario);
+  console.log('Before Cleanup:', payload);
+  
   Object.keys(payload).forEach(key => {
     if (payload[key] === undefined || payload[key] === null || payload[key] === '') {
       delete payload[key];
     }
   });
   
-  console.log('📤 Sending recommendation request:', payload);
+  console.log('After Cleanup (Final Payload to API):', payload);
+  console.groupEnd();
+  
   return api.post('/recommend', payload);
 };
 
