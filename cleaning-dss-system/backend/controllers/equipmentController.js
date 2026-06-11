@@ -2,7 +2,7 @@
  * equipmentController.js
  * Manages cleaning equipment (machines) with KB-DSS fields and image support.
  * Updated to handle machine_subtype, intensity classification, and new filtering fields.
- */
+ */ 
 
 const { Equipment } = require('../models/Equipment');
 const EquipmentSpecs = require('../models/EquipmentSpecs');

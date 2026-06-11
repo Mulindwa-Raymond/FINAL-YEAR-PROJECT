@@ -63,3 +63,7 @@ equipmentSpecsSchema.index({ equipment_id: 1 });
 equipmentSpecsSchema.index({ attribute_name: 1 });
 
 module.exports = mongoose.model('EquipmentSpecs', equipmentSpecsSchema);
+
+
+
+// this is some fun jss 
