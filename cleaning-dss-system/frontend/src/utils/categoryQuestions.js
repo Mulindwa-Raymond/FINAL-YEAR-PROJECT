@@ -48,8 +48,8 @@ const environmentOptions = [
 // Power source options
 const powerSourceOptions = [
   { value: 'battery', label: 'Battery (cordless, flexible)', icon: '🔋' },
-  { value: 'corded_electric', label: 'Mains / Electric (corded)', icon: '⚡' },
-  { value: 'petrol', label: 'Petrol / LPG (outdoor/heavy duty)', icon: '⛽' },
+  { value: 'corded_electric', label: 'Mains / Electric (corded)', icon: '⚡' }
+ 
 ];
 
 // Soil level options
@@ -141,6 +141,47 @@ const noiseSensitivityOptions = [
   { value: 'low', label: 'Low (≤60 dB) – Hospitals, schools, offices' },
   { value: 'medium', label: 'Medium (61–70 dB) – Commercial spaces' },
   { value: 'high', label: 'High (71+ dB) – Warehouses, factories' },
+];
+
+// ============================================
+// MISSING FIELD OPTIONS (NEW)
+// ============================================
+
+// Weight tolerance options (for portability)
+const weightToleranceOptions = [
+  { value: 'lightweight', label: 'Lightweight (<30 kg) – Easy to move/lift', icon: '💪' },
+  { value: 'moderate', label: 'Moderate (30–60 kg) – Some lifting required', icon: '🏋️' },
+  { value: 'no_constraint', label: 'Heavy or fixed installation (>60 kg) – No constraint', icon: '📍' },
+];
+
+// Power availability options (kW)
+const powerAvailableOptions = [
+  { value: 0.5, label: '0.5 kW – Single outlet / residential' },
+  { value: 2, label: '2 kW – Standard outlet' },
+  { value: 3.5, label: '3.5 kW – Dedicated circuit' },
+  { value: 7.5, label: '7.5 kW – Heavy commercial' },
+  { value: 15, label: '15+ kW – 3-phase / Industrial' },
+];
+
+// Downtime criticality options
+const downtimeCriticalityOptions = [
+  { value: 'high', label: 'Critical – Need spare parts <3 days', icon: '🔴' },
+  { value: 'medium', label: 'Moderate – Can wait 1–2 weeks', icon: '🟡' },
+  { value: 'low', label: 'Low – Can wait 2–4 weeks', icon: '🟢' },
+];
+
+// Cleaning frequency options (for working width recommendations)
+const cleaningFrequencyOptions = [
+  { value: 'light', label: 'Light (1-2x per week) – Minimal soiling', icon: '💧' },
+  { value: 'moderate', label: 'Moderate (3-4x per week) – Regular maintenance', icon: '💦' },
+  { value: 'daily', label: 'Daily or multiple times – Heavy traffic area', icon: '🌊' },
+];
+
+// Working width preference options (for efficiency)
+const workingWidthOptions = [
+  { value: 'compact', label: 'Compact (<50 cm) – Narrow spaces, tight aisles' },
+  { value: 'standard', label: 'Standard (50–90 cm) – Most commercial spaces' },
+  { value: 'wide', label: 'Wide (>90 cm) – Large open areas for speed' },
 ];
 
 // Sweeper use cases
@@ -271,6 +312,52 @@ const floorScrubberQuestions = {
       required: true,
       options: soilLevelOptions,
     },
+    {
+      id: 'cleaning_frequency',
+      title: 'Cleaning Frequency',
+      description: 'How often will you clean?',
+      type: QuestionTypes.SELECT,
+      required: false,
+      options: cleaningFrequencyOptions,
+      helpText: 'Daily cleaning requires higher efficiency (wider working width)',
+    },
+    {
+      id: 'working_width_preference',
+      title: 'Working Width Preference',
+      description: 'How much area coverage per pass do you need?',
+      type: QuestionTypes.SELECT,
+      required: false,
+      options: workingWidthOptions,
+      helpText: 'Wider machines are faster but harder to maneuver in tight spaces',
+      shouldDisplay: (machineSubtype) => machineSubtype === 'walk_behind' || machineSubtype === 'rider',
+    },
+    {
+      id: 'weight_tolerance',
+      title: 'Equipment Portability',
+      description: 'How will you handle equipment movement?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: weightToleranceOptions,
+      shouldDisplay: (machineSubtype) => machineSubtype === 'walk_behind',
+    },
+    {
+      id: 'power_available_kw',
+      title: 'Available Power Supply',
+      description: 'What is your maximum available power?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: powerAvailableOptions,
+      shouldDisplay: (machineSubtype) => 
+        machineSubtype !== 'petrol' && machineSubtype !== 'manual',
+    },
+    {
+      id: 'downtime_criticality',
+      title: 'Equipment Availability',
+      description: 'How critical is equipment uptime?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: downtimeCriticalityOptions,
+    },
   ],
   mapToFilters: (answers) => {
     const filters = {};
@@ -287,6 +374,13 @@ const floorScrubberQuestions = {
     if (answers.power_source) filters.power_source = answers.power_source;
     if (answers.aisle_width) filters.min_aisle_width_mm = answers.aisle_width * 10;
     if (answers.soil_level) filters.soil_level = answers.soil_level;
+    
+    // New filters
+    if (answers.cleaning_frequency) filters.cleaning_frequency = answers.cleaning_frequency;
+    if (answers.working_width_preference) filters.working_width_preference = answers.working_width_preference;
+    if (answers.weight_tolerance) filters.weight_tolerance = answers.weight_tolerance;
+    if (answers.power_available_kw) filters.power_available_kw = answers.power_available_kw;
+    if (answers.downtime_criticality) filters.downtime_criticality = answers.downtime_criticality;
     
     return filters;
   },
@@ -308,11 +402,12 @@ const pressureWasherQuestions = {
     },
     {
       id: 'pressure_required',
-      title: 'Pressure & Flow Rate Required',
-      description: 'What pressure level do you need?',
+      title: 'Pressure & Flow Rate',
+      description: 'Automatically set based on your use case. Override if needed.',
       type: QuestionTypes.SELECT,
-      required: true,
+      required: false,
       options: pressureLevels,
+      shouldDisplay: () => false, // Hidden; auto-set by use_case
     },
     {
       id: 'dirt_type',
@@ -333,9 +428,31 @@ const pressureWasherQuestions = {
     {
       id: 'power_source',
       title: 'Power Source',
+      description: 'Where will you source power?',
       type: QuestionTypes.SELECT,
       required: true,
-      options: powerSourceOptions,
+      options: [
+        { value: 'any', label: 'Any power source / No preference', icon: '⚡' },
+        ...powerSourceOptions,
+      ],
+      shouldDisplay: (machineSubtype) => machineSubtype === 'electric', // Only show for electric
+    },
+    {
+      id: 'weight_tolerance',
+      title: 'Equipment Portability',
+      description: 'How will you handle equipment movement?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: weightToleranceOptions,
+      shouldDisplay: (machineSubtype) => machineSubtype === 'electric', // Walk-behind are portable
+    },
+    {
+      id: 'downtime_criticality',
+      title: 'Equipment Availability',
+      description: 'How critical is equipment uptime?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: downtimeCriticalityOptions,
     },
   ],
   mapToFilters: (answers) => {
@@ -352,13 +469,20 @@ const pressureWasherQuestions = {
       filters.intensity = 'heavy';
     }
     
-    if (answers.pressure_required === 'low') filters.intensity = 'light';
-    if (answers.pressure_required === 'medium') filters.intensity = 'medium';
-    if (answers.pressure_required === 'high') filters.intensity = 'heavy';
+    // Only override if pressure_required is explicitly set (and not default)
+    if (answers.pressure_required) {
+      if (answers.pressure_required === 'low') filters.intensity = 'light';
+      if (answers.pressure_required === 'medium') filters.intensity = 'medium';
+      if (answers.pressure_required === 'high') filters.intensity = 'heavy';
+    }
     
     if (answers.dirt_type?.length) filters.dirt_compatibility = answers.dirt_type;
     if (answers.surface_type) filters.surface_compatibility = [answers.surface_type];
-    if (answers.power_source) filters.power_source = answers.power_source;
+    if (answers.power_source && answers.power_source !== 'any') filters.power_source = answers.power_source;
+    
+    // New filters
+    if (answers.weight_tolerance) filters.weight_tolerance = answers.weight_tolerance;
+    if (answers.downtime_criticality) filters.downtime_criticality = answers.downtime_criticality;
     
     return filters;
   },
@@ -438,6 +562,25 @@ const vacuumCleanerQuestions = {
         { value: 'pneumatic', label: 'Pneumatic / Compressed air (ATEX zones)' },
       ],
     },
+    {
+      id: 'weight_tolerance',
+      title: 'Equipment Portability',
+      description: 'How will you handle equipment movement?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: weightToleranceOptions,
+      shouldDisplay: (machineSubtype) => 
+        machineSubtype === 'backpack' || machineSubtype === 'portable',
+    },
+    {
+      id: 'downtime_criticality',
+      title: 'Equipment Availability',
+      description: 'How critical is equipment uptime?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: downtimeCriticalityOptions,
+      shouldDisplay: (machineSubtype) => machineSubtype === 'industrial',
+    },
   ],
   mapToFilters: (answers) => {
     const filters = {};
@@ -462,6 +605,10 @@ const vacuumCleanerQuestions = {
     if (answers.tank_capacity) filters.tank_capacity = answers.tank_capacity;
     if (answers.noise_sensitivity) filters.noise_sensitivity = answers.noise_sensitivity;
     if (answers.power_source) filters.power_source = answers.power_source;
+    
+    // New filters
+    if (answers.weight_tolerance) filters.weight_tolerance = answers.weight_tolerance;
+    if (answers.downtime_criticality) filters.downtime_criticality = answers.downtime_criticality;
     
     return filters;
   },
@@ -660,6 +807,26 @@ const carpetCleanerQuestions = {
         { value: 'any', label: 'No preference' },
       ],
     },
+    {
+      id: 'weight_tolerance',
+      title: 'Equipment Portability',
+      description: 'How will you handle equipment movement?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: weightToleranceOptions,
+    },
+    {
+      id: 'downtime_criticality',
+      title: 'Equipment Availability',
+      description: 'How critical is equipment uptime?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: downtimeCriticalityOptions,
+      shouldDisplay: (machineSubtype) => {
+        // Show for commercial/professional subtypes
+        return machineSubtype === 'walk_behind' || machineSubtype === 'portable';
+      },
+    },
   ],
   mapToFilters: (answers) => {
     const filters = {};
@@ -676,6 +843,10 @@ const carpetCleanerQuestions = {
     if (answers.power_source && answers.power_source !== 'any') {
       filters.power_source = answers.power_source;
     }
+    
+    // New filters
+    if (answers.weight_tolerance) filters.weight_tolerance = answers.weight_tolerance;
+    if (answers.downtime_criticality) filters.downtime_criticality = answers.downtime_criticality;
     
     return filters;
   },
@@ -792,6 +963,52 @@ const scrubberDrierQuestions = {
       required: true,
       options: soilLevelOptions,
     },
+    {
+      id: 'cleaning_frequency',
+      title: 'Cleaning Frequency',
+      description: 'How often will you clean?',
+      type: QuestionTypes.SELECT,
+      required: false,
+      options: cleaningFrequencyOptions,
+      helpText: 'Daily cleaning requires higher efficiency (wider working width)',
+    },
+    {
+      id: 'working_width_preference',
+      title: 'Working Width Preference',
+      description: 'How much area coverage per pass do you need?',
+      type: QuestionTypes.SELECT,
+      required: false,
+      options: workingWidthOptions,
+      helpText: 'Wider machines are faster but harder to maneuver in tight spaces',
+      shouldDisplay: (machineSubtype) => machineSubtype === 'walk_behind' || machineSubtype === 'rider',
+    },
+    {
+      id: 'weight_tolerance',
+      title: 'Equipment Portability',
+      description: 'How will you handle equipment movement?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: weightToleranceOptions,
+      shouldDisplay: (machineSubtype) => machineSubtype === 'walk_behind',
+    },
+    {
+      id: 'power_available_kw',
+      title: 'Available Power Supply',
+      description: 'What is your maximum available power?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: powerAvailableOptions,
+      shouldDisplay: (machineSubtype) => 
+        machineSubtype !== 'petrol' && machineSubtype !== 'manual',
+    },
+    {
+      id: 'downtime_criticality',
+      title: 'Equipment Availability',
+      description: 'How critical is equipment uptime?',
+      type: QuestionTypes.SELECT,
+      required: true,
+      options: downtimeCriticalityOptions,
+    },
   ],
   mapToFilters: (answers) => {
     const filters = {};
@@ -804,6 +1021,13 @@ const scrubberDrierQuestions = {
     if (answers.environment) filters.environment = answers.environment;
     if (answers.power_source) filters.power_source = answers.power_source;
     if (answers.soil_level) filters.soil_level = answers.soil_level;
+    
+    // New filters
+    if (answers.cleaning_frequency) filters.cleaning_frequency = answers.cleaning_frequency;
+    if (answers.working_width_preference) filters.working_width_preference = answers.working_width_preference;
+    if (answers.weight_tolerance) filters.weight_tolerance = answers.weight_tolerance;
+    if (answers.power_available_kw) filters.power_available_kw = answers.power_available_kw;
+    if (answers.downtime_criticality) filters.downtime_criticality = answers.downtime_criticality;
     
     return filters;
   },
