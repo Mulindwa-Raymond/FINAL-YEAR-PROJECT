@@ -58,7 +58,7 @@ const categorySubtypes = {
   pressure_washer: [
     { id: 'electric', name: 'Electric Pressure Washer', description: 'Plug-and-clean solution for light to medium duty indoor and outdoor tasks.', icon: <Zap size={18} />, functionality: 'Indoor facilities and light exterior cleaning' },
     { id: 'hot_water', name: 'Hot Water Pressure Washer', description: 'Integrated heating element for grease, oil, and heavy stain removal.', icon: <Flame size={18} />, functionality: 'Food processing and automotive workshops' },
-    { id: 'petrol', name: 'Petrol Pressure Washer', description: 'Gas-powered for remote locations and heavy-duty exterior cleaning.', icon: <Battery size={18} />, functionality: 'Construction sites and outdoor facilities' },
+    { id: 'petrol', name: 'Fuel Powered Pressure Washer(Petrol & diseal)', description: 'Gas-powered for remote locations and heavy-duty exterior cleaning.', icon: <Battery size={18} />, functionality: 'Construction sites and outdoor facilities' },
   ],
   steam_cleaner: [
     { id: 'portable', name: 'Portable Steam Cleaner', description: 'Lightweight chemical-free sanitisation for spot cleaning and detail work.', icon: <Package size={18} />, functionality: 'Spot cleaning and detail work' },

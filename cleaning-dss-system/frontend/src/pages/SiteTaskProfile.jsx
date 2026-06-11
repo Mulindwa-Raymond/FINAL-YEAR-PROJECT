@@ -2,7 +2,7 @@
  * SiteTaskProfile.jsx
  * Step 2 – Dynamic questionnaire based on selected machine category.
  * Enhanced with smooth animations, better progress tracking, and engaging visuals.
- */
+ */ 
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -11,7 +11,7 @@ import {
   Shield, Clock, Layers, ArrowRight, CheckCircle2, Zap, Gauge,
   Building2, Droplets, Brush, Wind, Flame, Package, Award,
   Activity, TrendingUp, HardDrive, Bot, User, LayoutGrid,
-  Compass, Star, Circle, CheckCircle, HelpCircle
+  Compass, Star, Circle, CheckCircle, HelpCircle, X
 } from 'lucide-react';
 import DynamicFormField from '../components/common/DynamicFormField';
 import { getCategoryQuestions } from '../utils/categoryQuestions';
@@ -39,6 +39,7 @@ export default function SiteTaskProfile() {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [categoryConfig, setCategoryConfig] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fadeIn, setFadeIn] = useState(false);
@@ -70,12 +71,42 @@ export default function SiteTaskProfile() {
     setIsLoading(false);
   }, [location, navigate]);
 
-  const steps = categoryConfig?.steps || [];
+  const allSteps = categoryConfig ? [...(categoryConfig.steps || [])] : [];
+  
+  const getVisibleSteps = () => {
+    return allSteps.filter(step => {
+      if (step.shouldDisplay) {
+        return step.shouldDisplay(categoryConfig?.selectedSubtype);
+      }
+      return true;
+    });
+  };
+
+  const steps = getVisibleSteps();
   const progressSteps = steps.map((step, idx) => ({
     id: step.id,
     title: step.title,
     icon: idx + 1,
   }));
+
+  // Auto-set pressure_required based on use_case
+  useEffect(() => {
+    const useCase = answers.use_case;
+    if (useCase && categoryConfig?.categoryId === 'pressure_washer') {
+      let defaultPressure = '';
+      if (useCase === 'domestic') {
+        defaultPressure = 'low';
+      } else if (useCase === 'commercial') {
+        defaultPressure = 'medium';
+      } else {
+        defaultPressure = 'high';
+      }
+      // Only set if not already set
+      if (!answers.pressure_required) {
+        setAnswers(prev => ({ ...prev, pressure_required: defaultPressure }));
+      }
+    }
+  }, [answers.use_case, categoryConfig?.categoryId]);
 
   const handleFieldChange = (fieldId, value) => {
     setAnswers(prev => ({ ...prev, [fieldId]: value }));
@@ -91,6 +122,12 @@ export default function SiteTaskProfile() {
   const validateCurrentStep = () => {
     const step = steps[currentStep];
     if (!step) return true;
+    
+    // Skip validation for hidden steps
+    if (step.shouldDisplay && !step.shouldDisplay(categoryConfig?.selectedSubtype)) {
+      return true;
+    }
+    
     const value = answers[step.id];
     
     if (step.required !== false && (value === undefined || value === null || value === '')) {
@@ -102,6 +139,112 @@ export default function SiteTaskProfile() {
       return false;
     }
     return true;
+  };
+
+  const getOptionLabel = (step, value) => {
+    if (value === undefined || value === null || value === '') return 'Not specified';
+    if (Array.isArray(value)) {
+      return value.map(item => {
+        const option = step.options?.find(opt => opt.value === item);
+        return option?.label || item;
+      }).join(', ');
+    }
+    const option = step.options?.find(opt => opt.value === value);
+    if (option) return option.label;
+    return typeof value === 'string' ? value.replace(/_/g, ' ') : String(value);
+  };
+
+  const getReviewItems = () => {
+    return steps.map((step, index) => {
+      const value = answers[step.id];
+      if (value === undefined || value === null || value === '') return null;
+      return {
+        id: step.id,
+        title: step.title,
+        value: getOptionLabel(step, value),
+        stepIndex: index,
+      };
+    }).filter(Boolean);
+  };
+
+  const handleReviewItemClick = (stepIndex) => {
+    setShowReviewModal(false);
+    setCurrentStep(stepIndex);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const submitRecommendations = async () => {
+    setShowReviewModal(false);
+    setIsProcessing(true);
+    setErrors({});
+
+    const apiPayload = buildApiPayload();
+    
+    // Enhanced logging
+    console.group('📤 API Request Details');
+    console.log('Raw Answers:', answers);
+    console.log('Transformed Filters:', categoryConfig.mapToFilters(answers));
+    console.log('Final API Payload:', apiPayload);
+    console.groupEnd();
+
+    try {
+      const response = await getRecommendations(apiPayload);
+      console.log('✅ API Response:', response);
+      
+      let recommendationsData;
+      let recommendationId;
+      
+      if (response.data?.data?.recommendations) {
+        recommendationsData = response.data.data.recommendations;
+        recommendationId = response.data.data.recommendation_id;
+      } else if (response.data?.recommendations) {
+        recommendationsData = response.data.recommendations;
+        recommendationId = response.data.recommendation_id;
+      } else {
+        recommendationsData = response.data;
+        recommendationId = new Date().getTime().toString();
+      }
+
+      saveToHistory(recommendationsData, apiPayload, recommendationId);
+
+      navigate('/recommendation-results', {
+        state: {
+          recommendations: recommendationsData,
+          recommendationId: recommendationId,
+          answers: answers,
+          categoryInfo: {
+            categoryId: categoryConfig.categoryId,
+            categoryName: categoryConfig.categoryName,
+            selectedSubtype: categoryConfig.selectedSubtype,
+            selectedBrand: categoryConfig.selectedBrand,
+          },
+        },
+      });
+    } catch (err) {
+      console.error('❌ Recommendation failed:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        config: err.config
+      });
+
+      let errorMessage = 'Failed to get recommendations. ';
+      if (err.response?.status === 404) {
+        errorMessage += 'The recommendation service is unavailable. Please try again later.';
+      } else if (err.response?.status === 401) {
+        errorMessage += 'Please log in again to continue.';
+      } else if (err.response?.data?.error) {
+        errorMessage += err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMessage += err.response.data.message;
+      } else {
+        errorMessage += 'Please check your connection and try again.';
+      }
+
+      setErrors({ general: errorMessage });
+      setIsProcessing(false);
+    }
   };
 
   const buildApiPayload = () => {
@@ -237,9 +380,12 @@ export default function SiteTaskProfile() {
       dirt_type: dirtType,
       area_size: parseFloat(answers.area_size) || 0,
       power_stability: answers.power_stability || 'stable',
-      budget_ugx: parseFloat(answers.budget) || 0,
       eco_preference: answers.eco_preference || false,
       cleaning_frequency: answers.cleaning_frequency || 'weekly',
+      weight_tolerance: answers.weight_tolerance,
+      power_available_kw: answers.power_available_kw,
+      downtime_criticality: answers.downtime_criticality,
+      working_width_preference: answers.working_width_preference,
       floor_texture: answers.floor_texture,
       environment: answers.environment,
       power_source: answers.power_source !== 'any' ? answers.power_source : undefined,
@@ -256,8 +402,28 @@ export default function SiteTaskProfile() {
       location: answers.location,
       operation_mode: answers.operation_mode,
       special_requirements: answers.special_requirements,
-      domain: answers.use_case === 'domestic' ? 'domestic' : answers.use_case === 'industrial' ? 'industrial' : undefined,
     };
+
+    // Get intensity and domain from mapToFilters if available
+    if (categoryConfig.mapToFilters) {
+      const filters = categoryConfig.mapToFilters(answers);
+      if (filters.intensity) payload.intensity = filters.intensity;
+      if (filters.domain) payload.domain = filters.domain;
+    }
+
+    // Fallback: derive domain/intensity from use_case when mapToFilters doesn't set them
+    if (answers.use_case && !payload.domain) {
+      if (answers.use_case === 'domestic' || answers.use_case === 'home') {
+        payload.domain = 'domestic';
+        payload.intensity = payload.intensity || 'light';
+      } else if (answers.use_case === 'commercial' || answers.use_case === 'office') {
+        payload.domain = 'commercial';
+        payload.intensity = payload.intensity || 'medium';
+      } else if (['industrial', 'food_beverage', 'construction', 'hazardous', 'warehouse', 'outdoor', 'vehicles'].includes(answers.use_case)) {
+        payload.domain = 'industrial';
+        payload.intensity = payload.intensity || 'heavy';
+      }
+    }
 
     Object.keys(payload).forEach(key => {
       if (payload[key] === undefined || payload[key] === null || payload[key] === '') {
@@ -284,7 +450,6 @@ export default function SiteTaskProfile() {
         surface_type: apiPayload.surface_type,
         dirt_type: apiPayload.dirt_type,
         power_stability: apiPayload.power_stability,
-        budget_ugx: apiPayload.budget_ugx,
         eco_preference: apiPayload.eco_preference,
         machine_category: apiPayload.machine_category,
         machine_subtype: apiPayload.machine_subtype,
@@ -340,73 +505,7 @@ export default function SiteTaskProfile() {
       setCurrentStep(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      setIsProcessing(true);
-      setErrors({});
-      
-      const apiPayload = buildApiPayload();
-      console.log('📤 Sending recommendation request:', apiPayload);
-
-      try {
-        const response = await getRecommendations(apiPayload);
-        console.log('✅ API Response:', response);
-        
-        // Handle different response structures
-        let recommendationsData;
-        let recommendationId;
-        
-        if (response.data?.data?.recommendations) {
-          recommendationsData = response.data.data.recommendations;
-          recommendationId = response.data.data.recommendation_id;
-        } else if (response.data?.recommendations) {
-          recommendationsData = response.data.recommendations;
-          recommendationId = response.data.recommendation_id;
-        } else {
-          recommendationsData = response.data;
-          recommendationId = new Date().getTime().toString();
-        }
-        
-        // Save to history (async, don't await to avoid delay)
-        saveToHistory(recommendationsData, apiPayload, recommendationId);
-        
-        // Navigate to results
-        navigate('/recommendation-results', {
-          state: {
-            recommendations: recommendationsData,
-            recommendationId: recommendationId,
-            answers: answers,
-            categoryInfo: {
-              categoryId: categoryConfig.categoryId,
-              categoryName: categoryConfig.categoryName,
-              selectedSubtype: categoryConfig.selectedSubtype,
-              selectedBrand: categoryConfig.selectedBrand,
-            },
-          },
-        });
-      } catch (err) {
-        console.error('❌ Recommendation failed:', err);
-        console.error('Error details:', {
-          message: err.message,
-          response: err.response?.data,
-          status: err.response?.status,
-          config: err.config
-        });
-        
-        let errorMessage = 'Failed to get recommendations. ';
-        if (err.response?.status === 404) {
-          errorMessage += 'The recommendation service is unavailable. Please try again later.';
-        } else if (err.response?.status === 401) {
-          errorMessage += 'Please log in again to continue.';
-        } else if (err.response?.data?.error) {
-          errorMessage += err.response.data.error;
-        } else if (err.response?.data?.message) {
-          errorMessage += err.response.data.message;
-        } else {
-          errorMessage += 'Please check your connection and try again.';
-        }
-        
-        setErrors({ general: errorMessage });
-        setIsProcessing(false);
-      }
+      setShowReviewModal(true);
     }
   };
 
@@ -673,6 +772,64 @@ export default function SiteTaskProfile() {
           </div>
         )}
 
+        {showReviewModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
+            <div className="w-full max-w-xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
+              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 sm:px-6 py-4 sm:py-5 text-white">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs uppercase tracking-[0.15em] text-cyan-100/90 font-semibold truncate">Review your selections</p>
+                    <h2 className="mt-1 sm:mt-2 text-lg sm:text-xl font-bold truncate">Confirm before recommendations</h2>
+                  </div>
+                  <button
+                    onClick={() => setShowReviewModal(false)}
+                    className="rounded-full bg-white/10 p-2 hover:bg-white/20 transition flex-shrink-0"
+                  >
+                    <X size={18} className="text-white" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 max-h-[60vh] overflow-y-auto">
+                <p className="text-xs sm:text-sm text-slate-500">Review the values you selected below. Click any row to edit that question.</p>
+                <div className="grid gap-2 sm:gap-3">
+                  {getReviewItems().map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleReviewItemClick(item.stepIndex)}
+                      className="text-left rounded-lg sm:rounded-3xl border border-slate-200 px-3 sm:px-4 py-3 sm:py-4 hover:border-blue-300 hover:bg-slate-50 transition"
+                    >
+                      <div className="flex items-center justify-between gap-3 sm:gap-4">
+                        <span className="font-semibold text-sm sm:text-base text-slate-900 truncate">{item.title}</span>
+                        <span className="text-[10px] sm:text-xs font-medium uppercase text-slate-400 flex-shrink-0">Edit</span>
+                      </div>
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-600 line-clamp-2">{item.value}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:gap-3 px-4 sm:px-6 pb-4 sm:pb-6 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={submitRecommendations}
+                  className="w-full rounded-lg sm:rounded-3xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 font-semibold text-sm sm:text-base shadow-lg shadow-cyan-500/20 hover:-translate-y-0.5 transition"
+                >
+                  Confirm & Load Machines
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className="w-full rounded-lg sm:rounded-3xl border border-slate-200 px-4 sm:px-5 py-2.5 sm:py-3 text-slate-700 font-semibold text-sm sm:text-base hover:bg-slate-50 transition"
+                >
+                  Return to questionnaire
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Footer Info */}
         <div className="mt-10 text-center text-[10px] text-slate-400 flex flex-wrap items-center justify-center gap-4">
           <div className="flex items-center gap-1.5"><Shield size={12} className="text-emerald-500" /> Enterprise Security</div>
@@ -695,3 +852,7 @@ export default function SiteTaskProfile() {
     </div>
   );
 }
+
+
+
+//this function is a bi joke it awaits user input and then immediately returns a resolved promise, simulating an async operation that doesn't actually do anything. It's used to create a delay or to simulate waiting for user input in an async function without blocking the main thread.

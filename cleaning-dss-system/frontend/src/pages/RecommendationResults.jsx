@@ -103,7 +103,6 @@ export default function RecommendationResults() {
           surface_type: answers?.surface_type || category?.surfaceType,
           dirt_type: answers?.dirt_type || category?.dirtType,
           power_stability: answers?.power_stability || 'stable',
-          budget_ugx: answers?.budget || 0,
           eco_preference: answers?.eco_preference || false,
           
           // Category and brand tracking
@@ -195,13 +194,14 @@ export default function RecommendationResults() {
   }, [recommendations, answers, category, isAuthenticated]);
 
   const addToCompare = (machine) => {
-    if (compareList.length < 2 && !compareList.find(m => m.id === machine.id)) {
-      setCompareList([...compareList, machine]);
+    const machineId = machine.id || machine._id;
+    if (compareList.length < 2 && !compareList.find(m => (m.id || m._id) === machineId)) {
+      setCompareList([...compareList, { ...machine, id: machineId }]);
     }
   };
 
   const removeFromCompare = (id) => {
-    setCompareList(compareList.filter(m => m.id !== id));
+    setCompareList(compareList.filter(m => (m.id || m._id) !== id));
   };
 
   const openCompare = () => setShowCompare(true);
@@ -227,7 +227,10 @@ export default function RecommendationResults() {
             <AlertTriangle className="w-10 h-10 text-amber-500" />
           </div>
           <h2 className="text-xl font-bold text-slate-800 mb-2">No Recommendations Found</h2>
-          <p className="text-slate-500 mb-6">No equipment matches your criteria. Try adjusting your requirements.</p>
+          <p className="text-slate-500 mb-6">
+            No equipment matches your criteria{answers?.use_case ? ` for ${answers.use_case.replace(/_/g, ' ')} use` : ''}.
+            Try adjusting your use type or requirements.
+          </p>
           <button
             onClick={() => navigate('/site-task-profile')}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg transition"
@@ -346,9 +349,9 @@ export default function RecommendationResults() {
                         Area: {answers.area_size} m²
                       </span>
                     )}
-                    {answers?.budget && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white rounded-full text-[9px] text-slate-600">
-                        Budget: {formatCurrency(answers.budget)}
+                    {answers?.use_case && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white rounded-full text-[9px] text-slate-600 capitalize">
+                        Use: {answers.use_case.replace(/_/g, ' ')}
                       </span>
                     )}
                   </div>
@@ -368,11 +371,12 @@ export default function RecommendationResults() {
         <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 delay-200 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
           {recommendations.map((machine, idx) => {
             const matchScore = machine.match_score || machine.final_score || machine.match || 85;
-            const isExpanded = expandedCard === machine.id;
+            const machineId = machine.id || machine._id || idx;
+            const isExpanded = expandedCard === machineId;
             
             return (
               <div
-                key={machine.id || idx}
+                key={machineId}
                 className="group bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
               >
                 <div className={`h-1.5 bg-gradient-to-r ${getIntensityColor(machine.intensity)}`} />
@@ -432,32 +436,136 @@ export default function RecommendationResults() {
                       <DollarSign size={14} className="mx-auto text-emerald-500 mb-1" />
                       <p className="text-[9px] text-slate-400">TCO/Year</p>
                       <p className="text-[10px] font-bold text-slate-700">
-                        {formatCurrency(machine.estimated_tco_per_year_ugx || machine.tco_5year_ugx || 0).replace('UGX', '').trim()}k
+                        {formatCurrency(machine.estimated_tco_per_year_ugx || 0)}
                       </p>
                     </div>
                     <div className="text-center">
                       <Gauge size={14} className="mx-auto text-cyan-500 mb-1" />
-                      <p className="text-[9px] text-slate-400">Performance</p>
+                      <p className="text-[9px] text-slate-400">Width</p>
                       <p className="text-[10px] font-bold text-slate-700">
-                        {machine.specifications?.working_width || 'N/A'}mm
+                        {machine.working_width_cm || machine.specifications?.working_width || 'N/A'} cm
                       </p>
                     </div>
                   </div>
 
+                  {/* Quick specs hints */}
+                  <div className="grid grid-cols-2 gap-2 mb-3 text-[9px]">
+                    {machine.hint_weight && (
+                      <div className="bg-slate-100 px-2 py-1.5 rounded-lg">{machine.hint_weight}</div>
+                    )}
+                    {machine.hint_noise && (
+                      <div className="bg-slate-100 px-2 py-1.5 rounded-lg">{machine.hint_noise}</div>
+                    )}
+                    {machine.hint_power && (
+                      <div className="bg-slate-100 px-2 py-1.5 rounded-lg">{machine.hint_power}</div>
+                    )}
+                    {machine.spare_parts_lead_time_days && (
+                      <div className="bg-slate-100 px-2 py-1.5 rounded-lg">📦 {machine.spare_parts_lead_time_days}d parts</div>
+                    )}
+                  </div>
+
+                  {/* Compatible detergent pinned to this machine */}
+                  {machine.detergent && (
+                    <div className="mb-3 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Droplets size={12} className="text-cyan-600" />
+                        <p className="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Compatible Detergent</p>
+                      </div>
+                      <h4 className="text-sm font-bold text-slate-800">{machine.detergent.name || machine.detergent.product_name}</h4>
+                      <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                        pH {machine.detergent.ph || machine.detergent.ph_value}
+                        {machine.detergent.unit_size && ` · ${machine.detergent.unit_size}L`}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {machine.detergent.eco_certified && (
+                          <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                            <Leaf size={10} /> Eco
+                          </span>
+                        )}
+                        {machine.detergent.biodegradable && (
+                          <span className="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                            <CheckCircle2 size={10} /> Biodegradable
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {isExpanded && (
-                    <div className="mt-4 p-4 bg-slate-50 rounded-xl space-y-2">
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-500">Working Width</span>
-                        <span className="font-semibold text-slate-700">{machine.specifications?.working_width || 'N/A'} mm</span>
+                    <div className="mt-4 p-4 bg-slate-50 rounded-xl space-y-3 border border-slate-200">
+                      <div className="text-xs font-bold text-slate-700 mb-3 flex items-center gap-2">
+                        <DollarSign size={12} /> TCO Breakdown (This Machine)
                       </div>
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-500">Tank Capacity</span>
-                        <span className="font-semibold text-slate-700">{machine.specifications?.tank_capacity || 'N/A'} L</span>
+                      <div className="grid grid-cols-2 gap-2 mb-3 text-[10px]">
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg">
+                          <span className="text-slate-500">Purchase</span>
+                          <span className="font-bold text-slate-700">{formatCurrency(machine.current_price_ugx || 0)}</span>
+                        </div>
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg">
+                          <span className="text-slate-500">Maintenance/yr</span>
+                          <span className="font-bold text-amber-600">{formatCurrency(machine.estimated_maintenance_cost_per_year_ugx || 0)}</span>
+                        </div>
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg">
+                          <span className="text-slate-500">Running/yr</span>
+                          <span className="font-bold text-cyan-600">{formatCurrency(machine.estimated_running_cost_per_year_ugx || 0)}</span>
+                        </div>
+                        <div className="flex justify-between py-1.5 px-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                          <span className="text-slate-700 font-semibold">Total TCO/yr</span>
+                          <span className="font-bold text-emerald-600">{formatCurrency(machine.estimated_tco_per_year_ugx || 0)}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-500">Noise Level</span>
-                        <span className="font-semibold text-slate-700">{machine.specifications?.noise_level || 'N/A'} dB</span>
+
+                      <div className="text-xs font-bold text-slate-700 mb-3 flex items-center gap-2">
+                        <Wrench size={12} /> Detailed Specifications
                       </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase">Working Width</p>
+                          <p className="text-[11px] font-bold text-slate-800">{machine.working_width_cm || machine.specifications?.working_width || 'N/A'} cm</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase">Weight</p>
+                          <p className="text-[11px] font-bold text-slate-800">{machine.weight_kg || 'N/A'} kg</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase">Noise Level</p>
+                          <p className="text-[11px] font-bold text-slate-800">{machine.noise_level_db || machine.specifications?.noise_level || 'N/A'} dB</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase">Power Req</p>
+                          <p className="text-[11px] font-bold text-slate-800">{machine.power_requirement_kw || machine.specifications?.power_requirement_kw || 'N/A'} kW</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase">Tank Capacity</p>
+                          <p className="text-[11px] font-bold text-slate-800">{machine.tank_capacity_liters || machine.specifications?.tank_capacity || 'N/A'} L</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase">Motor Type</p>
+                          <p className="text-[11px] font-bold text-slate-800 capitalize">{machine.motor_type || machine.specifications?.motor_type || 'Standard'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase">Spare Parts Lead</p>
+                          <p className="text-[11px] font-bold text-slate-800">{machine.spare_parts_lead_time_days || machine.specifications?.spare_parts_lead_time_days || 14} days</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase">Aisle Width Min</p>
+                          <p className="text-[11px] font-bold text-slate-800">{machine.min_aisle_width_mm ? (machine.min_aisle_width_mm / 10).toFixed(0) : 'N/A'} cm</p>
+                        </div>
+                      </div>
+
+                      {machine.specifications?.surface_compatibility && machine.specifications.surface_compatibility.length > 0 && (
+                        <div className="pt-3 border-t border-slate-200">
+                          <p className="text-[9px] text-slate-500 font-semibold uppercase mb-2">Compatible Surfaces</p>
+                          <div className="flex flex-wrap gap-1">
+                            {machine.specifications.surface_compatibility.map((surface, i) => (
+                              <span key={i} className="inline-flex items-center text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                ✓ {surface.replace(/_/g, ' ')}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -483,13 +591,13 @@ export default function RecommendationResults() {
                     </button>
                     <button
                       onClick={() => addToCompare(machine)}
-                      disabled={compareList.length >= 2 || compareList.find(m => m.id === machine.id)}
+                      disabled={compareList.length >= 2 || compareList.find(m => (m.id || m._id) === (machine.id || machine._id))}
                       className="px-4 py-2.5 border-2 border-slate-200 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:border-blue-300 hover:bg-blue-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Compare
                     </button>
                     <button
-                      onClick={() => setExpandedCard(isExpanded ? null : machine.id)}
+                      onClick={() => setExpandedCard(isExpanded ? null : machineId)}
                       className="px-3 py-2.5 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition"
                     >
                       {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -500,47 +608,6 @@ export default function RecommendationResults() {
             );
           })}
         </div>
-
-        {/* Detergent Section */}
-        {recommendations.some(m => m.detergent) && (
-          <div className={`mt-12 bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden transition-all duration-700 delay-300 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
-            <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center">
-                  <Droplets size={14} className="text-white" />
-                </div>
-                <h2 className="text-lg font-bold text-slate-800">Recommended Detergents</h2>
-              </div>
-            </div>
-            <div className="p-6 grid md:grid-cols-2 gap-4">
-              {recommendations.filter(m => m.detergent).map((machine, idx) => (
-                <div key={idx} className="flex gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-cyan-200 transition">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
-                    <Droplets size={20} className="text-cyan-700" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-slate-800">{machine.detergent.name}</h3>
-                    <p className="text-[10px] text-slate-500 font-mono">
-                      pH {machine.detergent.ph} · {formatCurrency(machine.detergent.current_price_ugx)}/{machine.detergent.unit_size}L
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {machine.detergent.eco_certified && (
-                        <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                          <Leaf size={10} /> Eco Certified
-                        </span>
-                      )}
-                      {machine.detergent.biodegradable && (
-                        <span className="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                          <CheckCircle2 size={10} /> Biodegradable
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Compare Bar */}
         {compareList.length > 0 && (
@@ -589,8 +656,9 @@ export default function RecommendationResults() {
                 <div className="grid md:grid-cols-2 gap-6">
                   {compareList.map((machine, idx) => {
                     const matchScore = machine.match_score || machine.final_score || machine.match || 85;
+                    const cmpId = machine.id || machine._id || idx;
                     return (
-                      <div key={machine.id} className="border-2 border-slate-200 rounded-xl overflow-hidden hover:border-blue-300 transition">
+                      <div key={cmpId} className="border-2 border-slate-200 rounded-xl overflow-hidden hover:border-blue-300 transition">
                         <div className={`h-1.5 bg-gradient-to-r ${getIntensityColor(machine.intensity)}`} />
                         <div className="p-5">
                           <div className="flex justify-between items-start mb-4">
