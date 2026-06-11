@@ -6,106 +6,330 @@
 const Recommendation = require('../models/Recommendation');
 const { Equipment } = require('../models/Equipment'); // Import Equipment model (destructured)
 const mongoose = require('mongoose');
+const { normalizeScenario } = require('../services/scenarioNormalizer');
+const { findBestDetergent } = require('../services/detergentMatcher');
 
-// KB-DSS Inference Engine - Matches equipment based on scenario parameters
+// KB-DSS Inference Engine v2 - Scoring-based equipment matching
 const runInferenceEngine = async (scenario) => {
   try {
-    // Build a flexible query that considers multiple parameters
-    const query = { active: true, in_stock: true };
-    
-    // Primary filter: machine category (most important)
+    console.group('🔍 INFERENCE ENGINE ANALYSIS');
+    console.log('Input Scenario:', scenario);
+
+    // STEP 1: Base query — hard filters (category + use-type domain)
+    const baseQuery = { active: true, in_stock: true };
     if (scenario.machine_category) {
-      query.machine_category = scenario.machine_category;
+      baseQuery.machine_category = scenario.machine_category;
+    }
+    // Strict use-type filter: domestic users only see domestic machines, etc.
+    if (scenario.domain) {
+      baseQuery.domain = scenario.domain;
+    }
+    if (scenario.intensity) {
+      baseQuery.intensity = scenario.intensity;
     }
     
-    // Secondary filters (can fallback without them)
-    const optionalFilters = [];
+    const allEquipment = await Equipment.find(baseQuery);
+    console.log(`✓ Found ${allEquipment.length} equipment matching category "${scenario.machine_category}"${scenario.domain ? `, domain "${scenario.domain}"` : ''}${scenario.intensity ? `, intensity "${scenario.intensity}"` : ''}`);
     
-    // Match on power source if specified
-    if (scenario.power_source) {
-      optionalFilters.push({ power_source: scenario.power_source });
-    }
-    
-    // Match on surface type compatibility if specified
-    if (scenario.surface_type) {
-      optionalFilters.push({ surface_compatibility: scenario.surface_type });
-    }
-    
-    // Match on dirt type compatibility if specified
-    if (scenario.dirt_type) {
-      optionalFilters.push({ dirt_compatibility: scenario.dirt_type });
-    }
-    
-    // Try to find equipment with all optional filters first
-    let equipmentList = [];
-    if (optionalFilters.length > 0) {
-      equipmentList = await Equipment.find({
-        ...query,
-        $and: optionalFilters
-      }).limit(10);
-    }
-    
-    // If no results with optional filters, try with just the base query
-    if (equipmentList.length === 0) {
-      equipmentList = await Equipment.find(query).limit(10);
-    }
-    
-    // If still no results, try to find any active equipment at all
-    if (equipmentList.length === 0) {
-      equipmentList = await Equipment.find({ active: true }).limit(10);
-    }
-    
-    // If absolutely no equipment found, return error state
-    if (equipmentList.length === 0) {
+    if (allEquipment.length === 0) {
+      console.log('❌ No equipment matching filters');
+      console.groupEnd();
+      const useTypeMsg = scenario.domain
+        ? `No ${scenario.domain} equipment found for this category. Try a different use type or machine category.`
+        : 'No matching equipment found in category';
       return {
         recommendations: [],
         recommendation_id: new mongoose.Types.ObjectId().toString(),
-        alerts: ['No matching equipment found in database. Database may need seeding.'],
-        summary_explanation: 'No equipment available matching your criteria'
+        alerts: [useTypeMsg],
+        summary_explanation: useTypeMsg
       };
     }
-    
-    // Map equipment to recommendation format with real data
-    const recommendations = equipmentList.map((equipment, index) => ({
-      _id: equipment._id,
-      name: `${equipment.brand_name} ${equipment.model_name}`,
-      model_name: equipment.model_name,
-      brand_name: equipment.brand_name,
-      machine_category: equipment.machine_category,
-      machine_subtype: equipment.machine_subtype,
-      intensity: equipment.intensity,
-      domain: equipment.domain,
-      // Calculate match score based on fit
-      match_score: 92 - (index * 3) + Math.floor(Math.random() * 8),
-      // Calculate TCO: sum of purchase price + annual maintenance + annual running costs
-      estimated_tco_per_year_ugx: Math.round(
-        (equipment.current_price_ugx || 0) + 
-        (equipment.estimated_maintenance_cost_per_year_ugx || 0) + 
-        (equipment.estimated_running_cost_per_year_ugx || 0)
-      ),
-      power_source: equipment.power_source,
-      weight_kg: equipment.weight_kg,
-      surface_compatibility: equipment.surface_compatibility,
-      dirt_compatibility: equipment.dirt_compatibility,
-      image_url: equipment.image_url,
-      specifications: {
-        working_width: equipment.working_width,
-        tank_capacity: equipment.tank_capacity,
-        noise_level: equipment.noise_level,
-        weight_kg: equipment.weight_kg,
-        power_source: equipment.power_source
+
+    // STEP 2: Score each equipment piece
+    const scoredEquipment = allEquipment.map(equipment => {
+      let score = 100;  // Start with perfect score
+      const matchDetails = [];
+
+      // ===== POWER SOURCE MATCHING (25 points) =====
+      if (scenario.power_source) {
+        if (equipment.power_source === scenario.power_source) {
+          matchDetails.push('✓ Power source exact match');
+        } else {
+          score -= 15;
+          matchDetails.push(`✗ Power source mismatch (need: ${scenario.power_source}, have: ${equipment.power_source})`);
+        }
       }
+
+      // ===== SURFACE COMPATIBILITY (20 points) =====
+      if (scenario.surfaces?.length && equipment.surface_compatibility?.length > 0) {
+        const matchedSurfaces = scenario.surfaces.filter(surface =>
+          equipment.surface_compatibility.includes(surface)
+        );
+        if (matchedSurfaces.length > 0) {
+          matchDetails.push('✓ Surface type compatible');
+        } else {
+          score -= 12;
+          matchDetails.push(`✗ Surface mismatch (need: ${scenario.surfaces.join(', ')})`);
+        }
+      }
+
+      // ===== DIRT/SOIL COMPATIBILITY (20 points) =====
+      if (scenario.soils?.length && equipment.dirt_compatibility?.length > 0) {
+        const matchedSoils = scenario.soils.filter(soil =>
+          equipment.dirt_compatibility.includes(soil)
+        );
+        if (matchedSoils.length > 0) {
+          matchDetails.push('✓ Dirt type compatible');
+        } else {
+          score -= 12;
+          matchDetails.push(`✗ Dirt type mismatch (need: ${scenario.soils.join(', ')})`);
+        }
+      }
+
+      // ===== ENVIRONMENT MATCHING (10 points) =====
+      if (scenario.environment && equipment.environment) {
+        if (equipment.environment === scenario.environment || equipment.environment === 'any') {
+          matchDetails.push('✓ Environment compatible');
+        } else {
+          score -= 8;
+          matchDetails.push(`✗ Environment mismatch (need: ${scenario.environment})`);
+        }
+      }
+
+      // Domain/intensity already hard-filtered in base query — confirm match in trace
+      if (scenario.intensity && equipment.intensity === scenario.intensity) {
+        matchDetails.push('✓ Intensity level matches');
+      }
+      if (scenario.domain && equipment.domain === scenario.domain) {
+        matchDetails.push('✓ Usage domain matches');
+      }
+
+      // ===== AISLE WIDTH CONSTRAINT (5 points) =====
+      if (scenario.min_aisle_width_mm && equipment.min_aisle_width_mm) {
+        if (scenario.min_aisle_width_mm >= equipment.min_aisle_width_mm) {
+          matchDetails.push('✓ Fits aisle width');
+        } else {
+          score -= 10;  // Significant penalty - can't fit!
+          matchDetails.push(`✗ Too wide for aisle (${equipment.min_aisle_width_mm}mm required)`);
+        }
+      }
+
+      // ===== ECO PREFERENCE (5 points) =====
+      if (scenario.eco_preference) {
+        const isEcoFriendly = equipment.power_source === 'battery' || 
+                             equipment.power_source === 'corded_electric';
+        if (isEcoFriendly) {
+          score += 5;
+          matchDetails.push('✓ Eco-friendly power source');
+        } else {
+          score -= 3;
+          matchDetails.push('✗ Not eco-friendly');
+        }
+      }
+
+      // ===== WEIGHT TOLERANCE (15 points) =====
+      if (scenario.weight_tolerance && equipment.weight_kg) {
+        const weightLimits = {
+          lightweight: 30,
+          moderate: 60,
+          no_constraint: 999
+        };
+        const maxWeight = weightLimits[scenario.weight_tolerance];
+        
+        if (equipment.weight_kg <= maxWeight) {
+          matchDetails.push(`✓ Weight acceptable (${equipment.weight_kg}kg ≤ ${maxWeight}kg)`);
+        } else {
+          score -= 25;  // Major penalty - physically can't use it!
+          matchDetails.push(`❌ TOO HEAVY: ${equipment.weight_kg}kg > ${maxWeight}kg limit`);
+        }
+      }
+
+      // ===== POWER AVAILABILITY CHECK (20 points) =====
+      if (scenario.power_available_kw && equipment.power_req?.kW) {
+        if (equipment.power_req.kW <= scenario.power_available_kw) {
+          matchDetails.push(`✓ Power available (${equipment.power_req.kW}kW ≤ ${scenario.power_available_kw}kW)`);
+        } else {
+          score -= 40;  // CRITICAL penalty - can't even plug it in!
+          matchDetails.push(`❌ POWER PROBLEM: Equipment needs ${equipment.power_req.kW}kW, only ${scenario.power_available_kw}kW available`);
+        }
+      }
+
+      // ===== SPARE PARTS / DOWNTIME CRITICALITY (10 points) =====
+      if (scenario.downtime_criticality && equipment.spare_part_lead_time_days) {
+        const criticalityThresholds = {
+          high: 3,    // Need parts within 3 days
+          medium: 14, // Can wait 1-2 weeks
+          low: 28     // Can wait 2-4 weeks
+        };
+        const maxLeadTime = criticalityThresholds[scenario.downtime_criticality];
+        
+        if (equipment.spare_part_lead_time_days <= maxLeadTime) {
+          matchDetails.push(`✓ Parts available within ${equipment.spare_part_lead_time_days} days`);
+        } else {
+          score -= 12;
+          matchDetails.push(`⚠️ Parts take ${equipment.spare_part_lead_time_days} days (max ${maxLeadTime} acceptable)`);
+        }
+      }
+
+      // ===== CLEANING FREQUENCY & EFFICIENCY (8 points) =====
+      if (scenario.cleaning_frequency && equipment.working_width) {
+        const efficiencyMap = {
+          light: 50,      // Light cleaning: can be slow, narrow is OK
+          moderate: 75,   // Moderate: need decent efficiency
+          daily: 100      // Daily: need wide coverage for speed
+        };
+        const targetWidth = efficiencyMap[scenario.cleaning_frequency];
+        
+        if (equipment.working_width >= targetWidth) {
+          matchDetails.push(`✓ Efficient for ${scenario.cleaning_frequency} cleaning (${equipment.working_width}cm width)`);
+        } else {
+          score -= 5;
+          matchDetails.push(`⚠️ Working width ${equipment.working_width}cm may be slow for ${scenario.cleaning_frequency} cleaning`);
+        }
+      }
+
+      // ===== WORKING WIDTH PREFERENCE (5 points) =====
+      if (scenario.working_width_preference && equipment.working_width) {
+        const widthMap = {
+          compact: { min: 0, max: 50 },
+          standard: { min: 50, max: 90 },
+          wide: { min: 90, max: 999 }
+        };
+        const preferred = widthMap[scenario.working_width_preference];
+        
+        if (equipment.working_width >= preferred.min && equipment.working_width <= preferred.max) {
+          matchDetails.push(`✓ Working width ${equipment.working_width}cm matches preference`);
+        } else {
+          score -= 3;
+          matchDetails.push(`⚠️ Working width ${equipment.working_width}cm outside ${scenario.working_width_preference} range`);
+        }
+      }
+
+      // Ensure score stays 0-100
+      score = Math.max(0, Math.min(100, score));
+
+      return {
+        equipment,
+        score,
+        matchDetails
+      };
+    });
+
+    // STEP 3: Sort by score (highest first)
+    const rankedEquipment = scoredEquipment
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);  // Top 10 results
+
+    console.log(`\n🎯 RANKING RESULTS:`);
+    rankedEquipment.forEach((item, idx) => {
+      console.log(`\n#${idx + 1} - ${item.equipment.brand_name} ${item.equipment.model_name} (Score: ${item.score}/100)`);
+      item.matchDetails.forEach(detail => console.log(`    ${detail}`));
+    });
+    console.groupEnd();
+
+    // STEP 4: Convert to recommendations format
+    const recommendations = await Promise.all(rankedEquipment.map(async (item, index) => {
+      const detergent = await findBestDetergent(item.equipment, {
+        ...scenario,
+        surface_type: scenario.surfaces,
+        dirt_type: scenario.soils,
+      });
+
+      return {
+      _id: item.equipment._id,
+      id: item.equipment._id,
+      name: `${item.equipment.brand_name} ${item.equipment.model_name}`,
+      model_name: item.equipment.model_name,
+      brand_name: item.equipment.brand_name,
+      machine_category: item.equipment.machine_category,
+      machine_subtype: item.equipment.machine_subtype,
+      intensity: item.equipment.intensity,
+      domain: item.equipment.domain,
+      match_score: item.score,
+      current_price_ugx: item.equipment.current_price_ugx || 0,
+      estimated_maintenance_cost_per_year_ugx: item.equipment.estimated_maintenance_cost_per_year_ugx || 0,
+      estimated_running_cost_per_year_ugx: item.equipment.estimated_running_cost_per_year_ugx || 0,
+      estimated_tco_per_year_ugx: Math.round(
+        (item.equipment.current_price_ugx || 0) + 
+        (item.equipment.estimated_maintenance_cost_per_year_ugx || 0) + 
+        (item.equipment.estimated_running_cost_per_year_ugx || 0)
+      ),
+      power_source: item.equipment.power_source,
+      weight_kg: item.equipment.weight_kg,
+      surface_compatibility: item.equipment.surface_compatibility,
+      dirt_compatibility: item.equipment.dirt_compatibility,
+      reasoning_trace: item.matchDetails,
+      image_url: item.equipment.image_url,
+      environment: item.equipment.environment,
+      min_aisle_width_mm: item.equipment.min_aisle_width_mm,
+      // Phase 3: Additional specs for enhanced display
+      motor_type: item.equipment.motor_type || 'Standard',
+      power_requirement_kw: item.equipment.power_req?.kW || 0,
+      noise_level_db: item.equipment.noise_level || 75,
+      working_width_cm: item.equipment.working_width || 50,
+      tank_capacity_liters: item.equipment.tank_capacity || 0,
+      spare_parts_lead_time_days: item.equipment.spare_part_lead_time_days || 14,
+      // Hint tags for display
+      hint_weight: item.equipment.weight_kg > 50 ? `⚠️ Heavy (${item.equipment.weight_kg}kg)` : `✓ ${item.equipment.weight_kg}kg`,
+      hint_noise: item.equipment.noise_level > 85 ? `⚠️ Loud (${item.equipment.noise_level}dB)` : 
+                  item.equipment.noise_level > 75 ? `🔊 Moderate (${item.equipment.noise_level}dB)` :
+                  `🔇 Quiet (${item.equipment.noise_level}dB)`,
+      hint_power: `⚡ ${item.equipment.power_req?.kW || 0}kW (${item.equipment.power_source})`,
+      specifications: {
+        working_width: item.equipment.working_width,
+        tank_capacity: item.equipment.tank_capacity,
+        noise_level: item.equipment.noise_level,
+        weight_kg: item.equipment.weight_kg,
+        power_source: item.equipment.power_source,
+        power_requirement_kw: item.equipment.power_req?.kW,
+        motor_type: item.equipment.motor_type,
+        spare_parts_lead_time_days: item.equipment.spare_part_lead_time_days
+      },
+      detergent: detergent ? {
+        _id: detergent._id,
+        id: detergent._id,
+        name: detergent.product_name,
+        product_name: detergent.product_name,
+        brand_name: detergent.brand_name,
+        detergent_category: detergent.detergent_category,
+        ph: detergent.ph_value,
+        ph_value: detergent.ph_value,
+        current_price_ugx: detergent.current_price_ugx,
+        unit_size: detergent.unit_size,
+        dilution_ratio: detergent.dilution_ratio,
+        eco_certified: detergent.eco_certified,
+        biodegradable: detergent.biodegradable,
+        requires_ppe: detergent.requires_ppe,
+        hazard_alerts: detergent.hazard_alerts,
+        image_url: detergent.image_url
+      } : null
+      };
     }));
-    
+
+    // Identify which filters were active
+    const activeFilters = [];
+    if (scenario.machine_category) activeFilters.push('category');
+    if (scenario.power_source) activeFilters.push('power_source');
+    if (scenario.surfaces?.length) activeFilters.push('surfaces');
+    if (scenario.soils?.length) activeFilters.push('soils');
+    if (scenario.environment) activeFilters.push('environment');
+    if (scenario.intensity) activeFilters.push('intensity');
+    if (scenario.domain) activeFilters.push('domain');
+    if (scenario.min_aisle_width_mm) activeFilters.push('aisle_width');
+    if (scenario.weight_tolerance) activeFilters.push('weight_tolerance');
+    if (scenario.power_available_kw) activeFilters.push('power_available_kw');
+    if (scenario.downtime_criticality) activeFilters.push('downtime_criticality');
+    if (scenario.cleaning_frequency) activeFilters.push('cleaning_frequency');
+    if (scenario.working_width_preference) activeFilters.push('working_width_preference');
+
     return {
-      recommendations: recommendations,
+      recommendations,
       recommendation_id: new mongoose.Types.ObjectId().toString(),
       alerts: [],
-      summary_explanation: `Found ${recommendations.length} matching equipment based on your criteria (${scenario.machine_category || 'any category'})`
+      summary_explanation: `Found ${recommendations.length} equipment ranked by match quality using filters: ${activeFilters.join(', ') || 'category only'}`
     };
   } catch (error) {
     console.error('Inference engine error:', error);
-    // Return empty recommendations instead of mock data on error
     return {
       recommendations: [],
       recommendation_id: new mongoose.Types.ObjectId().toString(),
@@ -122,7 +346,7 @@ const runInferenceEngine = async (scenario) => {
 const getRecommendations = async (req, res) => {
   try {
     const userId = req.user.id;
-    const scenario = req.body;
+    const scenario = normalizeScenario(req.body);
     
     console.log('📥 Received recommendation request:', { userId, scenario });
     
