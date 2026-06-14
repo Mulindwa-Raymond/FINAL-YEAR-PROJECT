@@ -700,18 +700,61 @@ const seed = async () => {
     await Training.insertMany(trainings);
     console.log(`   ✅ Inserted ${trainings.length} training items.`);
 
-    console.log('👤 Creating admin user...');
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
-    await User.create({
-      username: 'admin',
-      email: process.env.ADMIN_EMAIL || 'admin@cleanmatch.com',
-      password_hash: hashedPassword,
-      role: 'admin',
-      is_active: true,
-      organization: 'Clean Match Systems'
-    });
-    console.log(`   ✅ Admin user created (username: admin, password: ${adminPassword})`);
+    console.log('👤 Creating test users...');
+    
+    // Define all test users
+    const testUsers = [
+      {
+        username: 'super_admin',
+        email: 'superadmin@cleanmatch.com',
+        password_hash: 'super123',
+        role: 'super_admin',
+        organization: 'Clean Match Systems',
+      },
+      {
+        username: 'admin',
+        email: process.env.ADMIN_EMAIL || 'admin@cleanmatch.com',
+        password_hash: process.env.ADMIN_PASSWORD || 'admin123',
+        role: 'admin',
+        organization: 'Clean Match Systems',
+      },
+      {
+        username: 'john_doe',
+        email: 'john@example.com',
+        password_hash: 'user123',
+        role: 'standard',
+        organization: 'Kweeeza Cleaning Services',
+      },
+      {
+        username: 'jane_smith',
+        email: 'jane@example.com',
+        password_hash: 'user123',
+        role: 'standard',
+        organization: 'Freshly Kleen',
+      },
+      {
+        username: 'robert_m',
+        email: 'robert@cjay.com',
+        password_hash: 'user123',
+        role: 'standard',
+        organization: 'C-JAY Home Solutions',
+      }
+    ];
+
+    let usersCreated = 0;
+    for (const userData of testUsers) {
+      const user = new User({
+        username: userData.username,
+        email: userData.email,
+        password_hash: userData.password_hash,
+        role: userData.role,
+        organization: userData.organization,
+        is_active: true
+      });
+      await user.save();
+      console.log(`   ✅ Created user: ${userData.username} (${userData.role})`);
+      usersCreated++;
+    }
 
     console.log('\n🎉 Database seeding completed successfully!');
     console.log('\n📊 Summary:');
@@ -719,6 +762,13 @@ const seed = async () => {
     console.log(`   - Detergents: ${detergentCount}`);
     console.log(`   - Rules: ${ruleCount}`);
     console.log(`   - Training: ${trainings.length}`);
+    console.log(`   - Users: ${usersCreated}`);
+    console.log('\n📋 Login Credentials:');
+    console.log('   🔑 Super Admin: superadmin@cleanmatch.com / super123');
+    console.log('   🔑 Admin: admin@cleanmatch.com / admin123');
+    console.log('   🔑 Standard User: john@example.com / user123');
+    console.log('   🔑 Standard User: jane@example.com / user123');
+    console.log('   🔑 Standard User: robert@cjay.com / user123');
 
     process.exit(0);
   } catch (err) {

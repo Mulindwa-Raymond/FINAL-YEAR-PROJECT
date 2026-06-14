@@ -106,6 +106,25 @@ export const getMyProfile = () => api.get('/admin/me');
  */
 export const updateMyProfile = (data) => api.put('/admin/me', data);
 
+/**
+ * Change current user's password
+ * @param {Object} data - { currentPassword, newPassword }
+ * @returns {Promise}
+ */
+export const changePassword = (data) => {
+  if (!data.currentPassword) {
+    return Promise.reject(new Error('Current password is required'));
+  }
+  if (!data.newPassword) {
+    return Promise.reject(new Error('New password is required'));
+  }
+  if (data.newPassword.length < 6) {
+    return Promise.reject(new Error('Password must be at least 6 characters'));
+  }
+  // This uses the auth endpoint since password change is an auth function
+  return api.put('/auth/change-password', data);
+};
+
 // ============================================
 // SYSTEM METRICS & AUDIT
 // ============================================

@@ -58,6 +58,10 @@ import { HistoryList } from './history/HistoryList';
 // Feedback
 import { FeedbackList } from './feedback/FeedbackList';
 
+// Profile & Settings (NEW)
+import { AdminProfile } from './profile/AdminProfile';
+import { SystemSettings } from './settings/SystemSettings';
+
 export const AdminRoutes = () => {
   return (
     <Routes>
@@ -113,6 +117,10 @@ export const AdminRoutes = () => {
         
         {/* Feedback */}
         <Route path="feedback" element={<FeedbackList />} />
+        
+        {/* Profile & Settings (NEW) */}
+        <Route path="profile" element={<AdminProfile />} />
+        <Route path="settings" element={<SystemSettings />} />
       </Route>
     </Routes>
   );

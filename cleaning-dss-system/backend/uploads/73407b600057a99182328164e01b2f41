@@ -1,0 +1,31 @@
+rule_id,rule_text,category,priority
+R001,IF area_size > 1500 THEN recommend heavy-duty floor scrubber,equipment,90
+R002,IF area_size <= 300 AND surface_type = tile THEN recommend light-duty scrubber,equipment,85
+R003,IF use_case = industrial THEN recommend industrial-grade pressure washer,equipment,88
+R004,IF domain = domestic AND usage_hours_per_week < 10 THEN recommend light-duty equipment,equipment,82
+R005,IF power_stability = unstable THEN add alert about battery backup,safety,80
+R006,IF eco_preference = true THEN prioritize eco-certified detergents,environmental,75
+R007,IF surface_type = marble AND dirt_type = red laterite soil THEN add cleaning caution,safety,85
+R008,IF floor_texture = sensitive THEN recommend soft brush attachment,equipment,78
+R009,IF environment = food_grade THEN require food-safe certified equipment,safety,92
+R010,IF soil_level = heavy THEN recommend heavy-duty detergent,detergent,80
+R011,IF filtration = HEPA_H14 OR filtration = absolute THEN add safety compliance alert,safety,95
+R012,IF noise_sensitive = true THEN recommend low-noise equipment (<65dB),equipment,76
+R013,IF budget_ugx > 0 AND budget_ugx < 3000000 THEN recommend value-segment equipment,cost,70
+R014,IF budget_ugx >= 10000000 THEN recommend premium equipment,cost,75
+R015,IF aisle_width < 900 AND aisle_width > 0 THEN recommend compact equipment,equipment,84
+R016,"IF surface_type IN [wood, vinyl, marble] THEN caution against abrasive detergents",safety,88
+R017,IF dirt_type CONTAINS grease AND surface_type CONTAINS concrete THEN recommend alkaline detergent,detergent,82
+R018,IF machine_category = carpet_cleaner AND carpet_type = natural THEN add wool-safe instruction,safety,86
+R019,IF location = outdoor_height THEN recommend water-fed pole system,equipment,78
+R020,IF use_case = construction AND debris_type CONTAINS concrete_dust THEN recommend HEPA filtration,equipment,89
+R021,IF eco_preference = true AND detergent_category = alkaline THEN exclude non-eco detergents,detergent,70
+R022,IF power_source = battery AND usage_hours_per_week > 40 THEN recommend spare battery,equipment,72
+R023,IF environment = hazardous OR environment = atex THEN require ATEX-certified equipment,safety,98
+R024,IF cleaning_frequency = daily THEN recommend industrial-grade durability,equipment,76
+R025,IF area_size > 5000 THEN recommend ride-on sweeper,equipment,87
+R026,IF surface_type = glass AND dirt_type CONTAINS water_marks THEN recommend distilled water,detergent,74
+R027,IF requires_ppe = true AND user_training_completed = false THEN block recommendation,safety,99
+R028,IF noise_sensitivity = high THEN exclude equipment with dB > 70,equipment,73
+R029,IF machine_category = steam_cleaner AND function = sanitise THEN recommend hospital-grade steam,equipment,81
+R030,IF machine_category = scrubber_drier AND floor_type = textured THEN recommend cylindrical brush,equipment,79

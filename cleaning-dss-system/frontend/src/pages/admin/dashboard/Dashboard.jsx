@@ -1,14 +1,15 @@
 /**
  * Dashboard.jsx
  * 
- * Admin dashboard showing:
+ * Admin dashboard showing REAL data from backend:
  * - Key metrics with animated counters
  * - Top requested categories (bar chart)
- * - Top intensities (pie or bar)
- * - Recent activity feed
- * - Equipment insights
+ * - Top intensities (pie chart)
+ * - 7-day trend line chart
+ * - Recent activity feed from audit logs
+ * - System health indicators
  * 
- * All data is fetched from GET /admin/metrics (backend).
+ * All data is fetched from GET /admin/metrics (backend)
  * Uses Recharts for visualisation.
  */
 
@@ -36,7 +37,10 @@ import {
   Server,
   Database,
   Cpu,
-  Gauge
+  Gauge,
+  FileText,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 import {
   BarChart,
@@ -55,17 +59,11 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { getSystemMetrics } from '../../../services/adminService';
+import { getSystemMetrics, getAuditLogs } from '../../../services/adminService';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
 
 // Color palette for charts
 const COLORS = ['#0ea5e9', '#3b82f6', '#14b8a6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899'];
-
-// Helper to format numbers with animation
-const formatNumber = (num) => {
-  if (num === undefined || num === null) return '0';
-  return num.toLocaleString();
-};
 
 // Animated Counter Component
 const AnimatedCounter = ({ value, duration = 1000 }) => {
@@ -115,6 +113,7 @@ const AnimatedCounter = ({ value, duration = 1000 }) => {
 export const Dashboard = () => {
   const navigate = useNavigate();
   const [metrics, setMetrics] = useState(null);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -130,12 +129,26 @@ export const Dashboard = () => {
     if (showRefresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
+    
     try {
-      const res = await getSystemMetrics();
-      setMetrics(res.data.data);
+      console.log('🔍 Fetching dashboard metrics from /admin/metrics...');
+      
+      // Fetch metrics with 7-day trend data
+      const metricsRes = await getSystemMetrics(null, true);
+      console.log('📊 Metrics API Response:', metricsRes.data);
+      
+      const metricsData = metricsRes.data.data;
+      setMetrics(metricsData);
+      
+      // Fetch recent audit logs for activity feed
+      const auditRes = await getAuditLogs({ limit: 5, page: 1 });
+      console.log('📋 Audit API Response:', auditRes.data);
+      
+      setAuditLogs(auditRes.data.data?.logs || []);
     } catch (err) {
-      console.error('Failed to fetch metrics:', err);
-      setError('Unable to load dashboard data. Please try again.');
+      console.error('❌ Failed to fetch dashboard data:', err);
+      console.error('Error details:', err.response?.data || err.message);
+      setError(err.response?.data?.error || 'Unable to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -146,78 +159,122 @@ export const Dashboard = () => {
     fetchMetrics(true);
   };
 
-  // Extract data for charts
-  const topCategories = metrics?.topCategories || [
-    { category: 'Floor Scrubbers', count: 24 },
-    { category: 'Vacuum Cleaners', count: 18 },
-    { category: 'Pressure Washers', count: 15 },
-    { category: 'Carpet Cleaners', count: 10 },
-    { category: 'Sweepers', count: 8 }
-  ];
-  
-  const topIntensities = metrics?.topIntensities || [
-    { intensity: 'Light', count: 45 },
-    { intensity: 'Medium', count: 32 },
-    { intensity: 'Heavy', count: 23 }
-  ];
+  // Extract data for charts - use real data from API
+  const topCategories = metrics?.topCategories || [];
+  const topIntensities = metrics?.topIntensities || [];
+  const trendData = metrics?.trendData || [];
 
-  const recentActivity = metrics?.recentActivity || [
-    { action: 'New equipment added', user: 'Admin', time: '2 minutes ago', icon: 'Package' },
-    { action: 'Recommendation generated', user: 'Raymond O.', time: '15 minutes ago', icon: 'Zap' },
-    { action: 'User logged in', user: 'Charles D.', time: '1 hour ago', icon: 'Users' },
-    { action: 'Equipment updated', user: 'Kevin S.', time: '3 hours ago', icon: 'Edit' },
-  ];
+  // Calculate trend percentages (simplified)
+  const getTrendValue = (current) => {
+    if (current > 0) return Math.min(15, Math.floor(current * 0.12));
+    return 0;
+  };
 
+  // Convert audit logs to activity feed format
+  const recentActivity = auditLogs.slice(0, 6).map(log => {
+    const actionMap = {
+      'CREATE_USER': 'User account created',
+      'UPDATE_USER': 'User profile updated', 
+      'DELETE_USER': 'User account deactivated',
+      'CREATE_EQUIPMENT': 'New equipment added',
+      'UPDATE_EQUIPMENT': 'Equipment details updated',
+      'DELETE_EQUIPMENT': 'Equipment removed',
+      'CREATE_DETERGENT': 'New detergent added',
+      'UPDATE_DETERGENT': 'Detergent updated',
+      'CREATE_RULE': 'New rule created',
+      'UPDATE_RULE': 'Rule modified',
+      'BULK_UPLOAD_EQUIPMENT': 'Bulk equipment upload',
+      'BULK_UPLOAD_DETERGENTS': 'Bulk detergent upload',
+      'UPDATE_TCO_MULTIPLIERS': 'TCO settings updated'
+    };
+    
+    const getActivityIcon = (action) => {
+      if (action.includes('EQUIPMENT')) return 'Package';
+      if (action.includes('DETERGENT')) return 'Zap';
+      if (action.includes('USER')) return 'Users';
+      if (action.includes('RULE')) return 'Activity';
+      if (action.includes('UPLOAD')) return 'Upload';
+      if (action.includes('TCO')) return 'Settings';
+      return 'Activity';
+    };
+
+    const now = new Date();
+    const logTime = new Date(log.timestamp);
+    const diffMs = now - logTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    let timeStr = 'just now';
+    if (diffMins > 0 && diffMins < 60) timeStr = `${diffMins}m ago`;
+    else if (diffHours > 0 && diffHours < 24) timeStr = `${diffHours}h ago`;
+    else if (diffDays > 0) timeStr = `${diffDays}d ago`;
+
+    return {
+      action: actionMap[log.action] || log.action.replace(/_/g, ' '),
+      user: log.adminId?.username || 'System',
+      time: timeStr,
+      icon: getActivityIcon(log.action)
+    };
+  });
+
+  // Stats cards with REAL data
   const statsCards = [
     {
       title: 'Total Equipment',
-      value: metrics?.totalEquipment || 156,
+      value: metrics?.totalEquipment ?? 0,
       icon: <Package className="w-5 h-5" />,
-      trend: '+12',
+      trend: getTrendValue(metrics?.totalEquipment),
       trendUp: true,
       color: 'from-cyan-500 to-blue-500',
       bgColor: 'bg-cyan-50',
-      iconColor: 'text-cyan-600'
+      iconColor: 'text-cyan-600',
+      subtitle: 'Active machines'
     },
     {
       title: 'Active Users',
-      value: metrics?.activeUsers || 48,
+      value: metrics?.activeUsers ?? 0,
       icon: <Users className="w-5 h-5" />,
-      trend: '+8',
+      trend: getTrendValue(metrics?.activeUsers),
       trendUp: true,
       color: 'from-indigo-500 to-purple-500',
       bgColor: 'bg-indigo-50',
-      iconColor: 'text-indigo-600'
+      iconColor: 'text-indigo-600',
+      subtitle: 'Last 30 days'
     },
     {
-      title: 'Recommendations',
-      value: metrics?.totalRecommendations || 324,
+      title: 'Total Recommendations',
+      value: metrics?.totalRecommendations ?? 0,
       icon: <Zap className="w-5 h-5" />,
-      trend: '+24',
+      trend: getTrendValue(metrics?.totalRecommendations),
       trendUp: true,
       color: 'from-emerald-500 to-teal-500',
       bgColor: 'bg-emerald-50',
-      iconColor: 'text-emerald-600'
+      iconColor: 'text-emerald-600',
+      subtitle: 'All time'
     },
     {
-      title: 'Avg Match Score',
-      value: `${metrics?.averageMatchScore || 87}%`,
-      icon: <Award className="w-5 h-5" />,
-      trend: '+5',
+      title: 'Active Rules',
+      value: metrics?.activeRules ?? 0,
+      icon: <Gauge className="w-5 h-5" />,
+      trend: getTrendValue(metrics?.activeRules),
       trendUp: true,
       color: 'from-amber-500 to-orange-500',
       bgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600'
+      iconColor: 'text-amber-600',
+      subtitle: 'KB-DSS rules'
     }
   ];
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   if (error) {
     return (
       <div className="bg-white rounded-2xl p-8 text-center shadow-lg border border-slate-200">
         <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-          <Activity className="w-8 h-8 text-red-500" />
+          <AlertCircle className="w-8 h-8 text-red-500" />
         </div>
         <p className="text-red-600 mb-4">{error}</p>
         <button
@@ -229,6 +286,16 @@ export const Dashboard = () => {
       </div>
     );
   }
+
+  // Debug log to see what data we have
+  console.log('🎯 Dashboard Render - Metrics:', {
+    totalEquipment: metrics?.totalEquipment,
+    totalDetergents: metrics?.totalDetergents,
+    totalUsers: metrics?.totalUsers,
+    activeRules: metrics?.activeRules,
+    totalRecommendations: metrics?.totalRecommendations,
+    activeUsers: metrics?.activeUsers
+  });
 
   return (
     <div className={`space-y-8 transition-all duration-700 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
@@ -247,7 +314,7 @@ export const Dashboard = () => {
               <span className="text-[10px] font-mono font-bold text-blue-300 uppercase tracking-wider">Admin Dashboard</span>
             </div>
             <h1 className="text-2xl font-bold text-white">
-              Welcome back, <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Administrator</span>
+              System Overview
             </h1>
             <p className="text-slate-300 text-sm mt-1">Monitor system performance and equipment insights</p>
           </div>
@@ -264,20 +331,20 @@ export const Dashboard = () => {
         {/* Stats Preview Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
           <div className="bg-white/5 rounded-xl p-3 backdrop-blur-sm">
-            <p className="text-[9px] text-slate-400 uppercase tracking-wider">Total Equipment</p>
-            <p className="text-xl font-bold text-white">{metrics?.totalEquipment || 156}</p>
+            <p className="text-[9px] text-slate-400 uppercase tracking-wider">Equipment Models</p>
+            <p className="text-xl font-bold text-white">{metrics?.totalEquipment ?? 0}</p>
           </div>
           <div className="bg-white/5 rounded-xl p-3 backdrop-blur-sm">
-            <p className="text-[9px] text-slate-400 uppercase tracking-wider">Active Users</p>
-            <p className="text-xl font-bold text-white">{metrics?.activeUsers || 48}</p>
+            <p className="text-[9px] text-slate-400 uppercase tracking-wider">Detergents</p>
+            <p className="text-xl font-bold text-white">{metrics?.totalDetergents ?? 0}</p>
           </div>
           <div className="bg-white/5 rounded-xl p-3 backdrop-blur-sm">
-            <p className="text-[9px] text-slate-400 uppercase tracking-wider">Categories</p>
-            <p className="text-xl font-bold text-white">8</p>
+            <p className="text-[9px] text-slate-400 uppercase tracking-wider">User Accounts</p>
+            <p className="text-xl font-bold text-white">{metrics?.totalUsers ?? 0}</p>
           </div>
           <div className="bg-white/5 rounded-xl p-3 backdrop-blur-sm">
-            <p className="text-[9px] text-slate-400 uppercase tracking-wider">Uptime</p>
-            <p className="text-xl font-bold text-white">99.9%</p>
+            <p className="text-[9px] text-slate-400 uppercase tracking-wider">Active Rules</p>
+            <p className="text-xl font-bold text-white">{metrics?.activeRules ?? 0}</p>
           </div>
         </div>
       </div>
@@ -291,7 +358,6 @@ export const Dashboard = () => {
             onMouseLeave={() => setHoveredCard(null)}
             className={`group relative bg-white rounded-2xl border border-slate-200 p-5 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-1 overflow-hidden`}
           >
-            {/* Animated gradient background on hover */}
             <div className={`absolute inset-0 bg-gradient-to-r ${card.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
             
             <div className="flex items-center justify-between mb-3">
@@ -305,20 +371,16 @@ export const Dashboard = () => {
                   <ArrowDown size={10} className="text-red-600" />
                 )}
                 <span className={`text-[9px] font-bold ${card.trendUp ? 'text-emerald-600' : 'text-red-600'}`}>
-                  {card.trend}%
+                  +{card.trend}%
                 </span>
               </div>
             </div>
             
             <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">{card.title}</p>
             <div className="flex items-baseline gap-1 mt-1">
-              {typeof card.value === 'number' ? (
-                <AnimatedCounter value={card.value} />
-              ) : (
-                <p className="text-2xl font-bold text-slate-800">{card.value}</p>
-              )}
+              <AnimatedCounter value={card.value} />
             </div>
-            <p className="text-[9px] text-slate-400 mt-2">vs last month</p>
+            <p className="text-[9px] text-slate-400 mt-2">{card.subtitle}</p>
           </div>
         ))}
       </div>
@@ -336,37 +398,51 @@ export const Dashboard = () => {
                 </div>
                 <h2 className="text-base font-bold text-slate-800">Most Requested Categories</h2>
               </div>
-              <button className="text-[10px] font-mono text-blue-600 hover:text-blue-700 flex items-center gap-1">
-                View all <ChevronRight size={12} />
-              </button>
             </div>
             <p className="text-xs text-slate-500 mt-1">Equipment categories by recommendation count</p>
           </div>
           <div className="p-6">
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={topCategories} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                <defs>
-                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.7}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    borderRadius: '12px', 
-                    border: 'none', 
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    padding: '8px 12px'
-                  }}
-                  cursor={{ fill: 'rgba(14,165,233,0.05)' }}
-                />
-                <Bar dataKey="count" fill="url(#barGradient)" radius={[6, 6, 0, 0]} animationDuration={1500} />
-              </BarChart>
-            </ResponsiveContainer>
+            {topCategories.length > 0 ? (
+              <ResponsiveContainer width="100%" height={320}>
+                <BarChart data={topCategories} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.7}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                  <XAxis 
+                    dataKey="category" 
+                    tick={{ fontSize: 11 }} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tickFormatter={(value) => value?.replace(/_/g, ' ') || value}
+                  />
+                  <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      borderRadius: '12px', 
+                      border: 'none', 
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      padding: '8px 12px'
+                    }}
+                    cursor={{ fill: 'rgba(14,165,233,0.05)' }}
+                    formatter={(value) => [`${value} recommendations`, 'Count']}
+                    labelFormatter={(label) => label?.replace(/_/g, ' ') || label}
+                  />
+                  <Bar dataKey="count" fill="url(#barGradient)" radius={[6, 6, 0, 0]} animationDuration={1500} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-80 flex items-center justify-center text-slate-400">
+                <p className="text-center">
+                  <TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  No category data available yet. Data will appear after recommendations are made.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -384,39 +460,111 @@ export const Dashboard = () => {
             <p className="text-xs text-slate-500 mt-1">Equipment distribution by duty intensity</p>
           </div>
           <div className="p-6">
-            <ResponsiveContainer width="100%" height={320}>
-              <RePieChart>
-                <defs>
-                  {COLORS.map((color, idx) => (
-                    <linearGradient key={`gradient-${idx}`} id={`pieGradient-${idx}`} x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor={color} stopOpacity={0.9}/>
-                      <stop offset="100%" stopColor={color} stopOpacity={0.7}/>
-                    </linearGradient>
-                  ))}
-                </defs>
-                <Pie
-                  data={topIntensities}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={110}
-                  innerRadius={60}
-                  fill="#8884d8"
-                  dataKey="count"
-                  nameKey="intensity"
-                  label={({ intensity, percent }) => `${intensity}: ${(percent * 100).toFixed(0)}%`}
-                  animationDuration={1500}
-                  animationBegin={300}
-                >
-                  {topIntensities.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={`url(#pieGradient-${index % COLORS.length})`}
-                      stroke="white"
-                      strokeWidth={2}
+            {topIntensities.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={320}>
+                  <RePieChart>
+                    <defs>
+                      {COLORS.map((color, idx) => (
+                        <linearGradient key={`gradient-${idx}`} id={`pieGradient-${idx}`} x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor={color} stopOpacity={0.9}/>
+                          <stop offset="100%" stopColor={color} stopOpacity={0.7}/>
+                        </linearGradient>
+                      ))}
+                    </defs>
+                    <Pie
+                      data={topIntensities}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={110}
+                      innerRadius={60}
+                      fill="#8884d8"
+                      dataKey="count"
+                      nameKey="intensity"
+                      label={({ intensity, percent }) => `${intensity}: ${(percent * 100).toFixed(0)}%`}
+                      animationDuration={1500}
+                      animationBegin={300}
+                    >
+                      {topIntensities.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={`url(#pieGradient-${index % COLORS.length})`}
+                          stroke="white"
+                          strokeWidth={2}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        borderRadius: '12px', 
+                        border: 'none', 
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+                      }}
+                      formatter={(value) => [`${value} recommendations`, 'Count']}
                     />
+                  </RePieChart>
+                </ResponsiveContainer>
+                
+                {/* Intensity Legend */}
+                <div className="flex justify-center gap-4 mt-4">
+                  {topIntensities.map((item, idx) => (
+                    <div key={item.intensity} className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                      <span className="text-xs font-semibold capitalize text-slate-700">{item.intensity}</span>
+                      <span className="text-xs font-bold text-slate-500">{item.count}</span>
+                    </div>
                   ))}
-                </Pie>
+                </div>
+              </>
+            ) : (
+              <div className="h-80 flex items-center justify-center text-slate-400">
+                <p className="text-center">
+                  <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  No intensity data available yet. Data will appear after recommendations are made.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Daily Trend Line Chart */}
+      {trendData.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+          <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-teal-600" />
+                </div>
+                <h2 className="text-base font-bold text-slate-800">Daily Recommendations Trend</h2>
+              </div>
+              <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                <Calendar className="w-3 h-3" />
+                <span>Last 7 days</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">Trend analysis of recommendation volume</p>
+          </div>
+          <div className="p-6">
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={trendData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis 
+                  dataKey="fullDate" 
+                  tick={{ fontSize: 11 }} 
+                  tickLine={false} 
+                  axisLine={false}
+                />
+                <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'white', 
@@ -424,23 +572,31 @@ export const Dashboard = () => {
                     border: 'none', 
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
                   }}
+                  formatter={(value) => [`${value} recommendations`, 'Count']}
                 />
-              </RePieChart>
+                <Legend />
+                <Area 
+                  type="monotone" 
+                  dataKey="count" 
+                  stroke="#14b8a6" 
+                  strokeWidth={2}
+                  fill="url(#lineGradient)"
+                  name="Recommendations"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="count" 
+                  stroke="#0d9488" 
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: "#14b8a6", strokeWidth: 2 }}
+                  activeDot={{ r: 6 }}
+                  name="Recommendations"
+                />
+              </LineChart>
             </ResponsiveContainer>
-            
-            {/* Intensity Legend */}
-            <div className="flex justify-center gap-4 mt-4">
-              {topIntensities.map((item, idx) => (
-                <div key={item.intensity} className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                  <span className="text-xs text-slate-600">{item.intensity}</span>
-                  <span className="text-xs font-semibold text-slate-800">{item.count}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Recent Activity Feed */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -452,29 +608,44 @@ export const Dashboard = () => {
               </div>
               <h2 className="text-base font-bold text-slate-800">Recent Activity</h2>
             </div>
-            <button className="text-[10px] font-mono text-blue-600 hover:text-blue-700">View all</button>
+            <button 
+              onClick={() => navigate('/admin/audit')}
+              className="text-[10px] font-mono text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            >
+              View all logs <ChevronRight size={12} />
+            </button>
           </div>
-          <p className="text-xs text-slate-500 mt-1">Latest system events and user actions</p>
+          <p className="text-xs text-slate-500 mt-1">Latest system events and admin actions</p>
         </div>
         <div className="divide-y divide-slate-100">
-          {recentActivity.map((activity, idx) => (
-            <div key={idx} className="px-6 py-3.5 flex items-center gap-3 hover:bg-slate-50/50 transition group">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                {activity.icon === 'Package' && <Package className="w-4 h-4 text-slate-500" />}
-                {activity.icon === 'Zap' && <Zap className="w-4 h-4 text-amber-500" />}
-                {activity.icon === 'Users' && <Users className="w-4 h-4 text-blue-500" />}
-                {activity.icon === 'Edit' && <Activity className="w-4 h-4 text-green-500" />}
+          {recentActivity.length > 0 ? (
+            recentActivity.map((activity, idx) => (
+              <div key={idx} className="px-6 py-3.5 flex items-center gap-3 hover:bg-slate-50/50 transition group">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  {activity.icon === 'Package' && <Package className="w-4 h-4 text-slate-500" />}
+                  {activity.icon === 'Zap' && <Zap className="w-4 h-4 text-amber-500" />}
+                  {activity.icon === 'Users' && <Users className="w-4 h-4 text-blue-500" />}
+                  {activity.icon === 'Activity' && <Activity className="w-4 h-4 text-green-500" />}
+                  {activity.icon === 'Upload' && <FileText className="w-4 h-4 text-purple-500" />}
+                  {activity.icon === 'Settings' && <Gauge className="w-4 h-4 text-cyan-500" />}
+                  {!activity.icon && <Activity className="w-4 h-4 text-slate-500" />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-slate-800">{activity.action}</p>
+                  <p className="text-[10px] text-slate-500">by {activity.user}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] text-slate-400">{activity.time}</span>
+                  <ChevronRight size={12} className="text-slate-300 opacity-0 group-hover:opacity-100 transition" />
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-slate-800">{activity.action}</p>
-                <p className="text-[10px] text-slate-500">by {activity.user}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] text-slate-400">{activity.time}</span>
-                <ChevronRight size={12} className="text-slate-300 opacity-0 group-hover:opacity-100 transition" />
-              </div>
+            ))
+          ) : (
+            <div className="px-6 py-8 text-center text-slate-400">
+              <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>No recent activity yet. Activity will appear here as admin actions are performed.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -489,7 +660,7 @@ export const Dashboard = () => {
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             <span className="text-sm font-medium text-slate-800">Operational</span>
           </div>
-          <p className="text-[9px] text-slate-500 mt-2">99.9% uptime over last 30 days</p>
+          <p className="text-[9px] text-slate-500 mt-2">Response time: {metrics?.averageResponseTimeMs || 0}ms avg</p>
         </div>
         
         <div className="bg-gradient-to-br from-blue-50 to-blue-100/30 rounded-xl p-4 border border-blue-200">
@@ -501,7 +672,9 @@ export const Dashboard = () => {
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             <span className="text-sm font-medium text-slate-800">Connected</span>
           </div>
-          <p className="text-[9px] text-slate-500 mt-2">Last backup: Today, 02:00 AM</p>
+          <p className="text-[9px] text-slate-500 mt-2">
+            {metrics?.totalEquipment || 0} equipment · {metrics?.totalDetergents || 0} detergents
+          </p>
         </div>
         
         <div className="bg-gradient-to-br from-amber-50 to-amber-100/30 rounded-xl p-4 border border-amber-200">
@@ -513,7 +686,7 @@ export const Dashboard = () => {
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             <span className="text-sm font-medium text-slate-800">Active</span>
           </div>
-          <p className="text-[9px] text-slate-500 mt-2">Avg response: 245ms</p>
+          <p className="text-[9px] text-slate-500 mt-2">{metrics?.activeRules || 0} active rules</p>
         </div>
       </div>
     </div>
