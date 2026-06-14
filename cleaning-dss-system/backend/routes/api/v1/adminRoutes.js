@@ -23,6 +23,10 @@ const {
   getAllTrainings,
   getRecommendationHistory
 } = require('../../../controllers/adminController');
+const {
+  getAllFeedback,
+  getFeedbackStats
+} = require('../../../controllers/feedbackController');
 const { auth, requireAdmin, requireSuperAdmin, requireAdminOrSelf } = require('../../../middleware/auth');
 
 const router = express.Router();
@@ -69,5 +73,11 @@ router.post('/import', requireAdmin, upload.single('file'), importDatabase);
 // ============================================
 router.get('/trainings', requireAdmin, getAllTrainings);
 router.get('/history', requireAdmin, getRecommendationHistory);
+
+// ============================================
+// FEEDBACK MANAGEMENT
+// ============================================
+router.get('/feedback', requireAdmin, getAllFeedback);
+router.get('/feedback/stats', requireAdmin, getFeedbackStats);
 
 module.exports = router;
