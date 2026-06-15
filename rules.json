@@ -1,0 +1,1563 @@
+[
+  {
+    "rule_id": "R001",
+    "rule_text": "IF machine_category = pressure_washer AND intensity = light AND domain = domestic AND surface_type = concrete AND dirt_type = light soil THEN recommend light-duty pressure washer with universal detergent",
+    "category": "equipment",
+    "priority": 85,
+    "salience": 10,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" },
+        { "attribute": "domain", "operator": "EQ", "value": "domestic" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "light soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher K 2", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher K 2 Power Control", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk C110 Bar Domestic Washer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher Universal Cleaner RM 555", "parameters": {} }
+      ]
+    },
+    "explanation_template": "For light domestic pressure washing on concrete with light soil, we recommend a domestic-grade pressure washer with a universal alkaline detergent."
+  },
+  {
+    "rule_id": "R002",
+    "rule_text": "IF machine_category = pressure_washer AND intensity = light AND domain = domestic AND surface_type = wood AND dirt_type = organic THEN recommend pressure washer with adjustable pressure for wood",
+    "category": "equipment",
+    "priority": 85,
+    "salience": 10,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" },
+        { "attribute": "domain", "operator": "EQ", "value": "domestic" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "wood" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "organic" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher K 3 Premium Full Control", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher K 4", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk C135.1-8 PAD X-TRA", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher Universal Cleaner RM 555", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Use wide-angle nozzle and keep nozzle at least 30cm from wood surface to prevent damage" } }
+      ]
+    },
+    "explanation_template": "For wood surfaces, adjustable pressure control is essential to prevent damage. Use a wide spray pattern and neutral pH detergent."
+  },
+  {
+    "rule_id": "R003",
+    "rule_text": "IF machine_category = pressure_washer AND intensity = light AND domain = domestic AND surface_type = vehicles AND dirt_type = insects THEN recommend vehicle-specific pressure washer with vehicle detergent",
+    "category": "equipment",
+    "priority": 85,
+    "salience": 10,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" },
+        { "attribute": "domain", "operator": "EQ", "value": "domestic" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "vehicles" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "insects" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher K 4", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher K 5 WCM", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk C135.1-8 PAD X-TRA", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher Vehicle & Bike Cleaner RM 619", "parameters": {} }
+      ]
+    },
+    "explanation_template": "For vehicle washing, use a pressure washer with adjustable pressure and a vehicle-specific detergent that won't damage paint."
+  },
+  {
+    "rule_id": "R004",
+    "rule_text": "IF machine_category = pressure_washer AND intensity = medium AND domain = commercial AND surface_type = concrete AND dirt_type = heavy soil THEN recommend commercial-grade pressure washer with alkaline detergent",
+    "category": "equipment",
+    "priority": 90,
+    "salience": 15,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HD 6/15 C", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher K 7 WCM", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk MC3C Cold Water Pressure Washer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher PressurePro Active Cleaner Alkaline RM 81", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Heavy soil on commercial concrete requires a higher pressure (145-180 bar) and alkaline detergent for effective cleaning."
+  },
+  {
+    "rule_id": "R005",
+    "rule_text": "IF machine_category = pressure_washer AND intensity = medium AND domain = commercial AND surface_type = stainless_steel AND dirt_type = grease THEN recommend commercial pressure washer with neutral pH detergent",
+    "category": "equipment",
+    "priority": 90,
+    "salience": 15,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "stainless_steel" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "grease" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HD 6/15 M", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher HD 6/15 MXA Plus", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk MC5M", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher PressurePro Active Cleaner Neutral RM 55", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Stainless steel requires neutral pH detergent to prevent corrosion while effectively removing grease. Use a mobile professional-grade washer."
+  },
+  {
+    "rule_id": "R006",
+    "rule_text": "IF machine_category = pressure_washer AND intensity = heavy AND domain = industrial AND surface_type = concrete AND dirt_type = oil THEN recommend industrial pressure washer with heavy degreaser",
+    "category": "equipment",
+    "priority": 95,
+    "salience": 20,
+    "certainty_factor": 0.98,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "oil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HD 13/35-4 SX Plus", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher HD 6/15 MXA Plus", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk MC5M", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher PressurePro Oil & Grease Cleaner Extra RM 31", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Industrial oil removal requires high-pressure equipment (200+ bar) combined with heavy-duty degreaser for effective concrete cleaning."
+  },
+  {
+    "rule_id": "R007",
+    "rule_text": "IF machine_category = pressure_washer AND subtype = hot_water AND intensity = medium AND domain = commercial AND surface_type = concrete AND dirt_type = grease THEN recommend hot water pressure washer with degreaser",
+    "category": "equipment",
+    "priority": 92,
+    "salience": 18,
+    "certainty_factor": 0.97,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "hot_water" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "grease" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HDS 6/14 C", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher HDS 6/15 C", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk MC7P Hot Water Pressure Washer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher PressurePro Oil & Grease Cleaner Extra RM 31", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Hot water pressure washers are highly effective for grease removal as heat helps break down oils and fats. Use a degreaser for best results."
+  },
+  {
+    "rule_id": "R008",
+    "rule_text": "IF machine_category = pressure_washer AND subtype = hot_water AND intensity = heavy AND domain = industrial AND surface_type = concrete AND dirt_type = rust THEN recommend industrial hot water washer with acidic descaler",
+    "category": "equipment",
+    "priority": 95,
+    "salience": 20,
+    "certainty_factor": 0.98,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "hot_water" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "rust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HDS 8/18 M", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher HDS 12/18-4 S", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk MC7P Hot Water Pressure Washer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher PressurePro Descaler Acidic RM 25", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Rust removal requires high-temperature hot water combined with acidic descaling chemicals for industrial concrete surfaces."
+  },
+  {
+    "rule_id": "R009",
+    "rule_text": "IF machine_category = pressure_washer AND subtype = hot_water AND domain = industrial AND environment = food_grade AND surface_type = stainless_steel AND dirt_type = food_residue THEN recommend food-grade hot water washer with food-safe alkaline detergent",
+    "category": "equipment",
+    "priority": 98,
+    "salience": 25,
+    "certainty_factor": 0.99,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "hot_water" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "food_grade" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "stainless_steel" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "food_residue" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HDS 6/15 C", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher HDS 8/18 M", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk MC7P Hot Water Pressure Washer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FoodPro Active Cleaner Alkaline RM 735", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Food-grade environments require HACCP-compliant equipment and food-safe detergents for hygiene and safety compliance."
+  },
+  {
+    "rule_id": "R010",
+    "rule_text": "IF machine_category = pressure_washer AND subtype = petrol AND intensity = medium AND domain = commercial AND surface_type = concrete AND dirt_type = heavy soil AND power_stability = unstable THEN recommend petrol pressure washer for unreliable power areas",
+    "category": "equipment",
+    "priority": 92,
+    "salience": 18,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "petrol" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy soil" },
+        { "attribute": "power_stability", "operator": "EQ", "value": "unstable" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HD 6/15 G Classic", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk Poseidon 3-36 PE Electric", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher HD 9/23 G", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher PressurePro Active Cleaner Alkaline RM 81", "parameters": {} }
+      ]
+    },
+    "explanation_template": "For areas with unstable power supply, petrol pressure washers provide reliable operation without grid dependency."
+  },
+  {
+    "rule_id": "R011",
+    "rule_text": "IF machine_category = pressure_washer AND subtype = petrol AND intensity = heavy AND domain = industrial AND surface_type = concrete AND dirt_type = heavy soil AND power_stability = unstable THEN recommend heavy-duty petrol washer for industrial remote use",
+    "category": "equipment",
+    "priority": 95,
+    "salience": 20,
+    "certainty_factor": 0.97,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "petrol" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy soil" },
+        { "attribute": "power_stability", "operator": "EQ", "value": "unstable" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HD 9/23 G", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher HD 6/15 G Classic", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk Poseidon 3-36 PE Electric", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher PressurePro Oil & Grease Cleaner Extra RM 31", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Heavy-duty petrol pressure washers are essential for industrial remote applications where power supply is unreliable."
+  },
+  {
+    "rule_id": "R012",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = walk_behind AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = tile AND dirt_type = dust THEN recommend walk-behind scrubber drier for tile with neutral detergent",
+    "category": "equipment",
+    "priority": 85,
+    "salience": 10,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "dust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher BD 50/50 C Classic Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SC400", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic TT1840 Walk Behind Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Universal Cleaner RM 756", "parameters": {} }
+      ]
+    },
+    "explanation_template": "For tile floors in commercial indoor settings, a walk-behind scrubber drier with neutral pH detergent provides effective daily maintenance."
+  },
+  {
+    "rule_id": "R013",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = walk_behind AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = vinyl AND dirt_type = spills THEN recommend walk-behind scrubber drier for vinyl with neutral cleaner",
+    "category": "equipment",
+    "priority": 85,
+    "salience": 10,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "vinyl" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "spills" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher BD 50/55 C Classic Bp Pack", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SC500", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic TTB1840NX-R Cordless Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Universal Cleaner RM 756", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Vinyl floors require neutral pH detergent and effective spill recovery. A wider scrubber path improves productivity."
+  },
+  {
+    "rule_id": "R014",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = walk_behind AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = marble AND dirt_type = light_dust THEN recommend marble-safe scrubber drier with neutral detergent",
+    "category": "equipment",
+    "priority": 88,
+    "salience": 12,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "marble" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "light_dust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher BD 50/55 W Classic Bp Pack", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SC400", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic TTB3045NX Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Universal Cleaner RM 756", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Use soft pads and neutral pH detergent only. Avoid acidic or alkaline cleaners on marble." } }
+      ]
+    },
+    "explanation_template": "Marble is a sensitive natural stone requiring neutral pH detergent and soft pad scrubbing to avoid etching or damage."
+  },
+  {
+    "rule_id": "R015",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = walk_behind AND intensity = heavy AND domain = industrial AND environment = indoor AND surface_type = concrete AND dirt_type = grease THEN recommend industrial scrubber drier with heavy alkaline detergent",
+    "category": "equipment",
+    "priority": 92,
+    "salience": 18,
+    "certainty_factor": 0.97,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "grease" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher B 50 W Push Scrubber", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SC800", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic NTT1840 Walk Behind Scrubber", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Deep Cleaner RM 69 eco!efficiency", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Industrial grease on concrete requires heavy-duty scrubber with alkaline detergent for effective removal. Use the eco!efficiency mode for chemical savings."
+  },
+  {
+    "rule_id": "R016",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = walk_behind AND intensity = heavy AND domain = industrial AND environment = indoor AND surface_type = concrete AND dirt_type = heavy_soil THEN recommend industrial scrubber with basic alkaline detergent",
+    "category": "equipment",
+    "priority": 92,
+    "salience": 18,
+    "certainty_factor": 0.97,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher NTT2045 Walk Behind Scrubber", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SC3500 Walk Behind Scrubber", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic NTT2045 Walk Behind Scrubber", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Basic Cleaner RM 69", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Heavy soil on industrial concrete requires maximum scrubbing power and alkaline detergent for deep cleaning."
+  },
+  {
+    "rule_id": "R017",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = walk_behind AND intensity = heavy AND domain = industrial AND environment = food_grade AND surface_type = tile AND dirt_type = food_residue THEN recommend food-grade scrubber drier with food-safe alkaline detergent",
+    "category": "equipment",
+    "priority": 98,
+    "salience": 25,
+    "certainty_factor": 0.99,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "food_grade" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "food_residue" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher BD 50/55 W Classic Bp Pack", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SC500", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic TBL4055 Walk Behind Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FoodPro Active Cleaner Alkaline RM 735", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Food-grade environments require HACCP-compliant equipment and food-safe detergents to maintain hygiene standards."
+  },
+  {
+    "rule_id": "R018",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = rider AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = tile AND dirt_type = dust THEN recommend rider scrubber drier for large commercial tile areas",
+    "category": "equipment",
+    "priority": 88,
+    "salience": 12,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "rider" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "dust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher BD 50/70 R Classic Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic CRG8072 Rider Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic CRL8072 Compact Rider Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Universal Cleaner RM 756", "parameters": {} }
+      ]
+    },
+    "explanation_template": "For large tile areas, ride-on scrubber driers improve productivity and reduce operator fatigue."
+  },
+  {
+    "rule_id": "R019",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = rider AND intensity = heavy AND domain = industrial AND environment = indoor AND surface_type = concrete AND dirt_type = heavy_soil THEN recommend industrial rider scrubber for large concrete areas",
+    "category": "equipment",
+    "priority": 94,
+    "salience": 20,
+    "certainty_factor": 0.98,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "rider" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher BD 100/250 R Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk BR855", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic TRL720 Ride-On Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Deep Cleaner RM 69 eco!efficiency", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Large industrial concrete floors require heavy-duty ride-on scrubbers with high-capacity tanks and eco-efficient detergent dosing."
+  },
+  {
+    "rule_id": "R020",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = rider AND intensity = heavy AND domain = industrial AND environment = indoor AND surface_type = concrete AND dirt_type = oil THEN recommend industrial rider with alkaline detergent for oil removal",
+    "category": "equipment",
+    "priority": 94,
+    "salience": 20,
+    "certainty_factor": 0.98,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "rider" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "oil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Nilfisk CR1200", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher BD 100/250 R Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic TVL850 Ride-On Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Basic Cleaner RM 69", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Oil removal from concrete requires high-pressure scrubbing with alkaline detergent. Largest capacity scrubbers are recommended."
+  },
+  {
+    "rule_id": "R021",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = robotic AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = tile AND dirt_type = light_dust THEN recommend robotic scrubber for autonomous tile cleaning",
+    "category": "equipment",
+    "priority": 86,
+    "salience": 12,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "robotic" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "light_dust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher KIRA B 50", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk RS500", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic RSB140NX Robotic Scrubber", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Universal Cleaner RM 756", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Robotic scrubbers provide autonomous daily maintenance for tile floors, ideal for after-hours cleaning schedules."
+  },
+  {
+    "rule_id": "R022",
+    "rule_text": "IF machine_category = scrubber_drier AND subtype = micro AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = tile AND dirt_type = light_dust AND aisle_width < 1000 THEN recommend micro scrubber for tight spaces",
+    "category": "equipment",
+    "priority": 88,
+    "salience": 14,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "scrubber_drier" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "micro" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "light_dust" },
+        { "attribute": "aisle_width", "operator": "LT", "value": 1000 }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Nilfisk SC250", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic TTB3045NX Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher BD 50/50 C Classic Bp", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Universal Cleaner RM 756", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Narrow aisles require compact micro scrubbers that can maneuver in tight spaces while providing effective cleaning."
+  },
+  {
+    "rule_id": "R023",
+    "rule_text": "IF machine_category = vacuum_cleaner AND subtype = wet_dry AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = carpet AND dirt_type = dust THEN recommend wet/dry vacuum for commercial carpet dust",
+    "category": "equipment",
+    "priority": 80,
+    "salience": 8,
+    "certainty_factor": 0.92,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "wet_dry" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "carpet" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "dust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher NT 22/1 Ap", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk Attix 44 Wet & Dry", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic Harry HHR200", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Wet/dry vacuums are versatile for commercial carpet cleaning, handling both dust and occasional spills."
+  },
+  {
+    "rule_id": "R024",
+    "rule_text": "IF machine_category = vacuum_cleaner AND subtype = wet_dry AND intensity = heavy AND domain = industrial AND environment = indoor AND surface_type = concrete AND dirt_type = heavy_soil THEN recommend industrial wet/dry vacuum for heavy debris",
+    "category": "equipment",
+    "priority": 85,
+    "salience": 10,
+    "certainty_factor": 0.94,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "wet_dry" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher NT 65/2 Eco Te H", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk IVB7", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic WVD570 Wet & Dry Vacuum", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Industrial heavy debris requires large-capacity wet/dry vacuums with high airflow for efficient collection."
+  },
+  {
+    "rule_id": "R025",
+    "rule_text": "IF machine_category = vacuum_cleaner AND subtype = industrial AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = tile AND dirt_type = dust THEN recommend industrial vacuum for commercial tile dust",
+    "category": "equipment",
+    "priority": 80,
+    "salience": 8,
+    "certainty_factor": 0.92,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "industrial" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "dust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher NT 22/1 Ap", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk GD930", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic Henry HVR200", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Industrial vacuums provide reliable dust collection for commercial tile floors with durable construction."
+  },
+  {
+    "rule_id": "R026",
+    "rule_text": "IF machine_category = vacuum_cleaner AND subtype = industrial AND intensity = heavy AND domain = industrial AND environment = indoor AND surface_type = concrete AND dirt_type = heavy_soil THEN recommend heavy-duty industrial vacuum for heavy debris",
+    "category": "equipment",
+    "priority": 86,
+    "salience": 12,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "industrial" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher IVC 60/24-2 Tact²", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk VHS120", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic NTD750 Industrial Vacuum", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Heavy-duty industrial vacuums with twin motors provide maximum suction for heavy debris on concrete floors."
+  },
+  {
+    "rule_id": "R027",
+    "rule_text": "IF machine_category = vacuum_cleaner AND subtype = industrial AND intensity = heavy AND domain = industrial AND environment = hazardous AND surface_type = concrete AND dirt_type = hazardous_dust THEN recommend HEPA-certified vacuum with H-class filtration for hazardous dust",
+    "category": "equipment",
+    "priority": 98,
+    "salience": 30,
+    "certainty_factor": 0.99,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "industrial" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "hazardous" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "hazardous_dust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher IVC 60/30 Tact² Ec H", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk Attix 965-01", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic NDD900 Industrial Vacuum", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "HEPA H-class filtration required for hazardous dust. Ensure proper PPE and disposal protocols." } }
+      ]
+    },
+    "explanation_template": "Hazardous dust (asbestos, silica) requires certified HEPA H-class filtration for worker safety and regulatory compliance."
+  },
+  {
+    "rule_id": "R028",
+    "rule_text": "IF machine_category = vacuum_cleaner AND subtype = industrial AND intensity = heavy AND domain = industrial AND environment = hazardous AND surface_type = concrete AND dirt_type = hazardous_dust AND power_stability = unstable THEN recommend battery-powered HEPA vacuum for hazardous dust in unstable power areas",
+    "category": "equipment",
+    "priority": 98,
+    "salience": 30,
+    "certainty_factor": 0.99,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "industrial" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "hazardous" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "hazardous_dust" },
+        { "attribute": "power_stability", "operator": "EQ", "value": "unstable" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher IVC 30/12-1 Tact² M Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic HZB200 HEPA Vacuum", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk VHS120", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Battery operation ensures continuous hazardous dust collection during power outages." } }
+      ]
+    },
+    "explanation_template": "In areas with unstable power, battery-powered HEPA vacuums ensure continuous hazardous dust collection for safety compliance."
+  },
+  {
+    "rule_id": "R029",
+    "rule_text": "IF machine_category = vacuum_cleaner AND subtype = backpack AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = carpet AND dirt_type = light_dust THEN recommend backpack vacuum for efficient carpet dust collection",
+    "category": "equipment",
+    "priority": 82,
+    "salience": 10,
+    "certainty_factor": 0.93,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "backpack" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "carpet" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "light_dust" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher BVL 5/1 Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk BP30", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic NRV200 Backpack Vacuum", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Backpack vacuums provide hands-free operation and efficient dust collection for large carpeted areas."
+  },
+  {
+    "rule_id": "R030",
+    "rule_text": "IF machine_category = vacuum_cleaner AND subtype = backpack AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = tile AND dirt_type = dust AND power_stability = unstable THEN recommend battery backpack vacuum for cordless tile cleaning",
+    "category": "equipment",
+    "priority": 85,
+    "salience": 12,
+    "certainty_factor": 0.94,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "backpack" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "dust" },
+        { "attribute": "power_stability", "operator": "EQ", "value": "unstable" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Numatic NR200 Backpack Vacuum (Battery)", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher BVL 5/1 Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk BP30", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Battery backpack vacuums provide cordless operation for tile cleaning in areas with unstable power supply."
+  },
+  {
+    "rule_id": "R031",
+    "rule_text": "IF machine_category = steam_cleaner AND subtype = portable AND intensity = light AND domain = domestic AND environment = indoor AND surface_type = tile AND dirt_type = lime_scale THEN recommend portable steam cleaner for home tile descaling",
+    "category": "equipment",
+    "priority": 82,
+    "salience": 10,
+    "certainty_factor": 0.94,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "steam_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "portable" },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" },
+        { "attribute": "domain", "operator": "EQ", "value": "domestic" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "lime_scale" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher SC 2 Deluxe EasyFix", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic SC1 Steam Cleaner", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher SC 4 Premium", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Portable steam cleaners effectively remove lime scale from tile without chemicals, using high-temperature steam."
+  },
+  {
+    "rule_id": "R032",
+    "rule_text": "IF machine_category = steam_cleaner AND subtype = portable AND intensity = light AND domain = domestic AND environment = indoor AND surface_type = stainless_steel AND dirt_type = grease THEN recommend portable steam cleaner for kitchen grease removal",
+    "category": "equipment",
+    "priority": 82,
+    "salience": 10,
+    "certainty_factor": 0.94,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "steam_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "portable" },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" },
+        { "attribute": "domain", "operator": "EQ", "value": "domestic" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "stainless_steel" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "grease" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher SC 4 Premium", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher SC 2 Deluxe EasyFix", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic SC1 Steam Cleaner", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Steam cleaners dissolve kitchen grease on stainless steel without chemicals, using high-temperature steam."
+  },
+  {
+    "rule_id": "R033",
+    "rule_text": "IF machine_category = steam_cleaner AND subtype = continuous_fill AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = tile AND dirt_type = lime_scale THEN recommend continuous-fill steam cleaner for commercial descaling",
+    "category": "equipment",
+    "priority": 86,
+    "salience": 12,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "steam_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "continuous_fill" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "lime_scale" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher SC 5 EasyFix", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk D-ST15 Steam Cleaner", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic SC2 Commercial Steam Cleaner", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Continuous-fill steam cleaners provide uninterrupted operation for commercial descaling of tile surfaces."
+  },
+  {
+    "rule_id": "R034",
+    "rule_text": "IF machine_category = steam_cleaner AND subtype = continuous_fill AND intensity = heavy AND domain = industrial AND environment = food_grade AND surface_type = stainless_steel AND dirt_type = grease THEN recommend food-grade continuous steam cleaner for industrial sanitisation",
+    "category": "equipment",
+    "priority": 96,
+    "salience": 25,
+    "certainty_factor": 0.99,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "steam_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "continuous_fill" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "food_grade" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "stainless_steel" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "grease" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher SG 4/4 Professional", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk D-ST15 Steam Cleaner", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic SC2 Commercial Steam Cleaner", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Food-grade continuous steam cleaners provide chemical-free sanitisation for industrial food processing surfaces."
+  },
+  {
+    "rule_id": "R035",
+    "rule_text": "IF machine_category = window_cleaner AND subtype = robotic AND intensity = light AND domain = domestic AND environment = indoor AND surface_type = glass AND dirt_type = lime_scale THEN recommend robotic window cleaner for home glass descaling",
+    "category": "equipment",
+    "priority": 80,
+    "salience": 8,
+    "certainty_factor": 0.92,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "window_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "robotic" },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" },
+        { "attribute": "domain", "operator": "EQ", "value": "domestic" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "glass" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "lime_scale" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher WV 6 Plus", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher WVC 2", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher WVP 10 Adv", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Robotic window cleaners provide streak-free glass cleaning and effective lime scale removal for home windows."
+  },
+  {
+    "rule_id": "R036",
+    "rule_text": "IF machine_category = window_cleaner AND subtype = robotic AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = glass AND dirt_type = lime_scale THEN recommend commercial robotic window cleaner for office glass",
+    "category": "equipment",
+    "priority": 84,
+    "salience": 10,
+    "certainty_factor": 0.94,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "window_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "robotic" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "glass" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "lime_scale" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher WVP 10 Adv", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher WVC 2", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher WV 6 Plus", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Commercial robotic window cleaners provide efficient glass cleaning for office buildings with faster coverage."
+  },
+  {
+    "rule_id": "R037",
+    "rule_text": "IF machine_category = window_cleaner AND subtype = water_fed_pole AND intensity = medium AND domain = commercial AND environment = outdoor AND surface_type = glass AND dirt_type = organic AND location = outdoor_height THEN recommend water-fed pole system for high-rise windows",
+    "category": "equipment",
+    "priority": 88,
+    "salience": 14,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "window_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "water_fed_pole" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "outdoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "glass" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "organic" },
+        { "attribute": "location", "operator": "EQ", "value": "outdoor_height" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher WFP 60 Plus Water Fed Pole", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk WFC400 Water Fed Pole", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic NPW40 Water Fed Pole", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Water-fed pole systems provide safe, pure-water cleaning for high-rise windows without chemicals or scaffolding."
+  },
+  {
+    "rule_id": "R038",
+    "rule_text": "IF machine_category = carpet_cleaner AND subtype = portable AND intensity = light AND domain = domestic AND environment = indoor AND surface_type = carpet AND dirt_type = spills THEN recommend portable spot cleaner for home carpet stains",
+    "category": "equipment",
+    "priority": 82,
+    "salience": 10,
+    "certainty_factor": 0.94,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "carpet_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "portable" },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" },
+        { "attribute": "domain", "operator": "EQ", "value": "domestic" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "carpet" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "spills" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher SE 4002", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic WFF48 Spot Cleaner", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher CarpetPro Cleaner RM 519", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Portable spot cleaners quickly remove carpet spills and stains with injection-extraction technology."
+  },
+  {
+    "rule_id": "R039",
+    "rule_text": "IF machine_category = carpet_cleaner AND subtype = walk_behind AND intensity = medium AND domain = commercial AND environment = indoor AND surface_type = carpet AND dirt_type = heavy_soil THEN recommend walk-behind extractor for commercial carpet deep cleaning",
+    "category": "equipment",
+    "priority": 86,
+    "salience": 12,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "carpet_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "carpet" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher Puzzi 10/1", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk Multi II 30 Carpet Extractor", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic WFF10 Walk Behind Carpet Cleaner", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher CarpetPro Cleaner iCapsol RM 48", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Walk-behind extractors provide deep cleaning for commercial carpets with iCapsol technology for faster drying."
+  },
+  {
+    "rule_id": "R040",
+    "rule_text": "IF machine_category = carpet_cleaner AND subtype = walk_behind AND intensity = heavy AND domain = industrial AND environment = indoor AND surface_type = carpet AND dirt_type = red_laterite_soil THEN recommend industrial carpet extractor with intensive alkaline detergent",
+    "category": "equipment",
+    "priority": 90,
+    "salience": 16,
+    "certainty_factor": 0.97,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "carpet_cleaner" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "carpet" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "red_laterite_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher Puzzi 30/4", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher Puzzi 10/1", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic WFF10 Walk Behind Carpet Cleaner", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Intensive Cleaner RM 755", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Red laterite soil (common in Uganda) requires intensive extraction and alkaline detergent for complete removal from industrial carpets."
+  },
+  {
+    "rule_id": "R041",
+    "rule_text": "IF machine_category = sweeper AND subtype = walk_behind AND intensity = light AND domain = domestic AND surface_type = tile AND dirt_type = light_dust AND power_source = manual THEN recommend manual push sweeper for home dust collection",
+    "category": "equipment",
+    "priority": 78,
+    "salience": 6,
+    "certainty_factor": 0.90,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "sweeper" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" },
+        { "attribute": "domain", "operator": "EQ", "value": "domestic" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "light_dust" },
+        { "attribute": "power_source", "operator": "EQ", "value": "manual" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher S 6 Twin Push Sweeper", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic SW900B Walk Behind Sweeper", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Karcher KM 70/20 C 2SB Compact Sweeper", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Manual push sweepers provide cordless, energy-free dust collection for home tile floors."
+  },
+  {
+    "rule_id": "R042",
+    "rule_text": "IF machine_category = sweeper AND subtype = walk_behind AND intensity = medium AND domain = commercial AND surface_type = concrete AND dirt_type = heavy_soil THEN recommend battery walk-behind sweeper for commercial heavy debris",
+    "category": "equipment",
+    "priority": 84,
+    "salience": 10,
+    "certainty_factor": 0.94,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "sweeper" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher KM 70/30 C Bp Pack", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher KM 70/30 C Bp Plus", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SR1200S Walk Behind Sweeper", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Battery-powered walk-behind sweepers effectively collect heavy debris on commercial concrete floors."
+  },
+  {
+    "rule_id": "R043",
+    "rule_text": "IF machine_category = sweeper AND subtype = compact AND intensity = medium AND domain = commercial AND surface_type = tile AND dirt_type = organic THEN recommend compact sweeper for commercial organic debris",
+    "category": "equipment",
+    "priority": 82,
+    "salience": 8,
+    "certainty_factor": 0.93,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "sweeper" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "compact" },
+        { "attribute": "intensity", "operator": "EQ", "value": "medium" },
+        { "attribute": "domain", "operator": "EQ", "value": "commercial" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "tile" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "organic" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher KM 85/50 W Bp Pack", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SW5000", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Karcher KM 70/20 C 2SB Compact Sweeper", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Compact sweepers are ideal for collecting organic debris on commercial tile floors in retail and hospitality settings."
+  },
+  {
+    "rule_id": "R044",
+    "rule_text": "IF machine_category = sweeper AND subtype = walk_behind AND intensity = heavy AND domain = industrial AND environment = outdoor AND surface_type = concrete AND dirt_type = heavy_soil THEN recommend industrial outdoor sweeper for large area debris",
+    "category": "equipment",
+    "priority": 88,
+    "salience": 14,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "sweeper" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "walk_behind" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "outdoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Nilfisk SW750", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher KM 70/30 C Bp Plus", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SR1200S Walk Behind Sweeper", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Industrial outdoor sweepers handle heavy debris on large concrete areas with extended battery runtime."
+  },
+  {
+    "rule_id": "R045",
+    "rule_text": "IF machine_category = sweeper AND subtype = rider AND intensity = heavy AND domain = industrial AND environment = indoor_outdoor AND surface_type = concrete AND dirt_type = heavy_soil THEN recommend rider sweeper for large industrial areas",
+    "category": "equipment",
+    "priority": 90,
+    "salience": 16,
+    "certainty_factor": 0.97,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "sweeper" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "rider" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "indoor_outdoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "concrete" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher KM 90/60 R Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SR1900", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SW5500 Ride-On Sweeper", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Rider sweepers maximize productivity for large industrial indoor/outdoor areas with heavy debris."
+  },
+  {
+    "rule_id": "R046",
+    "rule_text": "IF machine_category = sweeper AND subtype = rider AND intensity = heavy AND domain = industrial AND environment = outdoor AND surface_type = asphalt AND dirt_type = heavy_soil AND power_source = diesel THEN recommend diesel rider sweeper for outdoor asphalt cleaning",
+    "category": "equipment",
+    "priority": 92,
+    "salience": 18,
+    "certainty_factor": 0.97,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "machine_category", "operator": "EQ", "value": "sweeper" },
+        { "attribute": "machine_subtype", "operator": "EQ", "value": "rider" },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" },
+        { "attribute": "domain", "operator": "EQ", "value": "industrial" },
+        { "attribute": "environment", "operator": "EQ", "value": "outdoor" },
+        { "attribute": "surface_type", "operator": "EQ", "value": "asphalt" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "heavy_soil" },
+        { "attribute": "power_source", "operator": "EQ", "value": "diesel" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher KM 130/300 R D", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SW5500 Ride-On Sweeper", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SR1900", "parameters": {} }
+      ]
+    },
+    "explanation_template": "Diesel rider sweepers provide powerful, independent operation for large outdoor asphalt areas without grid power."
+  },
+  {
+    "rule_id": "R047",
+    "rule_text": "IF eco_preference = true AND detergent_category = alkaline THEN prioritize eco-certified alkaline detergents",
+    "category": "environmental",
+    "priority": 75,
+    "salience": 10,
+    "certainty_factor": 0.90,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "eco_preference", "operator": "EQ", "value": true },
+        { "attribute": "detergent_category", "operator": "EQ", "value": "alkaline" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Deep Cleaner RM 69 eco!efficiency", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher PressurePro Natural Active Cleaner RM 82N", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Eco-certified detergent selected to minimise environmental impact." } }
+      ]
+    },
+    "explanation_template": "When eco-preference is enabled, we prioritise eco-certified detergents that are biodegradable and phosphate-free."
+  },
+  {
+    "rule_id": "R048",
+    "rule_text": "IF eco_preference = true AND detergent_category = neutral THEN prioritize eco-certified neutral detergents",
+    "category": "environmental",
+    "priority": 75,
+    "salience": 10,
+    "certainty_factor": 0.90,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "eco_preference", "operator": "EQ", "value": true },
+        { "attribute": "detergent_category", "operator": "EQ", "value": "neutral" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_detergent", "target": "Kärcher FloorPro Universal Cleaner RM 756", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Nilfisk Floor Clean Neutral Daily Cleaner", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Numatic NuScrub LFG Floor Scrubber Detergent", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Eco-certified neutral detergent selected." } }
+      ]
+    },
+    "explanation_template": "Eco-certified neutral detergents provide effective cleaning with minimal environmental impact."
+  },
+  {
+    "rule_id": "R049",
+    "rule_text": "IF power_stability = unstable AND machine_category = vacuum_cleaner AND power_source != battery THEN recommend battery-powered vacuum alternative",
+    "category": "safety",
+    "priority": 85,
+    "salience": 12,
+    "certainty_factor": 0.92,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "power_stability", "operator": "EQ", "value": "unstable" },
+        { "attribute": "machine_category", "operator": "EQ", "value": "vacuum_cleaner" },
+        { "attribute": "power_source", "operator": "NE", "value": "battery" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher BVL 5/1 Bp", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic NR200 Backpack Vacuum (Battery)", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "In unstable power areas, battery-powered vacuums ensure continuous operation." } }
+      ]
+    },
+    "explanation_template": "In areas with unstable power supply, battery-powered equipment provides reliable operation without grid dependency."
+  },
+  {
+    "rule_id": "R050",
+    "rule_text": "IF power_stability = unstable AND machine_category = pressure_washer AND power_source != petrol AND power_source != diesel THEN recommend petrol pressure washer for unstable power areas",
+    "category": "safety",
+    "priority": 85,
+    "salience": 12,
+    "certainty_factor": 0.92,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "power_stability", "operator": "EQ", "value": "unstable" },
+        { "attribute": "machine_category", "operator": "EQ", "value": "pressure_washer" },
+        { "attribute": "power_source", "operator": "NE", "value": "petrol" },
+        { "attribute": "power_source", "operator": "NE", "value": "diesel" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HD 6/15 G Classic", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk Poseidon 3-36 PE Electric", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher HD 9/23 G", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Petrol pressure washer recommended for areas with unstable power supply." } }
+      ]
+    },
+    "explanation_template": "For pressure washing in unstable power areas, petrol-powered equipment provides reliable operation without grid dependency."
+  },
+  {
+    "rule_id": "R051",
+    "rule_text": "IF surface_type = marble AND dirt_type = red_laterite_soil THEN add cleaning caution for marble surfaces",
+    "category": "safety",
+    "priority": 85,
+    "salience": 10,
+    "certainty_factor": 0.94,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "surface_type", "operator": "EQ", "value": "marble" },
+        { "attribute": "dirt_type", "operator": "EQ", "value": "red_laterite_soil" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "add_alert", "target": null, "parameters": { "message": "Marble is sensitive to abrasive red laterite soil. Use soft brushes and neutral pH detergent only. Avoid pressure washing marble directly." } }
+      ]
+    },
+    "explanation_template": "Red laterite soil is abrasive and can scratch marble surfaces. Special care is required to avoid damage."
+  },
+  {
+    "rule_id": "R052",
+    "rule_text": "IF environment = food_grade AND equipment_category != food_safe THEN require food-safe certified equipment",
+    "category": "safety",
+    "priority": 98,
+    "salience": 30,
+    "certainty_factor": 0.99,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "environment", "operator": "EQ", "value": "food_grade" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher HDS 6/15 C", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher SG 4/4 Professional", "parameters": {} },
+        { "type": "recommend_detergent", "target": "Kärcher FoodPro Active Cleaner Alkaline RM 735", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Food-grade environment requires HACCP-compliant equipment and food-safe detergents." } }
+      ]
+    },
+    "explanation_template": "Food-grade environments require certified food-safe equipment and detergents for hygiene compliance."
+  },
+  {
+    "rule_id": "R053",
+    "rule_text": "IF filtration = HEPA_H14 OR filtration = absolute AND environment != hazardous THEN recommend appropriate filtration for dust control",
+    "category": "safety",
+    "priority": 90,
+    "salience": 15,
+    "certainty_factor": 0.96,
+    "antecedent": {
+      "operator": "OR",
+      "conditions": [
+        { "attribute": "filtration", "operator": "EQ", "value": "HEPA_H14" },
+        { "attribute": "filtration", "operator": "EQ", "value": "absolute" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher IVC 60/30 Tact² Ec H", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk Attix 965-01", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Numatic NDD900 Industrial Vacuum", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "HEPA H14 or absolute filtration recommended for hazardous dust control. Ensure proper PPE." } }
+      ]
+    },
+    "explanation_template": "HEPA H14 or absolute filtration is required for hazardous dust applications to ensure worker safety."
+  },
+  {
+    "rule_id": "R054",
+    "rule_text": "IF noise_sensitive = true AND equipment_noise_level_db > 70 THEN exclude high-noise equipment",
+    "category": "equipment",
+    "priority": 80,
+    "salience": 8,
+    "certainty_factor": 0.90,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "noise_sensitive", "operator": "EQ", "value": true },
+        { "attribute": "equipment_noise_level_db", "operator": "GT", "value": 70 }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "exclude_equipment", "target": null, "parameters": { "reason": "Noise level exceeds 70dB in noise-sensitive environment" } },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Equipment with noise level >70dB excluded due to noise sensitivity requirement." } }
+      ]
+    },
+    "explanation_template": "In noise-sensitive environments (hospitals, hotels, offices), equipment exceeding 70dB is not recommended."
+  },
+  {
+    "rule_id": "R055",
+    "rule_text": "IF budget_ugx > 0 AND budget_ugx < 2000000 AND intensity = heavy THEN recommend value-segment equipment for limited budget",
+    "category": "cost",
+    "priority": 75,
+    "salience": 8,
+    "certainty_factor": 0.88,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "budget_ugx", "operator": "LT", "value": 2000000 },
+        { "attribute": "budget_ugx", "operator": "GT", "value": 0 },
+        { "attribute": "intensity", "operator": "EQ", "value": "heavy" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "add_alert", "target": null, "parameters": { "message": "Your budget is limited for heavy-duty equipment. Consider light/medium duty options or phased procurement." } }
+      ]
+    },
+    "explanation_template": "Limited budget may restrict heavy-duty equipment options. Consider adjusting intensity or increasing budget."
+  },
+  {
+    "rule_id": "R056",
+    "rule_text": "IF budget_ugx >= 10000000 AND intensity = light THEN recommend premium equipment for high-budget light-duty needs",
+    "category": "cost",
+    "priority": 70,
+    "salience": 5,
+    "certainty_factor": 0.85,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "budget_ugx", "operator": "GTE", "value": 10000000 },
+        { "attribute": "intensity", "operator": "EQ", "value": "light" }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Kärcher K 7 Comfort Premium", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher KIRA B 50", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Premium equipment recommended within your budget for light-duty requirements." } }
+      ]
+    },
+    "explanation_template": "With premium budget, high-end equipment with advanced features is recommended even for light-duty needs."
+  },
+  {
+    "rule_id": "R057",
+    "rule_text": "IF aisle_width < 1000 AND machine_subtype NOT IN (compact, micro, walk_behind) THEN recommend compact or micro equipment for narrow aisles",
+    "category": "equipment",
+    "priority": 88,
+    "salience": 12,
+    "certainty_factor": 0.95,
+    "antecedent": {
+      "operator": "AND",
+      "conditions": [
+        { "attribute": "aisle_width", "operator": "LT", "value": 1000 },
+        { "attribute": "aisle_width", "operator": "GT", "value": 0 },
+        { "attribute": "machine_subtype", "operator": "NOT_IN", "value": ["compact", "micro", "walk_behind"] }
+      ]
+    },
+    "consequent": {
+      "actions": [
+        { "type": "recommend_equipment", "target": "Numatic TTB3045NX Scrubber Dryer", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Nilfisk SC250", "parameters": {} },
+        { "type": "recommend_equipment", "target": "Kärcher BD 50/50 C Classic Bp", "parameters": {} },
+        { "type": "add_alert", "target": null, "parameters": { "message": "Narrow aisle width (<1000mm) requires compact or micro equipment for maneuverability." } }
+      ]
+    },
+    "explanation_template": "Narrow aisles require compact or micro equipment to maintain maneuverability and cleaning effectiveness."
+  }
+]
