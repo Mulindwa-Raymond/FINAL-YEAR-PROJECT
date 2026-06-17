@@ -9,6 +9,7 @@ const EquipmentSpecs = require('../models/EquipmentSpecs');
 const { success, error } = require('../utils/apiResponse');
 const { computeTCO } = require('../services/tcoCalculator');
 const AuditLog = require('../models/AuditLog');
+const { invalidateEquipmentCache } = require('../utils/cacheInvalidation');
 
 // Helper to get valid sub-types for a brand and category
 const getValidSubtypes = (brand, category) => {
@@ -225,6 +226,9 @@ const createEquipment = async (req, res, next) => {
       }).catch(err => console.warn('Audit log failed:', err));
     }
     
+    // Invalidate equipment-related caches
+    invalidateEquipmentCache();
+    
     return success(res, equipment, 'Equipment created', 201);
   } catch (err) {
     next(err);
@@ -290,6 +294,9 @@ const updateEquipment = async (req, res, next) => {
       }).catch(err => console.warn('Audit log failed:', err));
     }
     
+    // Invalidate equipment-related caches
+    invalidateEquipmentCache();
+    
     return success(res, equipment, 'Equipment updated');
   } catch (err) {
     next(err);
@@ -321,6 +328,9 @@ const deleteEquipment = async (req, res, next) => {
         ipAddress: req.ip
       }).catch(err => console.warn('Audit log failed:', err));
     }
+    
+    // Invalidate equipment-related caches
+    invalidateEquipmentCache();
     
     return success(res, null, 'Equipment deleted');
   } catch (err) {
