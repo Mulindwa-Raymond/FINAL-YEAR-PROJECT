@@ -1,168 +1,210 @@
 /**
- * cache.js
- * In-memory cache middleware with TTL support.
- * Can be replaced with Redis for production.
+ * Caching Middleware
+ * Provides intelligent caching for API endpoints with different strategies
  */
 
-const cache = new Map();
-const DEFAULT_TTL = 300; // 5 minutes
-const MAX_CACHE_SIZE = 1000; // Maximum items in cache
+const NodeCache = require('node-cache');
+const crypto = require('crypto');
 
-/**
- * Generate a cache key from request
- */
-const generateCacheKey = (req) => {
-  const key = `${req.method}:${req.originalUrl}`;
-  return key;
-};
+// Create cache instances with different TTLs
+const shortCache = new NodeCache({ stdTTL: 300, checkperiod: 120 }); // 5 minutes
+const mediumCache = new NodeCache({ stdTTL: 1800, checkperiod: 300 }); // 30 minutes
+const longCache = new NodeCache({ stdTTL: 3600, checkperiod: 600 }); // 1 hour
 
-/**
- * Clean expired cache entries
- */
-const cleanExpiredCache = () => {
-  const now = Date.now();
-  let removed = 0;
+// Cache key generators
+const generateCacheKey = (req, options = {}) => {
+  const { includeQuery = true, includeUser = false, prefix = '' } = options;
   
-  for (const [key, value] of cache) {
-    if (value.expires < now) {
-      cache.delete(key);
-      removed++;
-    }
+  let keyParts = [req.method, req.originalUrl || req.url];
+  
+  if (includeQuery && Object.keys(req.query).length > 0) {
+    const sortedQuery = Object.keys(req.query)
+      .sort()
+      .reduce((result, key) => {
+        result[key] = req.query[key];
+        return result;
+      }, {});
+    keyParts.push(JSON.stringify(sortedQuery));
   }
   
-  return removed;
-};
-
-/**
- * Ensure cache doesn't exceed max size
- */
-const enforceMaxCacheSize = () => {
-  if (cache.size > MAX_CACHE_SIZE) {
-    // Remove oldest entries (based on creation time)
-    const entries = Array.from(cache.entries());
-    entries.sort((a, b) => a[1].created - b[1].created);
-    
-    const toRemove = entries.slice(0, Math.floor(cache.size * 0.2));
-    for (const [key] of toRemove) {
-      cache.delete(key);
-    }
+  if (includeUser && req.user && req.user.id) {
+    keyParts.push(`user:${req.user.id}`);
   }
+  
+  if (prefix) {
+    keyParts.unshift(prefix);
+  }
+  
+  const keyString = keyParts.join(':');
+  return crypto.createHash('md5').update(keyString).digest('hex');
 };
 
-/**
- * Cache middleware
- * @param {number} ttl - Time to live in seconds (default: 300)
- */
-const cacheMiddleware = (ttl = DEFAULT_TTL) => {
+// Cache middleware factory
+const cacheMiddleware = (options = {}) => {
+  const {
+    ttl = 'short', // 'short', 'medium', 'long'
+    includeQuery = true,
+    includeUser = false,
+    keyPrefix = '',
+    condition = () => true // Function to determine if caching should be applied
+  } = options;
+  
+  const cache = ttl === 'short' ? shortCache : ttl === 'medium' ? mediumCache : longCache;
+  
   return (req, res, next) => {
-    // Only cache GET requests
+    // Skip caching if condition is not met
+    if (!condition(req, res)) {
+      return next();
+    }
+    
+    // Skip caching for non-GET requests
     if (req.method !== 'GET') {
       return next();
     }
-
-    // Skip cache for admin routes (they need fresh data)
-    if (req.originalUrl.includes('/admin') || req.originalUrl.includes('/auth')) {
-      return next();
+    
+    const cacheKey = generateCacheKey(req, { includeQuery, includeUser, prefix: keyPrefix });
+    
+    // Try to get from cache
+    const cachedResponse = cache.get(cacheKey);
+    if (cachedResponse) {
+      console.log(`🎯 Cache HIT for ${req.originalUrl} (${cacheKey})`);
+      res.set(cachedResponse.headers);
+      return res.status(cachedResponse.status).json(cachedResponse.data);
     }
-
-    // Skip cache for recommendation endpoints (dynamic)
-    if (req.originalUrl.includes('/recommend') || req.originalUrl.includes('/recommendations')) {
-      return next();
-    }
-
-    const key = generateCacheKey(req);
-    const cached = cache.get(key);
-
-    // Clean expired entries periodically
-    if (Math.random() < 0.01) { // 1% chance on each request
-      cleanExpiredCache();
-    }
-
-    if (cached && cached.expires > Date.now()) {
-      // Return cached response with cache headers
-      res.set('X-Cache', 'HIT');
-      res.set('Cache-Control', `max-age=${ttl}`);
-      return res.json(cached.data);
-    }
-
-    // Store original json method
+    
+    console.log(`❌ Cache MISS for ${req.originalUrl} (${cacheKey})`);
+    
+    // Override res.json to capture response
     const originalJson = res.json;
+    const originalStatus = res.status;
     
     res.json = function(data) {
-      // Cache the response
-      const cachedData = {
-        data: data,
-        expires: Date.now() + (ttl * 1000),
-        created: Date.now()
-      };
+      // Only cache successful responses
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        const responseToCache = {
+          status: res.statusCode,
+          headers: res.getHeaders(),
+          data: data
+        };
+        
+        cache.set(cacheKey, responseToCache);
+        console.log(`💾 Cached response for ${req.originalUrl} (${ttl} TTL)`);
+      }
       
-      cache.set(key, cachedData);
-      enforceMaxCacheSize();
-      
-      // Set cache headers
-      res.set('X-Cache', 'MISS');
-      res.set('Cache-Control', `max-age=${ttl}`);
-      
-      // Call original json
       return originalJson.call(this, data);
     };
-
+    
+    res.status = function(code) {
+      originalStatus.call(this, code);
+      return this;
+    };
+    
     next();
   };
 };
 
-/**
- * Clear cache by key pattern
- * @param {string} pattern - Optional pattern to match
- */
-const clearCache = (pattern = null) => {
-  if (!pattern) {
-    cache.clear();
-    console.log('🗑️ Cache cleared completely');
-    return;
-  }
+// Cache invalidation utilities
+const invalidateCache = (pattern, cacheInstance = null) => {
+  const caches = cacheInstance ? [cacheInstance] : [shortCache, mediumCache, longCache];
   
-  let count = 0;
-  for (const key of cache.keys()) {
-    if (key.includes(pattern)) {
-      cache.delete(key);
-      count++;
+  caches.forEach(cache => {
+    const keys = cache.keys();
+    const keysToDelete = keys.filter(key => {
+      if (typeof pattern === 'string') {
+        return key.includes(pattern);
+      } else if (pattern instanceof RegExp) {
+        return pattern.test(key);
+      }
+      return false;
+    });
+    
+    if (keysToDelete.length > 0) {
+      cache.del(keysToDelete);
+      console.log(`🗑️ Invalidated ${keysToDelete.length} cache entries matching pattern: ${pattern}`);
     }
-  }
-  
-  if (count > 0) {
-    console.log(`🗑️ Cleared ${count} cache entries matching pattern: ${pattern}`);
-  }
+  });
 };
 
-/**
- * Get cache stats
- */
-const getCacheStats = () => {
-  const now = Date.now();
-  let active = 0;
-  let expired = 0;
+const invalidateCacheByKey = (key, cacheInstance = null) => {
+  const caches = cacheInstance ? [cacheInstance] : [shortCache, mediumCache, longCache];
   
-  for (const [, value] of cache) {
-    if (value.expires > now) {
-      active++;
-    } else {
-      expired++;
+  caches.forEach(cache => {
+    if (cache.has(key)) {
+      cache.del(key);
+      console.log(`🗑️ Invalidated cache key: ${key}`);
     }
-  }
-  
+  });
+};
+
+// Clear all caches
+const clearAllCaches = () => {
+  shortCache.flushAll();
+  mediumCache.flushAll();
+  longCache.flushAll();
+  console.log('🧹 Cleared all caches');
+};
+
+// Cache statistics
+const getCacheStats = () => {
   return {
-    total: cache.size,
-    active,
-    expired,
-    maxSize: MAX_CACHE_SIZE
+    short: shortCache.getStats(),
+    medium: mediumCache.getStats(),
+    long: longCache.getStats()
   };
 };
 
-module.exports = { 
-  cacheMiddleware, 
-  clearCache, 
+// Predefined cache configurations for different endpoint types
+const cacheConfigs = {
+  // Static data that rarely changes
+  static: {
+    ttl: 'long',
+    includeQuery: false,
+    keyPrefix: 'static'
+  },
+  
+  // Lists that change occasionally
+  lists: {
+    ttl: 'medium',
+    includeQuery: true,
+    keyPrefix: 'list'
+  },
+  
+  // User-specific data
+  userSpecific: {
+    ttl: 'short',
+    includeQuery: true,
+    includeUser: true,
+    keyPrefix: 'user'
+  },
+  
+  // Recommendations (expensive computations)
+  recommendations: {
+    ttl: 'short',
+    includeQuery: true,
+    includeUser: true,
+    keyPrefix: 'recommend'
+  },
+  
+  // Search results
+  search: {
+    ttl: 'short',
+    includeQuery: true,
+    keyPrefix: 'search'
+  }
+};
+
+module.exports = {
+  cacheMiddleware,
+  invalidateCache,
+  invalidateCacheByKey,
+  clearAllCaches,
   getCacheStats,
-  cleanExpiredCache,
-  enforceMaxCacheSize
+  cacheConfigs,
+  generateCacheKey,
+  // Direct access to cache instances for advanced usage
+  caches: {
+    short: shortCache,
+    medium: mediumCache,
+    long: longCache
+  }
 };
