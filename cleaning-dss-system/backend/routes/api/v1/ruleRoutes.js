@@ -22,13 +22,14 @@ const {
   toggleRule
 } = require('../../../controllers/ruleController');
 const { auth, requireAdmin } = require('../../../middleware/auth');
+const { cacheMiddleware, cacheConfigs } = require('../../../middleware/cache');
 
 const router = express.Router();
 
-// Public read routes (authenticated users can view rules)
-router.get('/', auth, getAllRules);
-router.get('/category/:category', auth, getRulesByCategory);
-router.get('/:id', auth, getRuleById);
+// Public read routes (authenticated users can view rules - with caching)
+router.get('/', cacheMiddleware(cacheConfigs.lists), auth, getAllRules);
+router.get('/category/:category', cacheMiddleware(cacheConfigs.lists), auth, getRulesByCategory);
+router.get('/:id', cacheMiddleware(cacheConfigs.lists), auth, getRuleById);
 router.post('/match', auth, matchRules);
 
 // Admin write routes

@@ -31,17 +31,18 @@ const {
 } = require('../../../controllers/equipmentController');
 const { auth, requireAdmin } = require('../../../middleware/auth');
 const { uploadEquipmentImage: uploadImageMiddleware } = require('../../../middleware/multer');
+const { cacheMiddleware, cacheConfigs, invalidateCache } = require('../../../middleware/cache');
 
 const router = express.Router();
 
 // ============================================
-// PUBLIC READ ROUTES
+// PUBLIC READ ROUTES (with caching)
 // ============================================
-router.get('/', getAllEquipment);
-router.get('/categories', getMachineCategories);
-router.get('/subtypes', getValidSubtypesApi);  // NEW: Get valid sub-types for brand+category
-router.get('/category/:category', getEquipmentByCategory);
-router.get('/:id', getEquipmentById);
+router.get('/', cacheMiddleware(cacheConfigs.lists), getAllEquipment);
+router.get('/categories', cacheMiddleware(cacheConfigs.static), getMachineCategories);
+router.get('/subtypes', cacheMiddleware(cacheConfigs.lists), getValidSubtypesApi);  // NEW: Get valid sub-types for brand+category
+router.get('/category/:category', cacheMiddleware(cacheConfigs.lists), getEquipmentByCategory);
+router.get('/:id', cacheMiddleware(cacheConfigs.lists), getEquipmentById);
 
 // ============================================
 // ADMIN WRITE ROUTES

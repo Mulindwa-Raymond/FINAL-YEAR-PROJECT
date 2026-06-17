@@ -7,10 +7,11 @@
 const express = require('express');
 const { getDailyMetrics, getTrends } = require('../../../controllers/metricController');
 const { auth } = require('../../../middleware/auth');
+const { cacheMiddleware, cacheConfigs } = require('../../../middleware/cache');
 
 const router = express.Router();
 
-router.get('/daily', auth, getDailyMetrics);
-router.get('/trends', auth, getTrends);
+router.get('/daily', cacheMiddleware(cacheConfigs.recommendations), auth, getDailyMetrics);
+router.get('/trends', cacheMiddleware(cacheConfigs.recommendations), auth, getTrends);
 
 module.exports = router;
