@@ -460,7 +460,32 @@ export default function RecommendationResults() {
                     )}
                   </div>
 
-                  {/* Compatible detergent moved to bottom section */}
+                  {/* Compatible detergent pinned to this machine */}
+                  {machine.detergent && (
+                    <div className="mb-3 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Droplets size={12} className="text-cyan-600" />
+                        <p className="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Compatible Detergent</p>
+                      </div>
+                      <h4 className="text-sm font-bold text-slate-800">{machine.detergent.name || machine.detergent.product_name}</h4>
+                      <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                        pH {machine.detergent.ph || machine.detergent.ph_value}
+                        {machine.detergent.unit_size && ` · ${machine.detergent.unit_size}L`}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {machine.detergent.eco_certified && (
+                          <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                            <Leaf size={10} /> Eco
+                          </span>
+                        )}
+                        {machine.detergent.biodegradable && (
+                          <span className="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                            <CheckCircle2 size={10} /> Biodegradable
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {isExpanded && (
                     <div className="mt-4 p-4 bg-slate-50 rounded-xl space-y-3 border border-slate-200">
