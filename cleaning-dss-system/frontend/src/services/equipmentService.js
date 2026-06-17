@@ -5,12 +5,17 @@
  */
 
 import api from './api';
+import { createCacheKey, getCachedData, setCachedData, clearCacheByPrefix } from './cacheService';
 
-// Helper to get equipment ID (handles both _id and equipment_id)
+const cacheTTL = 300; // seconds
+
 const getEquipmentId = (id) => {
   if (!id) return null;
   return id;
 };
+
+const getEquipmentListCacheKey = (params) => createCacheKey('equipment_list', params);
+const getEquipmentDetailCacheKey = (id) => createCacheKey('equipment_detail', id);
 
 // ============================================
 // PUBLIC READ ROUTES
@@ -21,7 +26,17 @@ const getEquipmentId = (id) => {
  * @param {Object} params - { machine_category, power_source, brand_name, min_price, max_price, page, limit, search }
  * @returns {Promise}
  */
-export const getAllEquipment = (params = {}) => api.get('/equipment', { params });
+export const getAllEquipment = (params = {}) => {
+  const cacheKey = getEquipmentListCacheKey(params);
+  const cached = getCachedData(cacheKey);
+  if (cached) {
+    return Promise.resolve({ data: cached });
+  }
+  return api.get('/equipment', { params }).then((res) => {
+    setCachedData(cacheKey, res.data, cacheTTL);
+    return res;
+  });
+};
 
 /**
  * Get single equipment by ID
@@ -30,7 +45,15 @@ export const getAllEquipment = (params = {}) => api.get('/equipment', { params }
  */
 export const getEquipmentById = (id) => {
   if (!id) return Promise.reject(new Error('Equipment ID is required'));
-  return api.get(`/equipment/${id}`);
+  const cacheKey = getEquipmentDetailCacheKey(id);
+  const cached = getCachedData(cacheKey);
+  if (cached) {
+    return Promise.resolve({ data: cached });
+  }
+  return api.get(`/equipment/${id}`).then((res) => {
+    setCachedData(cacheKey, res.data, cacheTTL);
+    return res;
+  });
 };
 
 /**
@@ -63,7 +86,10 @@ export const createEquipment = (data) => {
   if (!data.machine_subtype) return Promise.reject(new Error('Machine sub-type is required'));
   if (!data.intensity) return Promise.reject(new Error('Intensity is required'));
   if (!data.domain) return Promise.reject(new Error('Domain is required'));
-  return api.post('/equipment', data);
+  return api.post('/equipment', data).then((res) => {
+    clearCacheByPrefix('equipment');
+    return res;
+  });
 };
 
 /**
@@ -74,7 +100,10 @@ export const createEquipment = (data) => {
  */
 export const updateEquipment = (id, data) => {
   if (!id) return Promise.reject(new Error('Equipment ID is required for update'));
-  return api.put(`/equipment/${id}`, data);
+  return api.put(`/equipment/${id}`, data).then((res) => {
+    clearCacheByPrefix('equipment');
+    return res;
+  });
 };
 
 /**
@@ -84,7 +113,10 @@ export const updateEquipment = (id, data) => {
  */
 export const deleteEquipment = (id) => {
   if (!id) return Promise.reject(new Error('Equipment ID is required for delete'));
-  return api.delete(`/equipment/${id}`);
+  return api.delete(`/equipment/${id}`).then((res) => {
+    clearCacheByPrefix('equipment');
+    return res;
+  });
 };
 
 // ============================================
@@ -104,6 +136,9 @@ export const uploadEquipmentImage = (id, file) => {
   fd.append('image', file);
   return api.post(`/equipment/${id}/image`, fd, {
     headers: { 'Content-Type': 'multipart/form-data' },
+  }).then((res) => {
+    clearCacheByPrefix('equipment');
+    return res;
   });
 };
 
@@ -116,7 +151,10 @@ export const uploadEquipmentImage = (id, file) => {
 export const updateEquipmentImageUrl = (id, imageUrl) => {
   if (!id) return Promise.reject(new Error('Equipment ID is required'));
   if (!imageUrl) return Promise.reject(new Error('Image URL is required'));
-  return api.put(`/equipment/${id}/image-url`, { image_url: imageUrl });
+  return api.put(`/equipment/${id}/image-url`, { image_url: imageUrl }).then((res) => {
+    clearCacheByPrefix('equipment');
+    return res;
+  });
 };
 
 /**
@@ -126,5 +164,8 @@ export const updateEquipmentImageUrl = (id, imageUrl) => {
  */
 export const deleteEquipmentImage = (id) => {
   if (!id) return Promise.reject(new Error('Equipment ID is required'));
-  return api.delete(`/equipment/${id}/image`);
+  return api.delete(`/equipment/${id}/image`).then((res) => {
+    clearCacheByPrefix('equipment');
+    return res;
+  });
 };

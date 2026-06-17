@@ -30,6 +30,7 @@ import {
   Save,
   Check
 } from 'lucide-react';
+import DatabaseImage from '../components/common/DatabaseImage';
 import { useAuth } from '../contexts/AuthContext';
 import { saveRecommendationToHistory } from '../services/recommendationHistoryService';
 
@@ -242,6 +243,8 @@ export default function RecommendationResults() {
     );
   }
 
+  const primaryDetergent = recommendations.find(m => m.detergent)?.detergent;
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-cyan-50/30">
       
@@ -382,20 +385,13 @@ export default function RecommendationResults() {
                 <div className={`h-1.5 bg-gradient-to-r ${getIntensityColor(machine.intensity)}`} />
         
                 <div className="h-48 relative bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-                  {machine.image_url ? (
-                    <img
-                      src={machine.image_url}
-                      alt={machine.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/400x300?text=Equipment';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Wrench className="w-16 h-16 text-slate-300" />
-                    </div>
-                  )}
+                  <DatabaseImage
+                    src={machine.image_url}
+                    alt={machine.name}
+                    type="equipment"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fallbackSrc="https://via.placeholder.com/400x300?text=Equipment"
+                  />
                   
                   <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full border shadow-sm ${getMatchScoreColor(matchScore)}`}>
                     <div className="flex items-center gap-1">
@@ -434,7 +430,7 @@ export default function RecommendationResults() {
                     </div>
                     <div className="text-center border-x border-slate-200">
                       <DollarSign size={14} className="mx-auto text-emerald-500 mb-1" />
-                      <p className="text-[9px] text-slate-400">TCO/Year</p>
+                      <p className="text-[9px] text-slate-400">Est. TCO/yr</p>
                       <p className="text-[10px] font-bold text-slate-700">
                         {formatCurrency(machine.estimated_tco_per_year_ugx || 0)}
                       </p>
@@ -464,32 +460,7 @@ export default function RecommendationResults() {
                     )}
                   </div>
 
-                  {/* Compatible detergent pinned to this machine */}
-                  {machine.detergent && (
-                    <div className="mb-3 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Droplets size={12} className="text-cyan-600" />
-                        <p className="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Compatible Detergent</p>
-                      </div>
-                      <h4 className="text-sm font-bold text-slate-800">{machine.detergent.name || machine.detergent.product_name}</h4>
-                      <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                        pH {machine.detergent.ph || machine.detergent.ph_value}
-                        {machine.detergent.unit_size && ` · ${machine.detergent.unit_size}L`}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {machine.detergent.eco_certified && (
-                          <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                            <Leaf size={10} /> Eco
-                          </span>
-                        )}
-                        {machine.detergent.biodegradable && (
-                          <span className="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                            <CheckCircle2 size={10} /> Biodegradable
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  {/* Compatible detergent moved to bottom section */}
 
                   {isExpanded && (
                     <div className="mt-4 p-4 bg-slate-50 rounded-xl space-y-3 border border-slate-200">
@@ -502,16 +473,19 @@ export default function RecommendationResults() {
                           <span className="font-bold text-slate-700">{formatCurrency(machine.current_price_ugx || 0)}</span>
                         </div>
                         <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg">
-                          <span className="text-slate-500">Maintenance/yr</span>
+                          <span className="text-slate-500">Est. Maint/yr</span>
                           <span className="font-bold text-amber-600">{formatCurrency(machine.estimated_maintenance_cost_per_year_ugx || 0)}</span>
                         </div>
-                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg">
-                          <span className="text-slate-500">Running/yr</span>
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg col-span-2">
+                          <span className="text-slate-500">Est. Run/yr</span>
                           <span className="font-bold text-cyan-600">{formatCurrency(machine.estimated_running_cost_per_year_ugx || 0)}</span>
                         </div>
-                        <div className="flex justify-between py-1.5 px-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                          <span className="text-slate-700 font-semibold">Total TCO/yr</span>
-                          <span className="font-bold text-emerald-600">{formatCurrency(machine.estimated_tco_per_year_ugx || 0)}</span>
+                        <div className="flex justify-between py-1.5 px-2 bg-emerald-50 rounded-lg border border-emerald-100 col-span-2">
+                          <div>
+                            <span className="text-slate-700 font-semibold block">Est. Total TCO/yr</span>
+                            <span className="text-[9px] text-slate-500">(Maint + Run)</span>
+                          </div>
+                          <span className="font-bold text-emerald-600 self-center">{formatCurrency(machine.estimated_tco_per_year_ugx || 0)}</span>
                         </div>
                       </div>
 
@@ -609,6 +583,46 @@ export default function RecommendationResults() {
           })}
         </div>
 
+        {/* Recommended Detergent Section (Standalone) */}
+        {primaryDetergent && (
+          <div className={`mt-8 transition-all duration-700 delay-300 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+              <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100">
+                <div className="flex items-center gap-2">
+                  <Droplets size={16} className="text-cyan-600" />
+                  <h2 className="text-lg font-bold text-slate-800">Recommended Detergent</h2>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex flex-col md:flex-row gap-6 items-center">
+                  <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center shrink-0">
+                    <Droplets size={32} className="text-cyan-700" />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <h3 className="text-xl font-bold text-slate-800 mb-1">{primaryDetergent.name || primaryDetergent.product_name}</h3>
+                    <p className="text-sm text-slate-500 font-mono mb-3">
+                      pH {primaryDetergent.ph || primaryDetergent.ph_value}
+                      {primaryDetergent.unit_size && ` · ${primaryDetergent.unit_size}L`}
+                    </p>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                      {primaryDetergent.eco_certified && (
+                        <span className="inline-flex items-center gap-1 text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium">
+                          <Leaf size={12} /> Eco Certified
+                        </span>
+                      )}
+                      {primaryDetergent.biodegradable && (
+                        <span className="inline-flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+                          <CheckCircle2 size={12} /> Biodegradable
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Compare Bar */}
         {compareList.length > 0 && (
           <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white rounded-full px-5 py-3 shadow-2xl flex items-center gap-5 z-50 animate-in slide-in-from-bottom-5 duration-300">
@@ -682,7 +696,7 @@ export default function RecommendationResults() {
                             </div>
                             <div className="flex justify-between py-2 border-b border-slate-100">
                               <span className="text-slate-500 flex items-center gap-1">
-                                <DollarSign size={12} /> TCO / Year
+                                <DollarSign size={12} /> Est. TCO / Year
                               </span>
                               <span className="font-bold text-emerald-600">
                                 {formatCurrency(machine.estimated_tco_per_year_ugx || machine.tco_5year_ugx)}

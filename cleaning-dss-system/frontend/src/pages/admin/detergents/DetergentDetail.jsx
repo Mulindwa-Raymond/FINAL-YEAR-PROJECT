@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { getDetergentById } from '../../../services/detergentService';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
+import DatabaseImage from '../../../components/common/DatabaseImage';
 import { formatCurrencyUGX } from '../../../utils/format';
 
 export const DetergentDetail = () => {
@@ -139,13 +140,13 @@ export const DetergentDetail = () => {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Image */}
             <div className="w-full md:w-40 h-40 bg-white rounded-lg overflow-hidden flex-shrink-0 border border-slate-200">
-              {detergent.image_url ? (
-                <img src={detergent.image_url} alt={detergent.product_name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-50 to-blue-50">
-                  <Droplet className="w-12 h-12 text-cyan-400" />
-                </div>
-              )}
+              <DatabaseImage
+                src={detergent.image_url}
+                alt={detergent.product_name}
+                type="detergent"
+                className="w-full h-full object-cover"
+                fallbackSrc="https://via.placeholder.com/160x160?text=No+Image"
+              />
             </div>
             
             {/* Basic Info */}

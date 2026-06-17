@@ -8,6 +8,7 @@ const apiRoutes = require('./routes/api');
 
 const app = express();
 
+
 // ==================== CORS Configuration ====================
 // Allow multiple origins for production and development
 const allowedOrigins = [
@@ -87,11 +88,13 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
-      api: '/api/v1/*'
+      api: '/api/v1/*',
+      imageProxy: '/api/image-proxy?url=<encoded_url>'
     }
   });
 });
 
+// ==================== Global Error Handler ====================
 // Error handler (must be last)
 app.use(errorHandler);
 

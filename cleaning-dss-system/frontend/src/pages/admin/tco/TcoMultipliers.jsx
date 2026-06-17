@@ -132,7 +132,7 @@ export const TcoMultipliers = () => {
           <div>
             <p className="font-medium">Equipment TCO is calculated per equipment:</p>
             <p className="text-xs mt-1">
-              <strong>Estimated TCO per year =</strong> Purchase Price + Maintenance Cost/Year + Running Cost/Year
+              <strong>Estimated TCO per year =</strong> Maintenance Cost/Year + Running Cost/Year
             </p>
             <p className="text-xs mt-1">
               These values are set individually in each Equipment record. The settings below are used as 
@@ -277,7 +277,7 @@ export const TcoMultipliers = () => {
                   • Maintenance Cost/Year: Set in Equipment form<br />
                   • Running Cost/Year: Set in Equipment form<br />
                   <br />
-                  <strong>Estimated TCO per year = Purchase Price + Maintenance Cost/Year + Running Cost/Year</strong>
+                  <strong>Estimated TCO per year = Maintenance Cost/Year + Running Cost/Year</strong>
                 </p>
                 <p className="text-xs text-slate-500 mt-2 italic">
                   Note: Running costs (electricity, water) are estimated based on equipment power rating and local electricity rates.

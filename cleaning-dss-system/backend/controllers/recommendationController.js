@@ -215,10 +215,20 @@ const runInferenceEngine = async (scenario) => {
       };
     });
 
-    // STEP 3: Sort by score (highest first)
-    const rankedEquipment = scoredEquipment
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);  // Top 10 results
+    // STEP 3: Sort by score (highest first) and group by brand (max 3 per brand)
+    const sortedEquipment = scoredEquipment.sort((a, b) => b.score - a.score);
+    const rankedEquipment = [];
+    const brandCounts = {};
+    
+    for (const item of sortedEquipment) {
+      const brand = item.equipment.brand_name || 'Unknown';
+      if (!brandCounts[brand]) brandCounts[brand] = 0;
+      if (brandCounts[brand] < 3) {
+        brandCounts[brand]++;
+        rankedEquipment.push(item);
+      }
+      if (rankedEquipment.length >= 15) break; // Return top 15 max
+    }
 
     console.log(`\n🎯 RANKING RESULTS:`);
     rankedEquipment.forEach((item, idx) => {
@@ -235,6 +245,14 @@ const runInferenceEngine = async (scenario) => {
         dirt_type: scenario.soils,
       });
 
+      const purchasePrice = item.equipment.current_price_ugx || 0;
+      // Default to 5% of purchase price if maintenance cost is not set or 0
+      const maintenanceCost = item.equipment.estimated_maintenance_cost_per_year_ugx || Math.round(purchasePrice * 0.05);
+      // Default running cost: assuming 2000 hrs/yr * power_kW * 800 UGX/kWh
+      const powerKw = item.equipment.power_req?.kW || 1;
+      const runningCost = item.equipment.estimated_running_cost_per_year_ugx || Math.round(powerKw * 2000 * 800);
+      const estimatedTCO = maintenanceCost + runningCost;
+
       return {
       _id: item.equipment._id,
       id: item.equipment._id,
@@ -246,14 +264,10 @@ const runInferenceEngine = async (scenario) => {
       intensity: item.equipment.intensity,
       domain: item.equipment.domain,
       match_score: item.score,
-      current_price_ugx: item.equipment.current_price_ugx || 0,
-      estimated_maintenance_cost_per_year_ugx: item.equipment.estimated_maintenance_cost_per_year_ugx || 0,
-      estimated_running_cost_per_year_ugx: item.equipment.estimated_running_cost_per_year_ugx || 0,
-      estimated_tco_per_year_ugx: Math.round(
-        (item.equipment.current_price_ugx || 0) + 
-        (item.equipment.estimated_maintenance_cost_per_year_ugx || 0) + 
-        (item.equipment.estimated_running_cost_per_year_ugx || 0)
-      ),
+      current_price_ugx: purchasePrice,
+      estimated_maintenance_cost_per_year_ugx: maintenanceCost,
+      estimated_running_cost_per_year_ugx: runningCost,
+      estimated_tco_per_year_ugx: estimatedTCO,
       power_source: item.equipment.power_source,
       weight_kg: item.equipment.weight_kg,
       surface_compatibility: item.equipment.surface_compatibility,
@@ -554,16 +568,20 @@ const getRecommendationHistory = async (req, res) => {
           match: rec.final_score || 85,
           score: rec.final_score || 85,
           // Calculate TCO from equipment data or use recommendation value
-          estimated_tco_per_year_ugx: rec.estimated_tco_per_year_ugx || Math.round(
-            (equipment.current_price_ugx || 0) + 
-            (equipment.estimated_maintenance_cost_per_year_ugx || 0) + 
-            (equipment.estimated_running_cost_per_year_ugx || 0)
-          ),
-          tco: rec.estimated_tco_per_year_ugx || Math.round(
-            (equipment.current_price_ugx || 0) + 
-            (equipment.estimated_maintenance_cost_per_year_ugx || 0) + 
-            (equipment.estimated_running_cost_per_year_ugx || 0)
-          ),
+          estimated_tco_per_year_ugx: rec.estimated_tco_per_year_ugx || (function() {
+            const p = equipment.current_price_ugx || 0;
+            const m = equipment.estimated_maintenance_cost_per_year_ugx || Math.round(p * 0.05);
+            const kw = equipment.power_req?.kW || 1;
+            const r = equipment.estimated_running_cost_per_year_ugx || Math.round(kw * 2000 * 800);
+            return Math.round(m + r);
+          })(),
+          tco: rec.estimated_tco_per_year_ugx || (function() {
+            const p = equipment.current_price_ugx || 0;
+            const m = equipment.estimated_maintenance_cost_per_year_ugx || Math.round(p * 0.05);
+            const kw = equipment.power_req?.kW || 1;
+            const r = equipment.estimated_running_cost_per_year_ugx || Math.round(kw * 2000 * 800);
+            return Math.round(m + r);
+          })(),
           power_source: equipment.power_source || rec.power_source,
           intensity: equipment.intensity || 'medium',
           image_url: equipment.image_url,

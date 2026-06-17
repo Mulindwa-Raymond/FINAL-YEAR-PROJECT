@@ -29,6 +29,7 @@ import {
   Eye
 } from 'lucide-react';
 import { getAllDetergents, deleteDetergent } from '../../../services/detergentService';
+import DatabaseImage from '../../../components/common/DatabaseImage';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import { formatCurrencyUGX } from '../../../utils/format';
@@ -253,13 +254,13 @@ export const DetergentList = () => {
                   return (
                     <tr key={detergentId} className="hover:bg-slate-50 transition-colors group">
                       <td className="px-6 py-4">
-                        {det.image_url ? (
-                          <img src={det.image_url} alt={det.product_name} className="w-10 h-10 object-cover rounded-md" />
-                        ) : (
-                          <div className="w-10 h-10 bg-slate-100 rounded-md flex items-center justify-center">
-                            <Droplet className="w-5 h-5 text-slate-400" />
-                          </div>
-                        )}
+                        <DatabaseImage
+                          src={det.image_url}
+                          alt={det.product_name}
+                          type="detergent"
+                          className="w-10 h-10 object-cover rounded-md"
+                          fallbackSrc="https://via.placeholder.com/40x40?text=No+Image"
+                        />
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-medium text-slate-800">{det.product_name}</div>

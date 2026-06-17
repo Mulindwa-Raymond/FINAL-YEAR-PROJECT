@@ -16,9 +16,30 @@ const authRoutes = require('./v1/authRoutes');
 const adminRoutes = require('./v1/adminRoutes');
 const metricRoutes = require('./v1/metricRoutes');
 const trainingRoutes = require('./v1/trainingRoutes'); 
+const publicTrainingRoutes = require('./v1/publicTrainingRoutes');
+
+// Import image proxy controller
+const { proxyImage, getCacheStats, clearCache } = require('../../controllers/imageProxyController');
+const { auth, requireAdmin } = require('../../middleware/auth');
 
 const router = express.Router();
 const v1Router = express.Router();
+
+// ============================================
+// IMAGE PROXY ROUTES (Root level)
+// ============================================
+// These are at the root of /api so they don't conflict with v1 routes
+
+// Public image proxy - no authentication required
+router.get('/image-proxy', proxyImage);
+
+// Admin-only cache management routes
+router.get('/image-proxy/stats', auth, requireAdmin, getCacheStats);
+router.post('/image-proxy/clear-cache', auth, requireAdmin, clearCache);
+
+// ============================================
+// V1 API ROUTES
+// ============================================
 
 // Core recommendation
 v1Router.use('/recommend', inferenceRouter);
@@ -50,9 +71,9 @@ v1Router.use('/auth', authRoutes);
 v1Router.use('/admin', adminRoutes);
 v1Router.use('/admin/trainings', trainingRoutes); 
 
-const publicTrainingRoutes = require('./v1/publicTrainingRoutes');
-// ...
+// Public training routes
 v1Router.use('/training/public', publicTrainingRoutes);
+
 // Public metrics
 v1Router.use('/metrics', metricRoutes);
 

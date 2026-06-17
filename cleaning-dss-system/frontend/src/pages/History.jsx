@@ -487,7 +487,7 @@ export default function HistoryPage() {
                               <TrendingUp size={10} className="text-emerald-500" />
                               <p className="text-sm font-bold text-emerald-600">{machine.match || machine.score || 85}% match</p>
                             </div>
-                            <p className="text-[10px] text-slate-500 font-mono mt-0.5">{formatCurrency(machine.tco || machine.estimated_tco_per_year_ugx)}/year</p>
+                            <p className="text-[10px] text-slate-500 font-mono mt-0.5">Est. TCO {formatCurrency(machine.tco || machine.estimated_tco_per_year_ugx)}/yr</p>
                           </div>
                         </div>
                       ))}

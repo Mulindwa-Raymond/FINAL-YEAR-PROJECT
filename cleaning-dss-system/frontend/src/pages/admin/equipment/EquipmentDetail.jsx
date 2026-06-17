@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { getEquipmentById } from '../../../services/equipmentService';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
+import DatabaseImage from '../../../components/common/DatabaseImage';
 import { formatCurrencyUGX } from '../../../utils/format';
 import { 
   intensityLabels, 
@@ -136,11 +137,13 @@ export const EquipmentDetail = () => {
         <div className="p-6 border-b border-slate-200 bg-slate-50/50">
           <div className="flex flex-col md:flex-row gap-6">
             <div className="w-full md:w-48 h-48 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-              {equipment.image_url ? (
-                <img src={equipment.image_url} alt={equipment.model_name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center"><Package className="w-12 h-12 text-slate-400" /></div>
-              )}
+              <DatabaseImage
+                src={equipment.image_url}
+                alt={equipment.model_name}
+                type="equipment"
+                className="w-full h-full object-cover"
+                fallbackSrc="https://via.placeholder.com/192x192?text=No+Image"
+              />
             </div>
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-slate-800">{equipment.brand_name} {equipment.model_name}</h1>
@@ -229,7 +232,13 @@ export const EquipmentDetail = () => {
               <div className="bg-slate-50 rounded-lg p-3"><span className="text-xs text-slate-500 uppercase">Maintenance / Year</span><p className="font-semibold">{formatCurrencyUGX(equipment.estimated_maintenance_cost_per_year_ugx)}</p></div>
               <div className="bg-slate-50 rounded-lg p-3"><span className="text-xs text-slate-500 uppercase">Running Cost / Year</span><p className="font-semibold">{formatCurrencyUGX(equipment.estimated_running_cost_per_year_ugx)}</p></div>
             </div>
-            <div className="mt-3 p-3 bg-cyan-50 rounded-lg"><span className="text-xs text-slate-500 uppercase">Estimated TCO per Year</span><p className="text-xl font-bold text-cyan-700">{formatCurrencyUGX(equipment.estimated_tco_per_year_ugx)}</p></div>
+            <div className="mt-3 p-3 bg-cyan-50 rounded-lg flex justify-between items-center">
+              <div>
+                <span className="text-xs text-slate-500 uppercase block">Estimated TCO per Year</span>
+                <span className="text-[10px] text-slate-400 font-mono">(Maintenance + Running)</span>
+              </div>
+              <p className="text-xl font-bold text-cyan-700">{formatCurrencyUGX(equipment.estimated_tco_per_year_ugx)}</p>
+            </div>
           </div>
 
           {/* Compatibility */}

@@ -273,10 +273,9 @@ const equipmentSchema = new mongoose.Schema({
  * Calculated as: Purchase Price + Maintenance + Running Costs
  */
 equipmentSchema.virtual('estimated_tco_per_year_ugx').get(function() {
-  const price = this.current_price_ugx || 0;
   const maintenance = this.estimated_maintenance_cost_per_year_ugx || 0;
   const running = this.estimated_running_cost_per_year_ugx || 0;
-  return Math.round(price + maintenance + running);
+  return Math.round(maintenance + running);
 });
 
 /**

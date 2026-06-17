@@ -30,7 +30,7 @@ const computeTCO = async (equipment, powerStability = 'stable', usageHoursPerYea
   // 5. Optional: power instability increases maintenance
   const instabilityFactor = (powerStability === 'unstable' && equipment.motor_type === 'brushed DC') ? 1.2 : 1.0;
 
-  const total = equipment.price_ugx + duty + powerCost + maintenance * instabilityFactor;
+  const total = powerCost + maintenance * instabilityFactor;
   return Math.round(total);
 };
 

@@ -722,7 +722,6 @@ export const EquipmentForm = () => {
                 </p>
                 <p className="text-lg font-semibold text-blue-900 mt-1">
                   UGX {(
-                    (parseInt(formData.current_price_ugx) || 0) / 5 +
                     (parseInt(formData.estimated_maintenance_cost_per_year_ugx) || 0) +
                     (parseInt(formData.estimated_running_cost_per_year_ugx) || 0)
                   ).toLocaleString()}

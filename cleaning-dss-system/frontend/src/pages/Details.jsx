@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import DatabaseImage from '../components/common/DatabaseImage';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -136,20 +137,13 @@ export default function Details() {
         {/* Header Section */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden mb-8">
           <div className="relative h-64 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
-            {machine.image_url ? (
-              <img
-                src={machine.image_url}
-                alt={machine.name}
-                className="w-full h-full object-cover opacity-70"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/800x400?text=Equipment+Image';
-                }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Wrench className="w-24 h-24 text-slate-600" />
-              </div>
-            )}
+            <DatabaseImage
+              src={machine.image_url}
+              alt={machine.name}
+              type="equipment"
+              className="w-full h-full object-cover opacity-70"
+              fallbackSrc="https://via.placeholder.com/800x400?text=Equipment+Image"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
             
             {/* Match Score Overlay */}
@@ -225,8 +219,8 @@ export default function Details() {
                 <div className="space-y-4">
                   {[
                     { label: 'Purchase Price', value: formatCurrency(machine.current_price_ugx || machine.purchase_price || 0), color: 'text-slate-700' },
-                    { label: 'Annual Maintenance', value: formatCurrency(machine.estimated_maintenance_cost_per_year_ugx || 0), color: 'text-amber-600' },
-                    { label: 'Annual Running Cost', value: formatCurrency(machine.estimated_running_cost_per_year_ugx || 0), color: 'text-cyan-600' },
+                    { label: 'Estimated Annual Maintenance', value: formatCurrency(machine.estimated_maintenance_cost_per_year_ugx || 0), color: 'text-amber-600' },
+                    { label: 'Estimated Annual Running Cost', value: formatCurrency(machine.estimated_running_cost_per_year_ugx || 0), color: 'text-cyan-600' },
                   ].map((item, idx) => (
                     <div key={idx} className="flex justify-between items-center py-3 border-b border-slate-100">
                       <span className="text-sm text-slate-500">{item.label}</span>
@@ -234,7 +228,10 @@ export default function Details() {
                     </div>
                   ))}
                   <div className="flex justify-between items-center pt-3">
-                    <span className="text-base font-bold text-slate-800">Projected Annual TCO</span>
+                    <div>
+                      <span className="text-base font-bold text-slate-800 block">Estimated Annual TCO</span>
+                      <span className="text-[10px] text-slate-500 font-mono">(Maintenance + Running)</span>
+                    </div>
                     <span className="text-xl font-bold text-emerald-600">{formatCurrency(tcoScore)}</span>
                   </div>
                   <p className="text-[10px] text-slate-400 mt-2 flex items-center gap-1">
