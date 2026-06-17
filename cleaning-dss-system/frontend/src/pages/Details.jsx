@@ -285,13 +285,27 @@ export default function Details() {
                 </div>
                 <div className="p-5">
                   <div className="flex gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
-                      <Droplets size={24} className="text-cyan-700" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-slate-800">{machine.detergent.name}</h3>
+                    {machine.detergent.image_url ? (
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-white border border-cyan-100 flex-shrink-0">
+                        <img
+                          src={machine.detergent.image_url}
+                          alt={machine.detergent.name || 'Detergent'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-100 to-blue-100"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-700"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center flex-shrink-0">
+                        <Droplets size={24} className="text-cyan-700" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-slate-800 truncate">{machine.detergent.name || machine.detergent.product_name}</h3>
                       <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                        pH {machine.detergent.ph} · {formatCurrency(machine.detergent.current_price_ugx)}/{machine.detergent.unit_size}L
+                        pH {machine.detergent.ph || machine.detergent.ph_value} · {formatCurrency(machine.detergent.current_price_ugx)}/{machine.detergent.unit_size}L
                       </p>
                       <div className="flex flex-wrap gap-2 mt-3">
                         {machine.detergent.eco_certified && (
