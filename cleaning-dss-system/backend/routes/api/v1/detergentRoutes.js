@@ -29,16 +29,17 @@ const {
 } = require('../../../controllers/detergentController');
 const { auth, requireAdmin } = require('../../../middleware/auth');
 const { uploadDetergentImage: uploadImageMiddleware } = require('../../../middleware/multer');
+const { cacheMiddleware, cacheConfigs } = require('../../../middleware/cache');
 
 const router = express.Router();
 
 // ============================================
-// PUBLIC READ ROUTES
+// PUBLIC READ ROUTES (with caching)
 // ============================================
-router.get('/', getAllDetergents);
-router.get('/ph-range', getDetergentsByPhRange);
-router.get('/category/:category', getDetergentsByCategory);
-router.get('/:id', getDetergentById);
+router.get('/', cacheMiddleware(cacheConfigs.lists), getAllDetergents);
+router.get('/ph-range', cacheMiddleware(cacheConfigs.lists), getDetergentsByPhRange);
+router.get('/category/:category', cacheMiddleware(cacheConfigs.lists), getDetergentsByCategory);
+router.get('/:id', cacheMiddleware(cacheConfigs.lists), getDetergentById);
 
 // ============================================
 // ADMIN WRITE ROUTES

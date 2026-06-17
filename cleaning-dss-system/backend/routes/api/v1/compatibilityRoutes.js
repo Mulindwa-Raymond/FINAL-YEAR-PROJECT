@@ -20,14 +20,15 @@ const {
   deleteCompatibility
 } = require('../../../controllers/compatibilityController');
 const { auth, requireAdmin } = require('../../../middleware/auth');
+const { cacheMiddleware, cacheConfigs } = require('../../../middleware/cache');
 
 const router = express.Router();
 
-// Public read routes
-router.get('/', getAllCompatibilities);
-router.get('/equipment/:equipmentId/detergents', getCompatibleDetergents);
-router.get('/detergent/:detergentId/equipment', getCompatibleEquipment);
-router.get('/check', checkCompatibility);
+// Public read routes (with caching)
+router.get('/', cacheMiddleware(cacheConfigs.lists), getAllCompatibilities);
+router.get('/equipment/:equipmentId/detergents', cacheMiddleware(cacheConfigs.lists), getCompatibleDetergents);
+router.get('/detergent/:detergentId/equipment', cacheMiddleware(cacheConfigs.lists), getCompatibleEquipment);
+router.get('/check', cacheMiddleware(cacheConfigs.lists), checkCompatibility);
 
 // Admin write routes
 router.post('/', auth, requireAdmin, createCompatibility);

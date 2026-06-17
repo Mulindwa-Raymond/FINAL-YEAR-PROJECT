@@ -13,6 +13,7 @@ const {
   deleteRecommendation
 } = require('../../../controllers/recommendationController');
 const { auth } = require('../../../middleware/auth');
+const { cacheMiddleware, cacheConfigs } = require('../../../middleware/cache');
 
 // Create routers
 const inferenceRouter = express.Router();
@@ -27,10 +28,10 @@ inferenceRouter.post('/', auth, getRecommendations);
 historyRouter.post('/', auth, saveRecommendation);
 
 // GET /api/v1/recommendations/history - Get user's recommendation history with pagination
-historyRouter.get('/history', auth, getRecommendationHistory);
+historyRouter.get('/history', cacheMiddleware(cacheConfigs.userSpecific), auth, getRecommendationHistory);
 
 // GET /api/v1/recommendations/:id - Get a single recommendation by ID
-historyRouter.get('/:id', auth, getRecommendationById);
+historyRouter.get('/:id', cacheMiddleware(cacheConfigs.userSpecific), auth, getRecommendationById);
 
 // PATCH /api/v1/recommendations/:id/save - Toggle save status
 historyRouter.patch('/:id/save', auth, toggleSaveRecommendation);

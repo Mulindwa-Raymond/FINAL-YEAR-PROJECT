@@ -1,11 +1,12 @@
 const express = require('express');
 const Training = require('../../../models/Training');
 const { success, error } = require('../../../utils/apiResponse');
+const { cacheMiddleware, cacheConfigs } = require('../../../middleware/cache');
 
 const router = express.Router();
 
-// GET /api/v1/training/public - list active trainings
-router.get('/', async (req, res, next) => {
+// GET /api/v1/training/public - list active trainings (with caching)
+router.get('/', cacheMiddleware(cacheConfigs.lists), async (req, res, next) => {
   try {
     const { search, type, page = 1, limit = 20 } = req.query;
     const filter = { active: true };

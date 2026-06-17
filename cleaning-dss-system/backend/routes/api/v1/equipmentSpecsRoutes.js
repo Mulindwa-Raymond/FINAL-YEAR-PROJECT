@@ -18,13 +18,14 @@ const {
   deleteSpec
 } = require('../../../controllers/equipmentSpecsController');
 const { auth, requireAdmin } = require('../../../middleware/auth');
+const { cacheMiddleware, cacheConfigs } = require('../../../middleware/cache');
 
 const router = express.Router();
 
-// Public read routes
-router.get('/equipment/:equipmentId', getSpecsByEquipment);
-router.get('/category/:category', getSpecsByCategory);
-router.get('/attributes', getCommonAttributes);
+// Public read routes (with caching)
+router.get('/equipment/:equipmentId', cacheMiddleware(cacheConfigs.lists), getSpecsByEquipment);
+router.get('/category/:category', cacheMiddleware(cacheConfigs.lists), getSpecsByCategory);
+router.get('/attributes', cacheMiddleware(cacheConfigs.static), getCommonAttributes);
 
 // Admin write routes
 router.post('/', auth, requireAdmin, createSpec);
