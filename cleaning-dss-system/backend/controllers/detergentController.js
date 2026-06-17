@@ -6,6 +6,7 @@
 const { Detergent } = require('../models/Detergent');
 const { success, error } = require('../utils/apiResponse');
 const AuditLog = require('../models/AuditLog');
+const { invalidateDetergentCache } = require('../utils/cacheInvalidation');
 
 // ============================================
 // PUBLIC READ ROUTES
