@@ -471,22 +471,43 @@ export default function RecommendationResults() {
                         <Droplets size={12} className="text-cyan-600" />
                         <p className="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Compatible Detergent</p>
                       </div>
-                      <h4 className="text-sm font-bold text-slate-800">{machine.detergent.name || machine.detergent.product_name}</h4>
-                      <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                        pH {machine.detergent.ph || machine.detergent.ph_value}
-                        {machine.detergent.unit_size && ` · ${machine.detergent.unit_size}L`}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {machine.detergent.eco_certified && (
-                          <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                            <Leaf size={10} /> Eco
-                          </span>
+                      <div className="flex gap-3">
+                        {machine.detergent.image_url ? (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0">
+                            <img
+                              src={machine.detergent.image_url}
+                              alt={machine.detergent.name || 'Detergent'}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-cyan-100"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-600"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>';
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-cyan-100 flex items-center justify-center flex-shrink-0">
+                            <Droplets size={20} className="text-cyan-600" />
+                          </div>
                         )}
-                        {machine.detergent.biodegradable && (
-                          <span className="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                            <CheckCircle2 size={10} /> Biodegradable
-                          </span>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-slate-800 truncate">{machine.detergent.name || machine.detergent.product_name}</h4>
+                          <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                            pH {machine.detergent.ph || machine.detergent.ph_value}
+                            {machine.detergent.unit_size && ` · ${machine.detergent.unit_size}L`}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {machine.detergent.eco_certified && (
+                              <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                                <Leaf size={10} /> Eco
+                              </span>
+                            )}
+                            {machine.detergent.biodegradable && (
+                              <span className="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                <CheckCircle2 size={10} /> Biodegradable
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
