@@ -1,10 +1,6 @@
-/**
- * Recommendation Controller
- * Handles both KB-DSS inference engine and recommendation history management
- */
-
+// backend/controllers/recommendationController.js
 const Recommendation = require('../models/Recommendation');
-const { Equipment } = require('../models/Equipment'); // Import Equipment model (destructured)
+const { Equipment } = require('../models/Equipment');
 const mongoose = require('mongoose');
 const { normalizeScenario } = require('../services/scenarioNormalizer');
 const { findBestDetergent } = require('../services/detergentMatcher');
@@ -20,17 +16,19 @@ const runInferenceEngine = async (scenario) => {
     if (scenario.machine_category) {
       baseQuery.machine_category = scenario.machine_category;
     }
-    // Strict use-type filter: domestic users only see domestic machines, etc.
     if (scenario.domain) {
       baseQuery.domain = scenario.domain;
     }
     if (scenario.intensity) {
       baseQuery.intensity = scenario.intensity;
     }
-    
+
     const allEquipment = await Equipment.find(baseQuery);
-    console.log(`✓ Found ${allEquipment.length} equipment matching category "${scenario.machine_category}"${scenario.domain ? `, domain "${scenario.domain}"` : ''}${scenario.intensity ? `, intensity "${scenario.intensity}"` : ''}`);
-    
+    console.log(
+      `✓ Found ${allEquipment.length} equipment matching category "${scenario.machine_category}"${scenario.domain ? `, domain "${scenario.domain}"` : ''
+      }${scenario.intensity ? `, intensity "${scenario.intensity}"` : ''}`
+    );
+
     if (allEquipment.length === 0) {
       console.log('❌ No equipment matching filters');
       console.groupEnd();
@@ -41,13 +39,13 @@ const runInferenceEngine = async (scenario) => {
         recommendations: [],
         recommendation_id: new mongoose.Types.ObjectId().toString(),
         alerts: [useTypeMsg],
-        summary_explanation: useTypeMsg
+        summary_explanation: useTypeMsg,
       };
     }
 
     // STEP 2: Score each equipment piece
-    const scoredEquipment = allEquipment.map(equipment => {
-      let score = 100;  // Start with perfect score
+    const scoredEquipment = allEquipment.map((equipment) => {
+      let score = 100;
       const matchDetails = [];
 
       // ===== POWER SOURCE MATCHING (25 points) =====
@@ -62,7 +60,7 @@ const runInferenceEngine = async (scenario) => {
 
       // ===== SURFACE COMPATIBILITY (20 points) =====
       if (scenario.surfaces?.length && equipment.surface_compatibility?.length > 0) {
-        const matchedSurfaces = scenario.surfaces.filter(surface =>
+        const matchedSurfaces = scenario.surfaces.filter((surface) =>
           equipment.surface_compatibility.includes(surface)
         );
         if (matchedSurfaces.length > 0) {
@@ -75,7 +73,7 @@ const runInferenceEngine = async (scenario) => {
 
       // ===== DIRT/SOIL COMPATIBILITY (20 points) =====
       if (scenario.soils?.length && equipment.dirt_compatibility?.length > 0) {
-        const matchedSoils = scenario.soils.filter(soil =>
+        const matchedSoils = scenario.soils.filter((soil) =>
           equipment.dirt_compatibility.includes(soil)
         );
         if (matchedSoils.length > 0) {
@@ -96,7 +94,7 @@ const runInferenceEngine = async (scenario) => {
         }
       }
 
-      // Domain/intensity already hard-filtered in base query — confirm match in trace
+      // Domain/intensity already hard-filtered in base query — confirm in trace
       if (scenario.intensity && equipment.intensity === scenario.intensity) {
         matchDetails.push('✓ Intensity level matches');
       }
@@ -109,15 +107,14 @@ const runInferenceEngine = async (scenario) => {
         if (scenario.min_aisle_width_mm >= equipment.min_aisle_width_mm) {
           matchDetails.push('✓ Fits aisle width');
         } else {
-          score -= 10;  // Significant penalty - can't fit!
+          score -= 10;
           matchDetails.push(`✗ Too wide for aisle (${equipment.min_aisle_width_mm}mm required)`);
         }
       }
 
       // ===== ECO PREFERENCE (5 points) =====
       if (scenario.eco_preference) {
-        const isEcoFriendly = equipment.power_source === 'battery' || 
-                             equipment.power_source === 'corded_electric';
+        const isEcoFriendly = equipment.power_source === 'battery' || equipment.power_source === 'corded_electric';
         if (isEcoFriendly) {
           score += 5;
           matchDetails.push('✓ Eco-friendly power source');
@@ -132,14 +129,14 @@ const runInferenceEngine = async (scenario) => {
         const weightLimits = {
           lightweight: 30,
           moderate: 60,
-          no_constraint: 999
+          no_constraint: 999,
         };
         const maxWeight = weightLimits[scenario.weight_tolerance];
-        
+
         if (equipment.weight_kg <= maxWeight) {
           matchDetails.push(`✓ Weight acceptable (${equipment.weight_kg}kg ≤ ${maxWeight}kg)`);
         } else {
-          score -= 25;  // Major penalty - physically can't use it!
+          score -= 25;
           matchDetails.push(`❌ TOO HEAVY: ${equipment.weight_kg}kg > ${maxWeight}kg limit`);
         }
       }
@@ -149,7 +146,7 @@ const runInferenceEngine = async (scenario) => {
         if (equipment.power_req.kW <= scenario.power_available_kw) {
           matchDetails.push(`✓ Power available (${equipment.power_req.kW}kW ≤ ${scenario.power_available_kw}kW)`);
         } else {
-          score -= 40;  // CRITICAL penalty - can't even plug it in!
+          score -= 40;
           matchDetails.push(`❌ POWER PROBLEM: Equipment needs ${equipment.power_req.kW}kW, only ${scenario.power_available_kw}kW available`);
         }
       }
@@ -157,12 +154,12 @@ const runInferenceEngine = async (scenario) => {
       // ===== SPARE PARTS / DOWNTIME CRITICALITY (10 points) =====
       if (scenario.downtime_criticality && equipment.spare_part_lead_time_days) {
         const criticalityThresholds = {
-          high: 3,    // Need parts within 3 days
-          medium: 14, // Can wait 1-2 weeks
-          low: 28     // Can wait 2-4 weeks
+          high: 3,
+          medium: 14,
+          low: 28,
         };
         const maxLeadTime = criticalityThresholds[scenario.downtime_criticality];
-        
+
         if (equipment.spare_part_lead_time_days <= maxLeadTime) {
           matchDetails.push(`✓ Parts available within ${equipment.spare_part_lead_time_days} days`);
         } else {
@@ -174,12 +171,12 @@ const runInferenceEngine = async (scenario) => {
       // ===== CLEANING FREQUENCY & EFFICIENCY (8 points) =====
       if (scenario.cleaning_frequency && equipment.working_width) {
         const efficiencyMap = {
-          light: 50,      // Light cleaning: can be slow, narrow is OK
-          moderate: 75,   // Moderate: need decent efficiency
-          daily: 100      // Daily: need wide coverage for speed
+          light: 50,
+          moderate: 75,
+          daily: 100,
         };
         const targetWidth = efficiencyMap[scenario.cleaning_frequency];
-        
+
         if (equipment.working_width >= targetWidth) {
           matchDetails.push(`✓ Efficient for ${scenario.cleaning_frequency} cleaning (${equipment.working_width}cm width)`);
         } else {
@@ -193,10 +190,10 @@ const runInferenceEngine = async (scenario) => {
         const widthMap = {
           compact: { min: 0, max: 50 },
           standard: { min: 50, max: 90 },
-          wide: { min: 90, max: 999 }
+          wide: { min: 90, max: 999 },
         };
         const preferred = widthMap[scenario.working_width_preference];
-        
+
         if (equipment.working_width >= preferred.min && equipment.working_width <= preferred.max) {
           matchDetails.push(`✓ Working width ${equipment.working_width}cm matches preference`);
         } else {
@@ -211,114 +208,119 @@ const runInferenceEngine = async (scenario) => {
       return {
         equipment,
         score,
-        matchDetails
+        matchDetails,
       };
     });
 
-    // STEP 3: Sort by score (highest first) and group by brand (max 3 per brand)
-    const sortedEquipment = scoredEquipment.sort((a, b) => b.score - a.score);
-    const rankedEquipment = [];
-    const brandCounts = {};
-    
-    for (const item of sortedEquipment) {
-      const brand = item.equipment.brand_name || 'Unknown';
-      if (!brandCounts[brand]) brandCounts[brand] = 0;
-      if (brandCounts[brand] < 3) {
-        brandCounts[brand]++;
-        rankedEquipment.push(item);
-      }
-      if (rankedEquipment.length >= 15) break; // Return top 15 max
-    }
+    // STEP 3: Sort by score (highest first)
+    const rankedEquipment = scoredEquipment
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10); // Top 10 results
 
     console.log(`\n🎯 RANKING RESULTS:`);
     rankedEquipment.forEach((item, idx) => {
       console.log(`\n#${idx + 1} - ${item.equipment.brand_name} ${item.equipment.model_name} (Score: ${item.score}/100)`);
-      item.matchDetails.forEach(detail => console.log(`    ${detail}`));
+      item.matchDetails.forEach((detail) => console.log(`    ${detail}`));
     });
     console.groupEnd();
 
-    // STEP 4: Convert to recommendations format
-    const recommendations = await Promise.all(rankedEquipment.map(async (item, index) => {
-      const detergent = await findBestDetergent(item.equipment, {
-        ...scenario,
-        surface_type: scenario.surfaces,
-        dirt_type: scenario.soils,
-      });
+    // STEP 4: Convert to recommendations format with detergents
+    const recommendations = await Promise.all(
+      rankedEquipment.map(async (item) => {
+        // Find best detergent for this specific equipment
+        const detergent = await findBestDetergent(item.equipment, {
+          ...scenario,
+          surface_type: scenario.surfaces,
+          dirt_type: scenario.soils,
+          domain: scenario.domain,
+          eco_preference: scenario.eco_preference,
+        });
 
-      const purchasePrice = item.equipment.current_price_ugx || 0;
-      // Default to 5% of purchase price if maintenance cost is not set or 0
-      const maintenanceCost = item.equipment.estimated_maintenance_cost_per_year_ugx || Math.round(purchasePrice * 0.05);
-      // Default running cost: assuming 2000 hrs/yr * power_kW * 800 UGX/kWh
-      const powerKw = item.equipment.power_req?.kW || 1;
-      const runningCost = item.equipment.estimated_running_cost_per_year_ugx || Math.round(powerKw * 2000 * 800);
-      const estimatedTCO = maintenanceCost + runningCost;
-
-      return {
-      _id: item.equipment._id,
-      id: item.equipment._id,
-      name: `${item.equipment.brand_name} ${item.equipment.model_name}`,
-      model_name: item.equipment.model_name,
-      brand_name: item.equipment.brand_name,
-      machine_category: item.equipment.machine_category,
-      machine_subtype: item.equipment.machine_subtype,
-      intensity: item.equipment.intensity,
-      domain: item.equipment.domain,
-      match_score: item.score,
-      current_price_ugx: purchasePrice,
-      estimated_maintenance_cost_per_year_ugx: maintenanceCost,
-      estimated_running_cost_per_year_ugx: runningCost,
-      estimated_tco_per_year_ugx: estimatedTCO,
-      power_source: item.equipment.power_source,
-      weight_kg: item.equipment.weight_kg,
-      surface_compatibility: item.equipment.surface_compatibility,
-      dirt_compatibility: item.equipment.dirt_compatibility,
-      reasoning_trace: item.matchDetails,
-      image_url: item.equipment.image_url,
-      environment: item.equipment.environment,
-      min_aisle_width_mm: item.equipment.min_aisle_width_mm,
-      // Phase 3: Additional specs for enhanced display
-      motor_type: item.equipment.motor_type || 'Standard',
-      power_requirement_kw: item.equipment.power_req?.kW || 0,
-      noise_level_db: item.equipment.noise_level || 75,
-      working_width_cm: item.equipment.working_width || 50,
-      tank_capacity_liters: item.equipment.tank_capacity || 0,
-      spare_parts_lead_time_days: item.equipment.spare_part_lead_time_days || 14,
-      // Hint tags for display
-      hint_weight: item.equipment.weight_kg > 50 ? `⚠️ Heavy (${item.equipment.weight_kg}kg)` : `✓ ${item.equipment.weight_kg}kg`,
-      hint_noise: item.equipment.noise_level > 85 ? `⚠️ Loud (${item.equipment.noise_level}dB)` : 
-                  item.equipment.noise_level > 75 ? `🔊 Moderate (${item.equipment.noise_level}dB)` :
-                  `🔇 Quiet (${item.equipment.noise_level}dB)`,
-      hint_power: `⚡ ${item.equipment.power_req?.kW || 0}kW (${item.equipment.power_source})`,
-      specifications: {
-        working_width: item.equipment.working_width,
-        tank_capacity: item.equipment.tank_capacity,
-        noise_level: item.equipment.noise_level,
-        weight_kg: item.equipment.weight_kg,
-        power_source: item.equipment.power_source,
-        power_requirement_kw: item.equipment.power_req?.kW,
-        motor_type: item.equipment.motor_type,
-        spare_parts_lead_time_days: item.equipment.spare_part_lead_time_days
-      },
-      detergent: detergent ? {
-        _id: detergent._id,
-        id: detergent._id,
-        name: detergent.product_name,
-        product_name: detergent.product_name,
-        brand_name: detergent.brand_name,
-        detergent_category: detergent.detergent_category,
-        ph: detergent.ph_value,
-        ph_value: detergent.ph_value,
-        current_price_ugx: detergent.current_price_ugx,
-        unit_size: detergent.unit_size,
-        dilution_ratio: detergent.dilution_ratio,
-        eco_certified: detergent.eco_certified,
-        biodegradable: detergent.biodegradable,
-        requires_ppe: detergent.requires_ppe,
-        hazard_alerts: detergent.hazard_alerts,
-        image_url: detergent.image_url
-      } : null
-      };
-    }));
+        return {
+          _id: item.equipment._id,
+          id: item.equipment._id,
+          name: `${item.equipment.brand_name} ${item.equipment.model_name}`,
+          model_name: item.equipment.model_name,
+          brand_name: item.equipment.brand_name,
+          machine_category: item.equipment.machine_category,
+          machine_subtype: item.equipment.machine_subtype,
+          intensity: item.equipment.intensity,
+          domain: item.equipment.domain,
+          match_score: item.score,
+          current_price_ugx: item.equipment.current_price_ugx || 0,
+          estimated_maintenance_cost_per_year_ugx:
+            item.equipment.estimated_maintenance_cost_per_year_ugx || 0,
+          estimated_running_cost_per_year_ugx:
+            item.equipment.estimated_running_cost_per_year_ugx || 0,
+          // Full TCO (including purchase price) – kept for historical/display purposes
+          estimated_tco_per_year_ugx: Math.round(
+            (item.equipment.current_price_ugx || 0) +
+            (item.equipment.estimated_maintenance_cost_per_year_ugx || 0) +
+            (item.equipment.estimated_running_cost_per_year_ugx || 0)
+          ),
+          // NEW: operating cost (maintenance + running) – used for recommendation display
+          estimated_operating_cost_per_year_ugx: Math.round(
+            (item.equipment.estimated_maintenance_cost_per_year_ugx || 0) +
+            (item.equipment.estimated_running_cost_per_year_ugx || 0)
+          ),
+          power_source: item.equipment.power_source,
+          weight_kg: item.equipment.weight_kg,
+          surface_compatibility: item.equipment.surface_compatibility,
+          dirt_compatibility: item.equipment.dirt_compatibility,
+          reasoning_trace: item.matchDetails,
+          image_url: item.equipment.image_url,
+          environment: item.equipment.environment,
+          min_aisle_width_mm: item.equipment.min_aisle_width_mm,
+          motor_type: item.equipment.motor_type || 'Standard',
+          power_requirement_kw: item.equipment.power_req?.kW || 0,
+          noise_level_db: item.equipment.noise_level || 75,
+          working_width_cm: item.equipment.working_width || 50,
+          tank_capacity_liters: item.equipment.tank_capacity || 0,
+          spare_parts_lead_time_days: item.equipment.spare_part_lead_time_days || 14,
+          hint_weight:
+            item.equipment.weight_kg > 50
+              ? `⚠️ Heavy (${item.equipment.weight_kg}kg)`
+              : `✓ ${item.equipment.weight_kg}kg`,
+          hint_noise:
+            item.equipment.noise_level > 85
+              ? `⚠️ Loud (${item.equipment.noise_level}dB)`
+              : item.equipment.noise_level > 75
+                ? `🔊 Moderate (${item.equipment.noise_level}dB)`
+                : `🔇 Quiet (${item.equipment.noise_level}dB)`,
+          hint_power: `⚡ ${item.equipment.power_req?.kW || 0}kW (${item.equipment.power_source})`,
+          specifications: {
+            working_width: item.equipment.working_width,
+            tank_capacity: item.equipment.tank_capacity,
+            noise_level: item.equipment.noise_level,
+            weight_kg: item.equipment.weight_kg,
+            power_source: item.equipment.power_source,
+            power_requirement_kw: item.equipment.power_req?.kW,
+            motor_type: item.equipment.motor_type,
+            spare_parts_lead_time_days: item.equipment.spare_part_lead_time_days,
+          },
+          detergent: detergent
+            ? {
+              _id: detergent._id,
+              id: detergent._id,
+              name: detergent.product_name,
+              product_name: detergent.product_name,
+              brand_name: detergent.brand_name,
+              detergent_category: detergent.detergent_category,
+              ph: detergent.ph_value,
+              ph_value: detergent.ph_value,
+              current_price_ugx: detergent.current_price_ugx,
+              unit_size: detergent.unit_size,
+              dilution_ratio: detergent.dilution_ratio,
+              eco_certified: detergent.eco_certified,
+              biodegradable: detergent.biodegradable,
+              requires_ppe: detergent.requires_ppe,
+              hazard_alerts: detergent.hazard_alerts,
+              image_url: detergent.image_url,
+            }
+            : null,
+        };
+      })
+    );
 
     // Identify which filters were active
     const activeFilters = [];
@@ -340,7 +342,7 @@ const runInferenceEngine = async (scenario) => {
       recommendations,
       recommendation_id: new mongoose.Types.ObjectId().toString(),
       alerts: [],
-      summary_explanation: `Found ${recommendations.length} equipment ranked by match quality using filters: ${activeFilters.join(', ') || 'category only'}`
+      summary_explanation: `Found ${recommendations.length} equipment ranked by match quality using filters: ${activeFilters.join(', ') || 'category only'}`,
     };
   } catch (error) {
     console.error('Inference engine error:', error);
@@ -348,7 +350,7 @@ const runInferenceEngine = async (scenario) => {
       recommendations: [],
       recommendation_id: new mongoose.Types.ObjectId().toString(),
       alerts: [`Error querying equipment: ${error.message}`],
-      summary_explanation: 'Error retrieving equipment recommendations'
+      summary_explanation: 'Error retrieving equipment recommendations',
     };
   }
 };
@@ -361,12 +363,12 @@ const getRecommendations = async (req, res) => {
   try {
     const userId = req.user.id;
     const scenario = normalizeScenario(req.body);
-    
+
     console.log('📥 Received recommendation request:', { userId, scenario });
-    
+
     // Run inference engine to get recommendations
     const result = await runInferenceEngine(scenario);
-    
+
     res.json({
       success: true,
       data: {
@@ -374,14 +376,14 @@ const getRecommendations = async (req, res) => {
         recommendation_id: result.recommendation_id,
         alerts: result.alerts,
         reasoning: result.summary_explanation,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   } catch (error) {
     console.error('Get recommendations error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get recommendations'
+      error: 'Failed to get recommendations',
     });
   }
 };
@@ -424,7 +426,7 @@ const saveRecommendation = async (req, res) => {
       alerts_triggered,
       summary_explanation,
       cleaning_frequency,
-      reasoning_trace
+      reasoning_trace,
     } = req.body;
 
     // Helper function to convert array to string (for MULTISELECT fields)
@@ -468,7 +470,7 @@ const saveRecommendation = async (req, res) => {
       alerts_triggered: alerts_triggered || [],
       summary_explanation: summary_explanation || null,
       reasoning_trace: reasoning_trace || [],
-      saved: false
+      saved: false,
     });
 
     await recommendation.save();
@@ -480,14 +482,14 @@ const saveRecommendation = async (req, res) => {
       data: {
         _id: recommendation._id,
         recommendation_id: recommendation.recommendation_id,
-        message: 'Recommendation saved successfully'
-      }
+        message: 'Recommendation saved successfully',
+      },
     });
   } catch (error) {
     console.error('Save recommendation error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to save recommendation: ' + error.message
+      error: 'Failed to save recommendation: ' + error.message,
     });
   }
 };
@@ -503,47 +505,44 @@ const getRecommendationHistory = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const savedOnly = req.query.saved_only === 'true';
     const search = req.query.search || '';
-    
+
     const skip = (page - 1) * limit;
-    
+
     let query = { user_id: userId };
-    
+
     if (savedOnly) {
       query.saved = true;
     }
-    
+
     if (search) {
       query.$or = [
         { surface_type: { $regex: search, $options: 'i' } },
         { dirt_type: { $regex: search, $options: 'i' } },
         { machine_category: { $regex: search, $options: 'i' } },
-        { summary_explanation: { $regex: search, $options: 'i' } }
+        { summary_explanation: { $regex: search, $options: 'i' } },
       ];
     }
-    
+
     const [recommendations, total] = await Promise.all([
       Recommendation.find(query)
         .sort({ timestamp: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('recommended_equipment_id')  // This populates equipment data
-        .populate('recommended_detergent_id')  // This populates detergent data
+        .populate('recommended_equipment_id')
+        .populate('recommended_detergent_id')
         .select('-reasoning_trace'),
-      Recommendation.countDocuments(query)
+      Recommendation.countDocuments(query),
     ]);
-    
+
     // Transform recommendations to frontend-friendly format
-    const formattedRecommendations = recommendations.map(rec => {
-      // Get equipment data from populated field
+    const formattedRecommendations = recommendations.map((rec) => {
       const equipment = rec.recommended_equipment_id;
-      
-      // Fallback: use stored brand_name if equipment reference is missing
-      const equipmentName = equipment 
+      const equipmentName = equipment
         ? `${equipment.brand_name} ${equipment.model_name}`
-        : rec.brand_name 
+        : rec.brand_name
           ? `${rec.brand_name} (ref)`
           : 'Equipment';
-      
+
       return {
         _id: rec._id,
         recommendation_id: rec.recommendation_id,
@@ -558,63 +557,74 @@ const getRecommendationHistory = async (req, res) => {
         eco_preference: rec.eco_preference,
         saved: rec.saved,
         created_at: rec.timestamp,
-        recommendations: equipment ? [{
-          _id: equipment._id,
-          machine_name: equipmentName,
-          name: equipmentName,
-          model_name: equipment.model_name,
-          brand: equipment.brand_name,
-          brand_name: equipment.brand_name,
-          match: rec.final_score || 85,
-          score: rec.final_score || 85,
-          // Calculate TCO from equipment data or use recommendation value
-          estimated_tco_per_year_ugx: rec.estimated_tco_per_year_ugx || (function() {
-            const p = equipment.current_price_ugx || 0;
-            const m = equipment.estimated_maintenance_cost_per_year_ugx || Math.round(p * 0.05);
-            const kw = equipment.power_req?.kW || 1;
-            const r = equipment.estimated_running_cost_per_year_ugx || Math.round(kw * 2000 * 800);
-            return Math.round(m + r);
-          })(),
-          tco: rec.estimated_tco_per_year_ugx || (function() {
-            const p = equipment.current_price_ugx || 0;
-            const m = equipment.estimated_maintenance_cost_per_year_ugx || Math.round(p * 0.05);
-            const kw = equipment.power_req?.kW || 1;
-            const r = equipment.estimated_running_cost_per_year_ugx || Math.round(kw * 2000 * 800);
-            return Math.round(m + r);
-          })(),
-          power_source: equipment.power_source || rec.power_source,
-          intensity: equipment.intensity || 'medium',
-          image_url: equipment.image_url,
-          machine_subtype: equipment.machine_subtype,
-          specifications: {
-            working_width: equipment.working_width,
-            tank_capacity: equipment.tank_capacity,
-            noise_level: equipment.noise_level,
-            weight_kg: equipment.weight_kg,
-            power_source: equipment.power_source
-          }
-        }] : [{
-          // Fallback data if equipment reference is missing
-          machine_name: equipmentName,
-          name: equipmentName,
-          brand: rec.brand_name || 'Unknown',
-          brand_name: rec.brand_name || 'Unknown',
-          match: rec.final_score || 85,
-          score: rec.final_score || 85,
-          estimated_tco_per_year_ugx: rec.estimated_tco_per_year_ugx || 0,
-          tco: rec.estimated_tco_per_year_ugx || 0,
-          power_source: rec.power_source || 'battery',
-          intensity: 'medium',
-          message: 'Equipment reference unavailable (may have been deleted)'
-        }],
+        recommendations: equipment
+          ? [
+            {
+              _id: equipment._id,
+              machine_name: equipmentName,
+              name: equipmentName,
+              model_name: equipment.model_name,
+              brand: equipment.brand_name,
+              brand_name: equipment.brand_name,
+              match: rec.final_score || 85,
+              score: rec.final_score || 85,
+              estimated_tco_per_year_ugx:
+                rec.estimated_tco_per_year_ugx ||
+                Math.round(
+                  (equipment.current_price_ugx || 0) +
+                  (equipment.estimated_maintenance_cost_per_year_ugx || 0) +
+                  (equipment.estimated_running_cost_per_year_ugx || 0)
+                ),
+              // Operating cost for display (if needed)
+              estimated_operating_cost_per_year_ugx:
+                Math.round(
+                  (equipment.estimated_maintenance_cost_per_year_ugx || 0) +
+                  (equipment.estimated_running_cost_per_year_ugx || 0)
+                ),
+              tco:
+                rec.estimated_tco_per_year_ugx ||
+                Math.round(
+                  (equipment.current_price_ugx || 0) +
+                  (equipment.estimated_maintenance_cost_per_year_ugx || 0) +
+                  (equipment.estimated_running_cost_per_year_ugx || 0)
+                ),
+              power_source: equipment.power_source || rec.power_source,
+              intensity: equipment.intensity || 'medium',
+              image_url: equipment.image_url,
+              machine_subtype: equipment.machine_subtype,
+              specifications: {
+                working_width: equipment.working_width,
+                tank_capacity: equipment.tank_capacity,
+                noise_level: equipment.noise_level,
+                weight_kg: equipment.weight_kg,
+                power_source: equipment.power_source,
+              },
+            },
+          ]
+          : [
+            {
+              machine_name: equipmentName,
+              name: equipmentName,
+              brand: rec.brand_name || 'Unknown',
+              brand_name: rec.brand_name || 'Unknown',
+              match: rec.final_score || 85,
+              score: rec.final_score || 85,
+              estimated_tco_per_year_ugx: rec.estimated_tco_per_year_ugx || 0,
+              estimated_operating_cost_per_year_ugx: 0,
+              tco: rec.estimated_tco_per_year_ugx || 0,
+              power_source: rec.power_source || 'battery',
+              intensity: 'medium',
+              message: 'Equipment reference unavailable (may have been deleted)',
+            },
+          ],
         detergent_name: rec.recommended_detergent_id?.name,
         detergent_ph: rec.recommended_detergent_id?.ph,
         detergent_price: rec.recommended_detergent_id?.current_price_ugx,
-        alerts: rec.alerts_triggered?.map(alert => alert.message || alert) || [],
-        reasoning: rec.summary_explanation
+        alerts: rec.alerts_triggered?.map((alert) => alert.message || alert) || [],
+        reasoning: rec.summary_explanation,
       };
     });
-    
+
     res.json({
       success: true,
       data: {
@@ -622,14 +632,14 @@ const getRecommendationHistory = async (req, res) => {
         total,
         page,
         limit,
-        total_pages: Math.ceil(total / limit)
-      }
+        total_pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Get recommendation history error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch recommendation history: ' + error.message
+      error: 'Failed to fetch recommendation history: ' + error.message,
     });
   }
 };
@@ -642,67 +652,76 @@ const getRecommendationById = async (req, res) => {
   try {
     const userId = req.user.id;
     const recommendationId = req.params.id;
-    
+
     const recommendation = await Recommendation.findOne({
       _id: recommendationId,
-      user_id: userId
+      user_id: userId,
     })
       .populate('recommended_equipment_id')
       .populate('recommended_detergent_id');
-    
+
     if (!recommendation) {
       return res.status(404).json({
         success: false,
-        error: 'Recommendation not found'
+        error: 'Recommendation not found',
       });
     }
-    
-    // Format equipment data
+
     const equipment = recommendation.recommended_equipment_id;
     const formattedRecommendation = {
       _id: recommendation._id,
       recommendation_id: recommendation.recommendation_id,
-      machine: equipment ? {
-        _id: equipment._id,
-        name: equipment.name,
-        brand: equipment.brand_name,
-        match_score: recommendation.final_score || 85,
-        estimated_tco_per_year_ugx: recommendation.estimated_tco_per_year_ugx,
-        power_source: equipment.power_source,
-        intensity: equipment.intensity || 'medium',
-        image_url: equipment.image_url,
-        specifications: {
-          working_width: equipment.working_width,
-          tank_capacity: equipment.tank_capacity,
-          noise_level: equipment.noise_level,
-          area_performance: equipment.area_performance
+      machine: equipment
+        ? {
+          _id: equipment._id,
+          name: equipment.name,
+          brand: equipment.brand_name,
+          match_score: recommendation.final_score || 85,
+          estimated_tco_per_year_ugx: recommendation.estimated_tco_per_year_ugx,
+          estimated_operating_cost_per_year_ugx:
+            Math.round(
+              (equipment.estimated_maintenance_cost_per_year_ugx || 0) +
+              (equipment.estimated_running_cost_per_year_ugx || 0)
+            ),
+          power_source: equipment.power_source,
+          intensity: equipment.intensity || 'medium',
+          image_url: equipment.image_url,
+          specifications: {
+            working_width: equipment.working_width,
+            tank_capacity: equipment.tank_capacity,
+            noise_level: equipment.noise_level,
+            area_performance: equipment.area_performance,
+          },
         }
-      } : null,
-      detergent: recommendation.recommended_detergent_id ? {
-        name: recommendation.recommended_detergent_id.name,
-        ph: recommendation.recommended_detergent_id.ph,
-        current_price_ugx: recommendation.recommended_detergent_id.current_price_ugx,
-        unit_size: recommendation.recommended_detergent_id.unit_size,
-        eco_certified: recommendation.recommended_detergent_id.eco_certified,
-        biodegradable: recommendation.recommended_detergent_id.biodegradable
-      } : null,
-      alerts: recommendation.alerts_triggered?.map(alert => alert.message) || [],
+        : null,
+      detergent: recommendation.recommended_detergent_id
+        ? {
+          name: recommendation.recommended_detergent_id.name,
+          ph: recommendation.recommended_detergent_id.ph,
+          current_price_ugx: recommendation.recommended_detergent_id.current_price_ugx,
+          unit_size: recommendation.recommended_detergent_id.unit_size,
+          eco_certified: recommendation.recommended_detergent_id.eco_certified,
+          biodegradable: recommendation.recommended_detergent_id.biodegradable,
+          image_url: recommendation.recommended_detergent_id.image_url,
+        }
+        : null,
+      alerts: recommendation.alerts_triggered?.map((alert) => alert.message) || [],
       reasoning: recommendation.summary_explanation,
       surface_type: recommendation.surface_type,
       dirt_type: recommendation.dirt_type,
       area_size: recommendation.area_size,
-      budget_ugx: recommendation.budget_ugx
+      budget_ugx: recommendation.budget_ugx,
     };
-    
+
     res.json({
       success: true,
-      data: formattedRecommendation
+      data: formattedRecommendation,
     });
   } catch (error) {
     console.error('Get recommendation error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch recommendation: ' + error.message
+      error: 'Failed to fetch recommendation: ' + error.message,
     });
   }
 };
@@ -716,34 +735,34 @@ const toggleSaveRecommendation = async (req, res) => {
     const userId = req.user.id;
     const recommendationId = req.params.id;
     const { saved } = req.body;
-    
+
     const recommendation = await Recommendation.findOne({
       _id: recommendationId,
-      user_id: userId
+      user_id: userId,
     });
-    
+
     if (!recommendation) {
       return res.status(404).json({
         success: false,
-        error: 'Recommendation not found'
+        error: 'Recommendation not found',
       });
     }
-    
+
     recommendation.saved = saved;
     await recommendation.save();
-    
+
     res.json({
       success: true,
       data: {
         _id: recommendation._id,
-        saved: recommendation.saved
-      }
+        saved: recommendation.saved,
+      },
     });
   } catch (error) {
     console.error('Toggle save error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update saved status: ' + error.message
+      error: 'Failed to update saved status: ' + error.message,
     });
   }
 };
@@ -756,28 +775,28 @@ const deleteRecommendation = async (req, res) => {
   try {
     const userId = req.user.id;
     const recommendationId = req.params.id;
-    
+
     const result = await Recommendation.findOneAndDelete({
       _id: recommendationId,
-      user_id: userId
+      user_id: userId,
     });
-    
+
     if (!result) {
       return res.status(404).json({
         success: false,
-        error: 'Recommendation not found'
+        error: 'Recommendation not found',
       });
     }
-    
+
     res.json({
       success: true,
-      message: 'Recommendation deleted successfully'
+      message: 'Recommendation deleted successfully',
     });
   } catch (error) {
     console.error('Delete recommendation error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to delete recommendation: ' + error.message
+      error: 'Failed to delete recommendation: ' + error.message,
     });
   }
 };
@@ -788,5 +807,5 @@ module.exports = {
   getRecommendationHistory,
   getRecommendationById,
   toggleSaveRecommendation,
-  deleteRecommendation
+  deleteRecommendation,
 };
