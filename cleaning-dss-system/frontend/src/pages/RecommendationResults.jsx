@@ -1,5 +1,5 @@
 // frontend/src/pages/RecommendationResults.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Zap,
@@ -27,13 +27,14 @@ import {
   Battery,
   Flame,
   Wind,
-  Image as ImageIcon,
+  Package,
   Info,
   Tag,
   Building2,
-  Package
+  Filter,
+  SlidersHorizontal,
+  MoveHorizontal
 } from 'lucide-react';
-import DatabaseImage from '../components/common/DatabaseImage';
 import { useAuth } from '../contexts/AuthContext';
 import { saveRecommendationToHistory } from '../services/recommendationHistoryService';
 
@@ -103,14 +104,6 @@ const getCategorySpecs = (machine) => {
   }
 };
 
-// Placeholder image component (matches admin list style)
-const PlaceholderImage = ({ className, label }) => (
-  <div className={`flex flex-col items-center justify-center bg-slate-100 ${className}`}>
-    <Package className="w-12 h-12 text-slate-400" />
-    <span className="text-xs text-slate-400 mt-1 font-mono">{label || 'No Image'}</span>
-  </div>
-);
-
 export default function RecommendationResults() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -123,13 +116,15 @@ export default function RecommendationResults() {
   const [compareList, setCompareList] = useState([]);
   const [showCompare, setShowCompare] = useState(false);
   const [expandedCard, setExpandedCard] = useState(null);
+  const [activeBrandTab, setActiveBrandTab] = useState('all');
   const hasSaved = useRef(false);
+  const tabContainerRef = useRef(null);
 
   useEffect(() => {
     setFadeIn(true);
   }, []);
 
-  // Auto-save logic
+  // Auto-save logic (unchanged)
   useEffect(() => {
     const saveRec = async () => {
       if (hasSaved.current || !recommendations || recommendations.length === 0 || !isAuthenticated) return;
@@ -181,6 +176,27 @@ export default function RecommendationResults() {
     saveRec();
   }, [recommendations, answers, category, isAuthenticated]);
 
+  // Group recommendations by brand
+  const groupedByBrand = useMemo(() => {
+    const groups = {};
+    recommendations?.forEach((item) => {
+      const brand = item.brand_name || 'Other';
+      if (!groups[brand]) groups[brand] = [];
+      groups[brand].push(item);
+    });
+    return groups;
+  }, [recommendations]);
+
+  const brandNames = useMemo(() => Object.keys(groupedByBrand), [groupedByBrand]);
+
+  // Filter recommendations based on active brand tab
+  const filteredRecommendations = useMemo(() => {
+    if (activeBrandTab === 'all') {
+      return recommendations || [];
+    }
+    return groupedByBrand[activeBrandTab] || [];
+  }, [activeBrandTab, groupedByBrand, recommendations]);
+
   const addToCompare = (machine) => {
     const id = machine.id || machine._id;
     if (compareList.length < 2 && !compareList.find(m => (m.id || m._id) === id)) {
@@ -195,6 +211,16 @@ export default function RecommendationResults() {
     navigate('/recommendation-details', { state: { machine, recommendationId, category } });
   };
 
+  // Scroll tab into view when active changes
+  useEffect(() => {
+    if (tabContainerRef.current) {
+      const activeTabEl = tabContainerRef.current.querySelector(`[data-brand="${activeBrandTab}"]`);
+      if (activeTabEl) {
+        activeTabEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }, [activeBrandTab]);
+
   if (!recommendations || recommendations.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-cyan-50/30 flex items-center justify-center">
@@ -207,20 +233,6 @@ export default function RecommendationResults() {
       </div>
     );
   }
-
-  // Group recommendations by brand
-  const groupedByBrand = recommendations.reduce((acc, item) => {
-    const brand = item.brand_name || 'Other';
-    if (!acc[brand]) acc[brand] = [];
-    acc[brand].push(item);
-    return acc;
-  }, {});
-
-  // For each brand, sort by match_score descending and take top 3
-  const sortedGroups = Object.entries(groupedByBrand).map(([brand, items]) => ({
-    brand,
-    items: items.sort((a, b) => (b.match_score || 0) - (a.match_score || 0)).slice(0, 3),
-  }));
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-cyan-50/30">
@@ -283,180 +295,209 @@ export default function RecommendationResults() {
           )}
         </div>
 
-        {sortedGroups.map(({ brand, items }) => (
-          <div key={brand} className="mb-12">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-1 h-8 bg-gradient-to-b from-blue-600 to-cyan-600 rounded-full" />
-              <h2 className="text-2xl font-bold text-slate-800">{brand}</h2>
-              <span className="text-sm text-slate-400 font-mono">{items.length} model{items.length > 1 ? 's' : ''}</span>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {items.map((machine) => {
-                const matchScore = machine.match_score || 85;
-                const machineId = machine.id || machine._id;
-                const isExpanded = expandedCard === machineId;
-                const categorySpecs = getCategorySpecs(machine);
-
-                return (
-                  <div key={machineId} className="group bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                    {/* Image Section - matches admin list pattern */}
-                    <div className="h-52 relative bg-slate-100 overflow-hidden flex-shrink-0">
-                      {machine.image_url ? (
-                        <img
-                          src={machine.image_url}
-                          alt={machine.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            const parent = e.target.parentElement;
-                            parent.innerHTML = `
-                              <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><polyline points="21 15 16 10 5 21" stroke="currentColor"/></svg>
-                                <span class="text-xs text-slate-400 mt-1 font-mono">No Image</span>
-                              </div>
-                            `;
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100">
-                          <Package className="w-12 h-12 text-slate-400" />
-                          <span className="text-xs text-slate-400 mt-1 font-mono">No Image</span>
-                        </div>
-                      )}
-                      <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full border shadow-sm bg-white/95 backdrop-blur-sm">
-                        <div className="flex items-center gap-1">
-                          <TrendingUp size={12} className="text-blue-600" />
-                          <span className="text-sm font-bold text-blue-600">{matchScore}% Match</span>
-                        </div>
-                      </div>
-                      <div className="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-sm px-3 py-1 rounded-lg">
-                        <span className="text-[10px] font-bold text-white">{machine.brand_name}</span>
-                      </div>
-                    </div>
-
-                    <div className="p-5 flex flex-col flex-1">
-                      <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1">{machine.name}</h3>
-                      <p className="text-[10px] font-mono text-slate-400 mb-3 capitalize">
-                        {machine.machine_category?.replace(/_/g, ' ')}
-                      </p>
-
-                      {/* Category-specific specs */}
-                      <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-slate-50 rounded-xl">
-                        {categorySpecs.map((spec, idx) => (
-                          <div key={idx} className="text-center">
-                            <div className="flex justify-center text-slate-400 mb-1">{spec.icon}</div>
-                            <p className="text-[9px] text-slate-400">{spec.label}</p>
-                            <p className="text-[10px] font-bold text-slate-700">{spec.value}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Operating cost (maintenance + running) */}
-                      <div className="flex items-center justify-between mb-3 p-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                        <span className="text-[10px] font-medium text-slate-600">Annual Operating Cost</span>
-                        <span className="text-sm font-bold text-emerald-700">{formatCurrency(machine.estimated_operating_cost_per_year_ugx || 0)}</span>
-                      </div>
-
-                      {/* Detergent */}
-                      {machine.detergent ? (
-                        <div className="mb-3 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Droplets size={12} className="text-cyan-600" />
-                            <p className="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Recommended Detergent</p>
-                          </div>
-                          <div className="flex gap-3">
-                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0 border border-cyan-200">
-                              {machine.detergent.image_url ? (
-                                <img
-                                  src={machine.detergent.image_url}
-                                  alt={machine.detergent.name}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-cyan-100"><Droplets size={20} className="text-cyan-600" /></div>';
-                                  }}
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-cyan-100"><Droplets size={20} className="text-cyan-600" /></div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-bold text-slate-800 truncate">{machine.detergent.name}</h4>
-                              <p className="text-[10px] text-slate-500 font-mono">
-                                pH {machine.detergent.ph} · {machine.detergent.unit_size}L
-                              </p>
-                              <div className="flex flex-wrap gap-1.5 mt-2">
-                                {machine.detergent.eco_certified && (
-                                  <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                                    <Leaf size={10} /> Eco
-                                  </span>
-                                )}
-                                {machine.detergent.biodegradable && (
-                                  <span className="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                                    <CheckCircle2 size={10} /> Biodegradable
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="mb-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                          <p className="text-[10px] text-slate-500">ℹ️ No specific detergent match found.</p>
-                        </div>
-                      )}
-
-                      {/* Alerts */}
-                      {machine.alerts && machine.alerts.length > 0 && (
-                        <div className="mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
-                          {machine.alerts.slice(0, 1).map((alert, i) => (
-                            <div key={i} className="flex items-center gap-1.5 text-[10px] text-amber-700"><AlertTriangle size={10} /> {alert}</div>
-                          ))}
-                          {machine.alerts.length > 1 && <p className="text-[9px] text-amber-500 mt-1">+{machine.alerts.length - 1} more</p>}
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="flex gap-2 mt-auto pt-2">
-                        <button onClick={() => handleViewDetails(machine)} className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl text-[11px] font-bold uppercase tracking-wider hover:shadow-md transition flex items-center justify-center gap-1.5">
-                          Details <ArrowRight size={12} />
-                        </button>
-                        <button onClick={() => addToCompare(machine)} disabled={compareList.length >= 2 || compareList.find(m => (m.id || m._id) === machineId)} className="px-4 py-2.5 border-2 border-slate-200 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:border-blue-300 hover:bg-blue-50 transition disabled:opacity-40">
-                          Compare
-                        </button>
-                        <button onClick={() => setExpandedCard(isExpanded ? null : machineId)} className="px-3 py-2.5 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition">
-                          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </button>
-                      </div>
-
-                      {/* Expandable section - full details */}
-                      {isExpanded && (
-                        <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                          <div className="text-xs font-bold text-slate-700">Full TCO Breakdown</div>
-                          <div className="grid grid-cols-2 gap-2 text-[10px]">
-                            <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Purchase Price</span><span className="font-bold text-slate-700">{formatCurrency(machine.current_price_ugx || 0)}</span></div>
-                            <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Maintenance/yr</span><span className="font-bold text-amber-600">{formatCurrency(machine.estimated_maintenance_cost_per_year_ugx || 0)}</span></div>
-                            <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Running/yr</span><span className="font-bold text-cyan-600">{formatCurrency(machine.estimated_running_cost_per_year_ugx || 0)}</span></div>
-                            <div className="flex justify-between py-1.5 px-2 bg-emerald-50 rounded-lg border border-emerald-100"><span className="text-slate-700 font-semibold">Total TCO/yr</span><span className="font-bold text-emerald-600">{formatCurrency(machine.estimated_tco_per_year_ugx || 0)}</span></div>
-                          </div>
-                          <div className="text-xs font-bold text-slate-700">Additional Specs</div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div><p className="text-[9px] text-slate-500 uppercase">Weight</p><p className="text-[11px] font-bold">{machine.weight_kg || 'N/A'} kg</p></div>
-                            <div><p className="text-[9px] text-slate-500 uppercase">Noise</p><p className="text-[11px] font-bold">{machine.noise_level_db || 'N/A'} dB</p></div>
-                            <div><p className="text-[9px] text-slate-500 uppercase">Power Source</p><p className="text-[11px] font-bold capitalize">{machine.power_source?.replace(/_/g, ' ') || 'N/A'}</p></div>
-                            <div><p className="text-[9px] text-slate-500 uppercase">Spare Parts Lead</p><p className="text-[11px] font-bold">{machine.spare_parts_lead_time_days || 'N/A'} days</p></div>
-                            <div><p className="text-[9px] text-slate-500 uppercase">Min Aisle Width</p><p className="text-[11px] font-bold">{machine.min_aisle_width_mm || 'N/A'} mm</p></div>
-                            <div><p className="text-[9px] text-slate-500 uppercase">Environment</p><p className="text-[11px] font-bold capitalize">{machine.environment?.replace(/_/g, ' ') || 'Any'}</p></div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+        {/* Brand Tab Strip – Centered, elegantly styled */}
+        <div className="flex justify-center mb-8">
+          <div className="relative overflow-x-auto scrollbar-hide py-2 px-1 w-full max-w-4xl" ref={tabContainerRef}>
+            <div className="flex justify-center gap-2 min-w-max mx-auto">
+              <button
+                data-brand="all"
+                onClick={() => setActiveBrandTab('all')}
+                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap shadow-sm ${activeBrandTab === 'all'
+                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md scale-105'
+                    : 'bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
+                  }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Layers size={16} /> All Brands
+                </span>
+              </button>
+              {brandNames.map((brand) => (
+                <button
+                  key={brand}
+                  data-brand={brand}
+                  onClick={() => setActiveBrandTab(brand)}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap shadow-sm ${activeBrandTab === brand
+                      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md scale-105'
+                      : 'bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
+                    }`}
+                >
+                  {brand}
+                </button>
+              ))}
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* Recommendations Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredRecommendations.map((machine) => {
+            const matchScore = machine.match_score || 85;
+            const machineId = machine.id || machine._id;
+            const isExpanded = expandedCard === machineId;
+            const categorySpecs = getCategorySpecs(machine);
+
+            return (
+              <div key={machineId} className="group bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                {/* Image Section – 16:9 aspect ratio with object-contain to avoid cropping */}
+                <div className="relative w-full aspect-video bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden flex-shrink-0">
+                  {machine.image_url ? (
+                    <img
+                      src={machine.image_url}
+                      alt={machine.name}
+                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        const parent = e.target.parentElement;
+                        parent.innerHTML = `
+                          <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><polyline points="21 15 16 10 5 21" stroke="currentColor"/></svg>
+                            <span class="text-xs text-slate-400 mt-1 font-mono">No Image</span>
+                          </div>
+                        `;
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100">
+                      <Package className="w-12 h-12 text-slate-400" />
+                      <span className="text-xs text-slate-400 mt-1 font-mono">No Image</span>
+                    </div>
+                  )}
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent pointer-events-none" />
+                  {/* Brand tag */}
+                  <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/10">
+                    <span className="text-[10px] font-bold text-white">{machine.brand_name}</span>
+                  </div>
+                  {/* Match badge */}
+                  <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full border shadow-sm bg-white/95 backdrop-blur-sm">
+                    <div className="flex items-center gap-1">
+                      <TrendingUp size={12} className="text-blue-600" />
+                      <span className="text-sm font-bold text-blue-600">{matchScore}% Match</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1">{machine.name}</h3>
+                  <p className="text-[10px] font-mono text-slate-400 mb-3 capitalize">
+                    {machine.machine_category?.replace(/_/g, ' ')}
+                  </p>
+
+                  {/* Category-specific specs */}
+                  <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-slate-50 rounded-xl">
+                    {categorySpecs.map((spec, idx) => (
+                      <div key={idx} className="text-center">
+                        <div className="flex justify-center text-slate-400 mb-1">{spec.icon}</div>
+                        <p className="text-[9px] text-slate-400">{spec.label}</p>
+                        <p className="text-[10px] font-bold text-slate-700">{spec.value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Operating cost */}
+                  <div className="flex items-center justify-between mb-3 p-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                    <span className="text-[10px] font-medium text-slate-600">Annual Operating Cost</span>
+                    <span className="text-sm font-bold text-emerald-700">{formatCurrency(machine.estimated_operating_cost_per_year_ugx || 0)}</span>
+                  </div>
+
+                  {/* Detergent */}
+                  {machine.detergent ? (
+                    <div className="mb-3 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Droplets size={12} className="text-cyan-600" />
+                        <p className="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Recommended Detergent</p>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-white flex-shrink-0 border border-cyan-200">
+                          {machine.detergent.image_url ? (
+                            <img
+                              src={machine.detergent.image_url}
+                              alt={machine.detergent.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-cyan-100"><Droplets size={20} className="text-cyan-600" /></div>';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-cyan-100"><Droplets size={20} className="text-cyan-600" /></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-slate-800 truncate">{machine.detergent.name}</h4>
+                          <p className="text-[10px] text-slate-500 font-mono">
+                            pH {machine.detergent.ph} · {machine.detergent.unit_size}L
+                          </p>
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {machine.detergent.eco_certified && (
+                              <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                                <Leaf size={10} /> Eco
+                              </span>
+                            )}
+                            {machine.detergent.biodegradable && (
+                              <span className="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                <CheckCircle2 size={10} /> Biodegradable
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mb-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                      <p className="text-[10px] text-slate-500">ℹ️ No specific detergent match found.</p>
+                    </div>
+                  )}
+
+                  {/* Alerts */}
+                  {machine.alerts && machine.alerts.length > 0 && (
+                    <div className="mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                      {machine.alerts.slice(0, 1).map((alert, i) => (
+                        <div key={i} className="flex items-center gap-1.5 text-[10px] text-amber-700"><AlertTriangle size={10} /> {alert}</div>
+                      ))}
+                      {machine.alerts.length > 1 && <p className="text-[9px] text-amber-500 mt-1">+{machine.alerts.length - 1} more</p>}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-2 mt-auto pt-2">
+                    <button onClick={() => handleViewDetails(machine)} className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl text-[11px] font-bold uppercase tracking-wider hover:shadow-md transition flex items-center justify-center gap-1.5">
+                      Details <ArrowRight size={12} />
+                    </button>
+                    <button onClick={() => addToCompare(machine)} disabled={compareList.length >= 2 || compareList.find(m => (m.id || m._id) === machineId)} className="px-4 py-2.5 border-2 border-slate-200 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:border-blue-300 hover:bg-blue-50 transition disabled:opacity-40">
+                      Compare
+                    </button>
+                    <button onClick={() => setExpandedCard(isExpanded ? null : machineId)} className="px-3 py-2.5 border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition">
+                      {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+                  </div>
+
+                  {/* Expandable section - full details */}
+                  {isExpanded && (
+                    <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                      <div className="text-xs font-bold text-slate-700">Full TCO Breakdown</div>
+                      <div className="grid grid-cols-2 gap-2 text-[10px]">
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Purchase Price</span><span className="font-bold text-slate-700">{formatCurrency(machine.current_price_ugx || 0)}</span></div>
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Maintenance/yr</span><span className="font-bold text-amber-600">{formatCurrency(machine.estimated_maintenance_cost_per_year_ugx || 0)}</span></div>
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Running/yr</span><span className="font-bold text-cyan-600">{formatCurrency(machine.estimated_running_cost_per_year_ugx || 0)}</span></div>
+                        <div className="flex justify-between py-1.5 px-2 bg-emerald-50 rounded-lg border border-emerald-100"><span className="text-slate-700 font-semibold">Total TCO/yr</span><span className="font-bold text-emerald-600">{formatCurrency(machine.estimated_tco_per_year_ugx || 0)}</span></div>
+                      </div>
+                      <div className="text-xs font-bold text-slate-700">Additional Specs</div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><p className="text-[9px] text-slate-500 uppercase">Weight</p><p className="text-[11px] font-bold">{machine.weight_kg || 'N/A'} kg</p></div>
+                        <div><p className="text-[9px] text-slate-500 uppercase">Noise</p><p className="text-[11px] font-bold">{machine.noise_level_db || 'N/A'} dB</p></div>
+                        <div><p className="text-[9px] text-slate-500 uppercase">Power Source</p><p className="text-[11px] font-bold capitalize">{machine.power_source?.replace(/_/g, ' ') || 'N/A'}</p></div>
+                        <div><p className="text-[9px] text-slate-500 uppercase">Spare Parts Lead</p><p className="text-[11px] font-bold">{machine.spare_parts_lead_time_days || 'N/A'} days</p></div>
+                        <div><p className="text-[9px] text-slate-500 uppercase">Min Aisle Width</p><p className="text-[11px] font-bold">{machine.min_aisle_width_mm || 'N/A'} mm</p></div>
+                        <div><p className="text-[9px] text-slate-500 uppercase">Environment</p><p className="text-[11px] font-bold capitalize">{machine.environment?.replace(/_/g, ' ') || 'Any'}</p></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
         {/* Compare bar & modal */}
         {compareList.length > 0 && (

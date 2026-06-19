@@ -1,8 +1,4 @@
-/**
- * Training Model
- * Stores training materials (videos, PDFs, articles) linked to equipment.
- */
-
+// backend/models/Training.js
 const mongoose = require('mongoose');
 
 const trainingSchema = new mongoose.Schema(
@@ -28,7 +24,8 @@ const trainingSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: function (v) {
-          return !v || /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(v);
+          // Allow www., m., and youtu.be
+          return !v || /^(https?:\/\/)?(www\.|m\.)?(youtube\.com|youtu\.be)\/.+$/.test(v);
         },
         message: 'Invalid YouTube URL',
       },

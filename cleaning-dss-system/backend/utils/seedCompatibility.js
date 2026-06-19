@@ -49,8 +49,12 @@ async function seedCompatibility() {
         for (const eq of equipmentList) {
             for (const det of detergentList) {
                 // ---- Domain compatibility ----
-                // Allow if detergent domain is 'both' or matches equipment domain
-                if (det.domain !== 'both' && det.domain !== eq.domain) {
+                // Map equipment domain to detergent domain:
+                // Equipment: 'commercial' -> Detergent: 'industrial' (treat commercial as industrial)
+                // Equipment: 'domestic' -> Detergent: 'domestic'
+                // Equipment: 'industrial' -> Detergent: 'industrial'
+                const equipmentDomain = eq.domain === 'commercial' ? 'industrial' : eq.domain;
+                if (det.domain !== 'both' && det.domain !== equipmentDomain) {
                     skipped++;
                     continue;
                 }

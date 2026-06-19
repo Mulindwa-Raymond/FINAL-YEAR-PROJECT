@@ -197,14 +197,15 @@ const equipmentSchema = new mongoose.Schema(
 // VIRTUAL FIELDS
 // ============================================
 
+// Full TCO including purchase price (maintenance + running + price)
 equipmentSchema.virtual('estimated_tco_per_year_ugx').get(function () {
   const price = this.current_price_ugx || 0;
   const maintenance = this.estimated_maintenance_cost_per_year_ugx || 0;
   const running = this.estimated_running_cost_per_year_ugx || 0;
-  return Math.round(maintenance + running);
+  return Math.round(price + maintenance + running);
 });
 
-// NEW: Operating cost = maintenance + running (excludes purchase price)
+// Operating cost = maintenance + running (excludes purchase price)
 equipmentSchema.virtual('estimated_operating_cost_per_year_ugx').get(function () {
   const maintenance = this.estimated_maintenance_cost_per_year_ugx || 0;
   const running = this.estimated_running_cost_per_year_ugx || 0;

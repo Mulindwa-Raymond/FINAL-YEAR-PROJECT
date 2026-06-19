@@ -12,56 +12,97 @@ const normalizePowerSource = (value) => {
   return value;
 };
 
+// Map user‑friendly surface names to database‑exact strings
+const surfaceMapping = {
+  tile: 'tile',
+  tiles: 'tile',
+  ceramic: 'tile',
+  vinyl: 'vinyl',
+  concrete: 'concrete',
+  wood: 'wood',
+  hardwood: 'wood',
+  marble: 'marble',
+  natural_stone: 'marble',
+  carpet: 'carpet',
+  glass: 'glass',
+  stainless_steel: 'stainless_steel',
+  steel: 'stainless_steel',
+  // Add more as needed
+};
+
+// Map user‑friendly dirt names to database‑exact strings
+const dirtMapping = {
+  grease: 'grease',
+  oil: 'oil',
+  red_laterite_soil: 'red laterite soil',
+  laterite: 'red laterite soil',
+  dust: 'dust',
+  light_dust: 'light dust',
+  heavy_soil: 'heavy soil',
+  organic: 'organic',
+  spills: 'spills',
+  lime_scale: 'lime scale',
+  rust: 'rust',
+  // Add more as needed
+};
+
+// Normalize a single value using a mapping object
+const normalizeValue = (value, mapping) => {
+  if (!value) return value;
+  const lower = value.toLowerCase().trim();
+  return mapping[lower] || value;
+};
+
+// Normalize an array of values using a mapping
+const normalizeArray = (arr, mapping) => {
+  if (!arr) return [];
+  return arr.map(v => normalizeValue(v, mapping)).filter(Boolean);
+};
+
 const deriveUseCase = (useCase) => {
-  switch (useCase) {
-    case 'domestic':
-    case 'home':
-      return { domain: 'domestic', intensity: 'light' };
-    case 'commercial':
-    case 'office':
-      return { domain: 'commercial', intensity: 'medium' };
-    case 'food_beverage':
-    case 'construction':
-    case 'hazardous':
-    case 'industrial':
-    case 'warehouse':
-    case 'outdoor':
-    case 'vehicles':
-      return { domain: 'industrial', intensity: 'heavy' };
-    default:
-      return {};
+  if (!useCase) return {};
+  const lower = useCase.toLowerCase();
+  if (['domestic', 'home'].includes(lower)) {
+    return { domain: 'domestic', intensity: 'light' };
   }
+  if (['commercial', 'office', 'retail', 'hospitality'].includes(lower)) {
+    return { domain: 'commercial', intensity: 'medium' };
+  }
+  if (['food_beverage', 'construction', 'hazardous', 'industrial', 'warehouse', 'outdoor', 'vehicles'].includes(lower)) {
+    return { domain: 'industrial', intensity: 'heavy' };
+  }
+  return {};
 };
 
 const derivePressureIntensity = (pressureRequired) => {
-  if (pressureRequired === 'low') return 'light';
-  if (pressureRequired === 'medium') return 'medium';
-  if (pressureRequired === 'high') return 'heavy';
+  if (!pressureRequired) return null;
+  const lower = pressureRequired.toLowerCase();
+  if (lower === 'low') return 'light';
+  if (lower === 'medium') return 'medium';
+  if (lower === 'high') return 'heavy';
   return null;
 };
 
 const normalizeAisleWidthMm = (scenario) => {
   if (scenario.min_aisle_width_mm) return Number(scenario.min_aisle_width_mm);
-  if (scenario.aisle_width) return Number(scenario.aisle_width) * 10;
+  if (scenario.aisle_width) return Number(scenario.aisle_width) * 10; // assume cm to mm
   return null;
 };
 
+/**
+ * Normalize the user scenario to a consistent format for the inference engine.
+ * Applies mapping to ensure surface/dirt types match database values.
+ */
 const normalizeScenario = (raw = {}) => {
   const useCaseDefaults = deriveUseCase(raw.use_case);
   const pressureIntensity = derivePressureIntensity(raw.pressure_required);
 
-  const surfaces = unique([
-    ...toArray(raw.surface_type),
-    ...toArray(raw.surface_compatibility),
-    ...toArray(raw.floor_type),
-  ]);
+  // Normalize surfaces and dirts using the mappings
+  const rawSurfaces = toArray(raw.surface_type).concat(toArray(raw.surface_compatibility)).concat(toArray(raw.floor_type));
+  const surfaces = unique(normalizeArray(rawSurfaces, surfaceMapping));
 
-  const soils = unique([
-    ...toArray(raw.dirt_type),
-    ...toArray(raw.dirt_compatibility),
-    ...toArray(raw.debris_type),
-    ...toArray(raw.soil_type),
-  ]);
+  const rawSoils = toArray(raw.dirt_type).concat(toArray(raw.dirt_compatibility)).concat(toArray(raw.debris_type)).concat(toArray(raw.soil_type));
+  const soils = unique(normalizeArray(rawSoils, dirtMapping));
 
   return {
     ...raw,
@@ -73,6 +114,9 @@ const normalizeScenario = (raw = {}) => {
     min_aisle_width_mm: normalizeAisleWidthMm(raw),
     power_source: normalizePowerSource(raw.power_source),
     power_available_kw: raw.power_available_kw ? Number(raw.power_available_kw) : null,
+    // Also pass through other fields as is, but ensure surface_type and dirt_type are overridden with normalized version for backward compatibility
+    surface_type: surfaces.length > 0 ? surfaces[0] : null,
+    dirt_type: soils.length > 0 ? soils[0] : null,
   };
 };
 

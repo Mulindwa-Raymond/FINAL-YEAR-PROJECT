@@ -236,6 +236,11 @@ const runInferenceEngine = async (scenario) => {
           eco_preference: scenario.eco_preference,
         });
 
+        // Safely compute operating cost – default to 0 if fields are missing
+        const maintenance = item.equipment.estimated_maintenance_cost_per_year_ugx || 0;
+        const running = item.equipment.estimated_running_cost_per_year_ugx || 0;
+        const operatingCost = maintenance + running;
+
         return {
           _id: item.equipment._id,
           id: item.equipment._id,
@@ -248,21 +253,14 @@ const runInferenceEngine = async (scenario) => {
           domain: item.equipment.domain,
           match_score: item.score,
           current_price_ugx: item.equipment.current_price_ugx || 0,
-          estimated_maintenance_cost_per_year_ugx:
-            item.equipment.estimated_maintenance_cost_per_year_ugx || 0,
-          estimated_running_cost_per_year_ugx:
-            item.equipment.estimated_running_cost_per_year_ugx || 0,
+          estimated_maintenance_cost_per_year_ugx: maintenance,
+          estimated_running_cost_per_year_ugx: running,
           // Full TCO (including purchase price) – kept for historical/display purposes
           estimated_tco_per_year_ugx: Math.round(
-            (item.equipment.current_price_ugx || 0) +
-            (item.equipment.estimated_maintenance_cost_per_year_ugx || 0) +
-            (item.equipment.estimated_running_cost_per_year_ugx || 0)
+            (item.equipment.current_price_ugx || 0) + maintenance + running
           ),
-          // NEW: operating cost (maintenance + running) – used for recommendation display
-          estimated_operating_cost_per_year_ugx: Math.round(
-            (item.equipment.estimated_maintenance_cost_per_year_ugx || 0) +
-            (item.equipment.estimated_running_cost_per_year_ugx || 0)
-          ),
+          // Operating cost (maintenance + running) – used for recommendation display
+          estimated_operating_cost_per_year_ugx: Math.round(operatingCost),
           power_source: item.equipment.power_source,
           weight_kg: item.equipment.weight_kg,
           surface_compatibility: item.equipment.surface_compatibility,
