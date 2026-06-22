@@ -108,7 +108,11 @@ const getAllFeedback = async (req, res, next) => {
       .sort({ created_at: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('recommendation_id', 'user_id surface_type dirt_type');
+      .populate({
+        path: 'recommendation_id',
+        select: 'user_id surface_type dirt_type machine_category',
+        populate: { path: 'user_id', select: 'email username' }
+      });
     
     const total = await Feedback.countDocuments(filter);
     

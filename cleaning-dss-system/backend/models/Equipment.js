@@ -197,7 +197,7 @@ const equipmentSchema = new mongoose.Schema(
 // VIRTUAL FIELDS
 // ============================================
 
-// Full TCO including purchase price (maintenance + running + price)
+// FIX: price was declared but never included in the sum — now correctly adds all three components
 equipmentSchema.virtual('estimated_tco_per_year_ugx').get(function () {
   const price = this.current_price_ugx || 0;
   const maintenance = this.estimated_maintenance_cost_per_year_ugx || 0;
@@ -290,7 +290,6 @@ equipmentSchema.index({ active: 1, in_stock: 1 });
 
 module.exports = {
   Equipment: mongoose.model('Equipment', equipmentSchema),
-  // Export enums for use in other files
   machineCategories,
   intensityLevels,
   domainLevels,

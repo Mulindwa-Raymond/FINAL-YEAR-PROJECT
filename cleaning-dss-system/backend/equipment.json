@@ -1,0 +1,4764 @@
+[{
+  "_id": {
+    "$oid": "6a2f8adb0fba2f8a358a76d3"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "K 2",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light soil",
+    "organic"
+  ],
+  "current_price_ugx": 1820000,
+  "estimated_maintenance_cost_per_year_ugx": 180000,
+  "estimated_running_cost_per_year_ugx": 120000,
+  "image_url": "https://s1.kaercher-media.com/mam/16735200/mainproduct/df983c9c-d19e-435a-917d-9f5de5cf93ef/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adb0fba2f8a358a76d4",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:15.469Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:02:07.330Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adb0fba2f8a358a76d6"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "K 2 Power Control",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood",
+    "garden furniture"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light soil",
+    "organic"
+  ],
+  "current_price_ugx": 2180000,
+  "estimated_maintenance_cost_per_year_ugx": 180000,
+  "estimated_running_cost_per_year_ugx": 130000,
+  "image_url": "https://s1.kaercher-media.com/mam/16736100/mainproduct/4f258d76-c19b-49eb-9b79-4079dc9273ce/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adb0fba2f8a358a76d7",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:15.604Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:00:02.753Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adb0fba2f8a358a76d9"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "K 4",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood",
+    "vehicles"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light soil",
+    "heavy soil",
+    "organic"
+  ],
+  "current_price_ugx": 3640000,
+  "estimated_maintenance_cost_per_year_ugx": 200000,
+  "estimated_running_cost_per_year_ugx": 150000,
+  "image_url": "https://s1.kaercher-media.com/mam/13240450/mainproduct/168175/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adb0fba2f8a358a76da",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:15.776Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:09:34.494Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adb0fba2f8a358a76dc"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "K 5 WCM",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood",
+    "vehicles",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "organic",
+    "oil"
+  ],
+  "current_price_ugx": 5460000,
+  "estimated_maintenance_cost_per_year_ugx": 300000,
+  "estimated_running_cost_per_year_ugx": 200000,
+  "image_url": "https://s1.kaercher-media.com/mam/11806330/mainproduct/82483/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adb0fba2f8a358a76dd",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:15.981Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:12:06.202Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adc0fba2f8a358a76df"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "K 7 WCM",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood",
+    "vehicles",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "organic",
+    "oil",
+    "lime scale"
+  ],
+  "current_price_ugx": 9100000,
+  "estimated_maintenance_cost_per_year_ugx": 350000,
+  "estimated_running_cost_per_year_ugx": 280000,
+  "image_url": "https://s1.kaercher-media.com/mam/13174000/mainproduct/6d1f237e-53ae-41ef-b68a-8b6451e54e96/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adc0fba2f8a358a76e0",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:16.189Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:13:18.971Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adc0fba2f8a358a76e2"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "K 7 Comfort Premium",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood",
+    "vehicles",
+    "stainless steel",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "organic",
+    "oil",
+    "lime scale",
+    "rust"
+  ],
+  "current_price_ugx": 10920000,
+  "estimated_maintenance_cost_per_year_ugx": 370000,
+  "estimated_running_cost_per_year_ugx": 300000,
+  "image_url": "https://s1.kaercher-media.com/mam/14470500/mainproduct/108133/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adc0fba2f8a358a76e3",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:16.387Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:13:59.797Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adc0fba2f8a358a76e5"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HD 6/15 C",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "rust"
+  ],
+  "current_price_ugx": 14560000,
+  "estimated_maintenance_cost_per_year_ugx": 600000,
+  "estimated_running_cost_per_year_ugx": 480000,
+  "image_url": "https://s1.kaercher-media.com/mam/13679000/mainproduct/2f16cbce-7953-44f3-a52f-d537b96acaa7/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adc0fba2f8a358a76e6",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:16.523Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:15:45.673Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adc0fba2f8a358a76e8"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HD 6/15 M",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "rust",
+    "lime scale"
+  ],
+  "current_price_ugx": 18200000,
+  "estimated_maintenance_cost_per_year_ugx": 700000,
+  "estimated_running_cost_per_year_ugx": 520000,
+  "image_url": "https://s1.kaercher-media.com/mam/11509300/mainproduct/185721/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adc0fba2f8a358a76e9",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:16.657Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:23:43.782Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adc0fba2f8a358a76eb"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HD 6/15 MXA Plus",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "rust",
+    "lime scale"
+  ],
+  "current_price_ugx": 21840000,
+  "estimated_maintenance_cost_per_year_ugx": 750000,
+  "estimated_running_cost_per_year_ugx": 560000,
+  "image_url": "https://s1.kaercher-media.com/mam/11509430/mainproduct/147639/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adc0fba2f8a358a76ec",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:16.790Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:26:01.194Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8add0fba2f8a358a76ee"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HDS 6/14 C",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "hot_water",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "oil",
+    "heavy soil",
+    "organic",
+    "rust"
+  ],
+  "current_price_ugx": 29120000,
+  "estimated_maintenance_cost_per_year_ugx": 1200000,
+  "estimated_running_cost_per_year_ugx": 900000,
+  "image_url": "https://s1.kaercher-media.com/mam/11699000/mainproduct/143294/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8add0fba2f8a358a76ef",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:17.004Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:28:38.552Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8add0fba2f8a358a76f1"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HDS 6/15 C",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "hot_water",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "stainless steel",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "oil",
+    "heavy soil",
+    "organic",
+    "rust",
+    "lime scale"
+  ],
+  "current_price_ugx": 36400000,
+  "estimated_maintenance_cost_per_year_ugx": 1400000,
+  "estimated_running_cost_per_year_ugx": 1100000,
+  "image_url": "https://s1.kaercher-media.com/mam/11699000/mainproduct/143294/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8add0fba2f8a358a76f2",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:17.163Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:29:14.387Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8add0fba2f8a358a76f4"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HDS 8/18 M",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "hot_water",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "oil",
+    "heavy soil",
+    "rust",
+    "lime scale"
+  ],
+  "current_price_ugx": 54600000,
+  "estimated_maintenance_cost_per_year_ugx": 1800000,
+  "estimated_running_cost_per_year_ugx": 1500000,
+  "image_url": "https://s1.kaercher-media.com/mam/10779080/mainproduct/143285/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8add0fba2f8a358a76f5",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:17.311Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:31:46.030Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8add0fba2f8a358a76f7"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HD 6/15 G Classic",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "petrol",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "petrol",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "rust"
+  ],
+  "current_price_ugx": 18200000,
+  "estimated_maintenance_cost_per_year_ugx": 900000,
+  "estimated_running_cost_per_year_ugx": 800000,
+  "image_url": "https://s1.kaercher-media.com/mam/11870100/mainproduct/175620/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8add0fba2f8a358a76f8",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:17.443Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:33:47.484Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8add0fba2f8a358a76fa"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HD 9/23 G",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "petrol",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "petrol",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "rust",
+    "oil"
+  ],
+  "current_price_ugx": 36400000,
+  "estimated_maintenance_cost_per_year_ugx": 1500000,
+  "estimated_running_cost_per_year_ugx": 1400000,
+  "image_url": "https://s1.kaercher-media.com/mam/11879060/mainproduct/74962/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8add0fba2f8a358a76fb",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:17.620Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:35:24.924Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8add0fba2f8a358a76fd"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "BD 50/50 C Classic Bp",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "dust",
+    "organic",
+    "spills",
+    "light dust"
+  ],
+  "current_price_ugx": 47320000,
+  "estimated_maintenance_cost_per_year_ugx": 2100000,
+  "estimated_running_cost_per_year_ugx": 900000,
+  "image_url": "https://s1.kaercher-media.com/mam/11270010/mainproduct/172021/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8add0fba2f8a358a76fe",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:17.806Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:38:32.149Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8add0fba2f8a358a7700"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "BD 50/55 C Classic Bp Pack",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "dust",
+    "organic",
+    "spills",
+    "light dust"
+  ],
+  "current_price_ugx": 52780000,
+  "estimated_maintenance_cost_per_year_ugx": 2200000,
+  "estimated_running_cost_per_year_ugx": 950000,
+  "image_url": "https://s1.kaercher-media.com/mam/11270010/mainproduct/172021/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8add0fba2f8a358a7701",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:17.936Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:39:38.899Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ade0fba2f8a358a7703"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "BD 50/55 W Classic Bp Pack",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl",
+    "marble",
+    "wood",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "dust",
+    "organic",
+    "spills",
+    "light dust"
+  ],
+  "current_price_ugx": 58240000,
+  "estimated_maintenance_cost_per_year_ugx": 2300000,
+  "estimated_running_cost_per_year_ugx": 1000000,
+  "image_url": "https://s1.kaercher-media.com/mam/11270010/mainproduct/172021/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ade0fba2f8a358a7704",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:18.130Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:41:16.471Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ade0fba2f8a358a7706"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "B 50 W Push Scrubber",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills",
+    "organic"
+  ],
+  "current_price_ugx": 74620000,
+  "estimated_maintenance_cost_per_year_ugx": 2800000,
+  "estimated_running_cost_per_year_ugx": 1300000,
+  "image_url": "https://s1.kaercher-media.com/mam/15332420/mainproduct/208080/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ade0fba2f8a358a7707",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:18.337Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:43:07.987Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ade0fba2f8a358a7709"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "BD 50/70 R Classic Bp",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "rider",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "dust",
+    "organic",
+    "spills",
+    "heavy soil"
+  ],
+  "current_price_ugx": 114660000,
+  "estimated_maintenance_cost_per_year_ugx": 3500000,
+  "estimated_running_cost_per_year_ugx": 1600000,
+  "image_url": "https://s1.kaercher-media.com/mam/11610710/mainproduct/73638/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ade0fba2f8a358a770a",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:18.480Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:44:39.730Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ade0fba2f8a358a770c"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "BD 100/250 R Bp",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "rider",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 364000000,
+  "estimated_maintenance_cost_per_year_ugx": 8000000,
+  "estimated_running_cost_per_year_ugx": 4000000,
+  "image_url": "https://s1.kaercher-media.com/mam/14802130/mainproduct/26594/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ade0fba2f8a358a770d",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:18.643Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:45:17.440Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ade0fba2f8a358a7711"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "NT 22/1 Ap",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl",
+    "carpet"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 1638000,
+  "estimated_maintenance_cost_per_year_ugx": 150000,
+  "estimated_running_cost_per_year_ugx": 80000,
+  "image_url": "https://s1.kaercher-media.com/mam/13786000/mainproduct/582520b8-4b89-4ea4-afb6-a4ec0a2c402f/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ade0fba2f8a358a7712",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:18.851Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T07:45:49.699Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ade0fba2f8a358a7714"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "NT 65/2 Eco Te H",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl",
+    "carpet",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 3458000,
+  "estimated_maintenance_cost_per_year_ugx": 200000,
+  "estimated_running_cost_per_year_ugx": 120000,
+  "image_url": "https://s1.kaercher-media.com/mam/13251410/mainproduct/46502/d0.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ade0fba2f8a358a7715",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:18.986Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T09:16:19.821Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adf0fba2f8a358a7717"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "IVC 60/24-2 Tact²",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "heavy soil",
+    "organic",
+    "oil"
+  ],
+  "current_price_ugx": 12376000,
+  "estimated_maintenance_cost_per_year_ugx": 500000,
+  "estimated_running_cost_per_year_ugx": 320000,
+  "image_url": "https://s1.kaercher-media.com/mam/15761000/mainproduct/45728/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adf0fba2f8a358a7718",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:19.154Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:25:42.348Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adf0fba2f8a358a771a"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "IVC 60/30 Tact² Ec H",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "hazardous",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "hazardous dust"
+  ],
+  "current_price_ugx": 20748000,
+  "estimated_maintenance_cost_per_year_ugx": 700000,
+  "estimated_running_cost_per_year_ugx": 480000,
+  "image_url": "https://s1.kaercher-media.com/mam/15761010/mainproduct/28680/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adf0fba2f8a358a771b",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:19.359Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:26:35.869Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adf0fba2f8a358a771d"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "BVL 5/1 Bp",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "backpack",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 4732000,
+  "estimated_maintenance_cost_per_year_ugx": 200000,
+  "estimated_running_cost_per_year_ugx": 100000,
+  "image_url": "https://s1.kaercher-media.com/mam/13942740/mainproduct/187890/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adf0fba2f8a358a771e",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:19.566Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:27:32.149Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adf0fba2f8a358a7720"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "SC 2 Deluxe EasyFix",
+  "machine_category": "steam_cleaner",
+  "machine_subtype": "portable",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "stainless steel",
+    "glass"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "lime scale",
+    "organic",
+    "light dust"
+  ],
+  "current_price_ugx": 1456000,
+  "estimated_maintenance_cost_per_year_ugx": 100000,
+  "estimated_running_cost_per_year_ugx": 90000,
+  "image_url": "https://s1.kaercher-media.com/mam/15134000/mainproduct/216547/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adf0fba2f8a358a7721",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:19.699Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:28:18.153Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8adf0fba2f8a358a7723"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "SC 4 Premium",
+  "machine_category": "steam_cleaner",
+  "machine_subtype": "portable",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "stainless steel",
+    "glass",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "lime scale",
+    "organic"
+  ],
+  "current_price_ugx": 2548000,
+  "estimated_maintenance_cost_per_year_ugx": 120000,
+  "estimated_running_cost_per_year_ugx": 100000,
+  "image_url": "https://s1.kaercher-media.com/mam/15124880/mainproduct/84989/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8adf0fba2f8a358a7724",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:19.871Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:28:45.755Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae00fba2f8a358a7726"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "SC 5 EasyFix",
+  "machine_category": "steam_cleaner",
+  "machine_subtype": "continuous_fill",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "stainless steel",
+    "glass",
+    "wood",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "lime scale",
+    "organic",
+    "light dust"
+  ],
+  "current_price_ugx": 3276000,
+  "estimated_maintenance_cost_per_year_ugx": 150000,
+  "estimated_running_cost_per_year_ugx": 120000,
+  "image_url": "https://s1.kaercher-media.com/mam/15126600/mainproduct/56742d7b-c10c-4feb-ae72-1f47e46e684e/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae00fba2f8a358a7727",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:20.039Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:29:31.407Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae00fba2f8a358a7729"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "SG 4/4 Professional",
+  "machine_category": "steam_cleaner",
+  "machine_subtype": "continuous_fill",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "food_grade",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "stainless steel",
+    "glass",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "lime scale",
+    "organic"
+  ],
+  "current_price_ugx": 8736000,
+  "estimated_maintenance_cost_per_year_ugx": 400000,
+  "estimated_running_cost_per_year_ugx": 280000,
+  "image_url": "https://s1.kaercher-media.com/mam/10921040/mainproduct/57031/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae00fba2f8a358a772a",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:20.182Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:30:08.583Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae00fba2f8a358a772c"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "WV 6 Plus",
+  "machine_category": "window_cleaner",
+  "machine_subtype": "robotic",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "glass"
+  ],
+  "dirt_compatibility": [
+    "lime scale",
+    "organic",
+    "light dust"
+  ],
+  "current_price_ugx": 728000,
+  "estimated_maintenance_cost_per_year_ugx": 50000,
+  "estimated_running_cost_per_year_ugx": 30000,
+  "image_url": "https://s1.kaercher-media.com/mam/16337450/mainproduct/218584/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae00fba2f8a358a772d",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:20.385Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:32:58.248Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae00fba2f8a358a772f"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "WVP 10 Adv",
+  "machine_category": "window_cleaner",
+  "machine_subtype": "robotic",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "glass"
+  ],
+  "dirt_compatibility": [
+    "lime scale",
+    "organic",
+    "light dust"
+  ],
+  "current_price_ugx": 1092000,
+  "estimated_maintenance_cost_per_year_ugx": 60000,
+  "estimated_running_cost_per_year_ugx": 40000,
+  "image_url": "https://s1.kaercher-media.com/mam/16335600/mainproduct/95827/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae00fba2f8a358a7730",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:20.541Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:33:29.585Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae00fba2f8a358a7732"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "SE 4002",
+  "machine_category": "carpet_cleaner",
+  "machine_subtype": "portable",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "carpet",
+    "vinyl",
+    "upholstery"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "organic",
+    "dust",
+    "light soil"
+  ],
+  "current_price_ugx": 2184000,
+  "estimated_maintenance_cost_per_year_ugx": 150000,
+  "estimated_running_cost_per_year_ugx": 110000,
+  "image_url": "https://s1.kaercher-media.com/mam/10811400/mainproduct/47701/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae00fba2f8a358a7733",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:20.672Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:34:01.436Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae00fba2f8a358a7735"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "Puzzi 8/1 C",
+  "machine_category": "carpet_cleaner",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "carpet",
+    "upholstery"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "organic",
+    "heavy soil",
+    "grease"
+  ],
+  "current_price_ugx": 3640000,
+  "estimated_maintenance_cost_per_year_ugx": 200000,
+  "estimated_running_cost_per_year_ugx": 150000,
+  "image_url": "https://s1.kaercher-media.com/mam/11002400/mainproduct/196789/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae00fba2f8a358a7736",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:20.803Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:35:19.394Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae00fba2f8a358a7738"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "Puzzi 10/1",
+  "machine_category": "carpet_cleaner",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "carpet",
+    "upholstery"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "organic",
+    "heavy soil",
+    "grease"
+  ],
+  "current_price_ugx": 4914000,
+  "estimated_maintenance_cost_per_year_ugx": 250000,
+  "estimated_running_cost_per_year_ugx": 180000,
+  "image_url": "https://s1.kaercher-media.com/mam/11001300/mainproduct/d306ec1a-1aef-462c-90e9-5a99c134aef9/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae00fba2f8a358a7739",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:20.997Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:36:28.239Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae10fba2f8a358a773b"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "S 6 Twin Push Sweeper",
+  "machine_category": "sweeper",
+  "machine_subtype": "walk_behind",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "manual",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 546000,
+  "estimated_maintenance_cost_per_year_ugx": 20000,
+  "estimated_running_cost_per_year_ugx": null,
+  "image_url": "https://s1.kaercher-media.com/mam/17664600/mainproduct/125494/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae10fba2f8a358a773c",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:21.130Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:37:29.117Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae10fba2f8a358a773e"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "KM 70/30 C Bp Pack",
+  "machine_category": "sweeper",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "wood",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic",
+    "heavy soil"
+  ],
+  "current_price_ugx": 10920000,
+  "estimated_maintenance_cost_per_year_ugx": 400000,
+  "estimated_running_cost_per_year_ugx": 200000,
+  "image_url": "https://s1.kaercher-media.com/mam/15172310/mainproduct/220344/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae10fba2f8a358a773f",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:21.267Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:38:06.200Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae10fba2f8a358a7741"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "KM 90/60 R Bp",
+  "machine_category": "sweeper",
+  "machine_subtype": "rider",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "wood",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic",
+    "heavy soil"
+  ],
+  "current_price_ugx": 36400000,
+  "estimated_maintenance_cost_per_year_ugx": 1200000,
+  "estimated_running_cost_per_year_ugx": 600000,
+  "image_url": "https://s1.kaercher-media.com/mam/10473110/mainproduct/172553/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae10fba2f8a358a7742",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:21.397Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:38:37.635Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae10fba2f8a358a7744"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "KM 130/300 R D",
+  "machine_category": "sweeper",
+  "machine_subtype": "rider",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "diesel",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "asphalt"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "organic"
+  ],
+  "current_price_ugx": 255220000,
+  "estimated_maintenance_cost_per_year_ugx": 8000000,
+  "estimated_running_cost_per_year_ugx": 6000000,
+  "image_url": "https://s1.kaercher-media.com/mam/11861390/mainproduct/66328/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae10fba2f8a358a7745",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:21.527Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:39:10.292Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae10fba2f8a358a7747"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "KM 85/50 W Bp Pack",
+  "machine_category": "sweeper",
+  "machine_subtype": "compact",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 25480000,
+  "estimated_maintenance_cost_per_year_ugx": 800000,
+  "estimated_running_cost_per_year_ugx": 400000,
+  "image_url": "https://s1.kaercher-media.com/mam/13511170/mainproduct/158279/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae10fba2f8a358a7748",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:21.659Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:39:43.506Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae10fba2f8a358a774a"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SC250",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "organic",
+    "light dust"
+  ],
+  "current_price_ugx": 15288000,
+  "estimated_maintenance_cost_per_year_ugx": 700000,
+  "estimated_running_cost_per_year_ugx": 350000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/SC250-masked-ps-Original-ETEEJJ.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae10fba2f8a358a774b",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:21.812Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T10:46:41.983Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae20fba2f8a358a774d"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SC400",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "organic",
+    "light dust",
+    "grease"
+  ],
+  "current_price_ugx": 23452000,
+  "estimated_maintenance_cost_per_year_ugx": 1100000,
+  "estimated_running_cost_per_year_ugx": 600000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/SC4000_06_Perspective_Cylinder-ps-Original-JNOTHUB.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae20fba2f8a358a774e",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:22.022Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:10:48.376Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae20fba2f8a358a7750"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SC500",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "organic",
+    "heavy soil",
+    "grease"
+  ],
+  "current_price_ugx": 36400000,
+  "estimated_maintenance_cost_per_year_ugx": 1500000,
+  "estimated_running_cost_per_year_ugx": 800000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/9087351020_SC500_masked_shadowweb-ps-Original-JNHJPLB.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae20fba2f8a358a7751",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:22.228Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:11:31.172Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae20fba2f8a358a7754"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SC800",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 72800000,
+  "estimated_maintenance_cost_per_year_ugx": 2500000,
+  "estimated_running_cost_per_year_ugx": 1400000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/SC800-ironmetal-ps-Original-JUNPUM.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae20fba2f8a358a7755",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:22.366Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:12:53.540Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae20fba2f8a358a7758"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "BR855",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "rider",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 218400000,
+  "estimated_maintenance_cost_per_year_ugx": 6000000,
+  "estimated_running_cost_per_year_ugx": 3200000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/BR755PB-ps-Original-JUUPPF.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae20fba2f8a358a7759",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:22.495Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:13:50.710Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae20fba2f8a358a775b"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "CR1200",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "rider",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 327600000,
+  "estimated_maintenance_cost_per_year_ugx": 9000000,
+  "estimated_running_cost_per_year_ugx": 4800000,
+  "image_url": "https://img.yumpu.com/27496631/1/500x640/nilfisk-cr1200-sweeper-scrubber-brochure.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae20fba2f8a358a775c",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:22.631Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:15:12.728Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae20fba2f8a358a7760"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "VP300 Eco",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 1456000,
+  "estimated_maintenance_cost_per_year_ugx": 120000,
+  "estimated_running_cost_per_year_ugx": 70000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/VP300-extension-tube-ps-Original-JPLLCCN.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae20fba2f8a358a7761",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:22.839Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:18:01.190Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae30fba2f8a358a7763"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "GD930",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic",
+    "heavy soil"
+  ],
+  "current_price_ugx": 3094000,
+  "estimated_maintenance_cost_per_year_ugx": 180000,
+  "estimated_running_cost_per_year_ugx": 100000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/GD930_frit-ps-Original-JPUOCK.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae30fba2f8a358a7764",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:23.074Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:20:02.757Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae30fba2f8a358a7766"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "IVB7",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "spills",
+    "dust",
+    "oil"
+  ],
+  "current_price_ugx": 9464000,
+  "estimated_maintenance_cost_per_year_ugx": 400000,
+  "estimated_running_cost_per_year_ugx": 250000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/GD930_frit-ps-Original-JPUOCK.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae30fba2f8a358a7767",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:23.250Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:20:45.730Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae30fba2f8a358a776a"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "VHS120",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "hazardous",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "hazardous dust"
+  ],
+  "current_price_ugx": 14560000,
+  "estimated_maintenance_cost_per_year_ugx": 600000,
+  "estimated_running_cost_per_year_ugx": 350000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/VHS120-(7)-ps-Original-JPLTNJF.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae30fba2f8a358a776b",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:23.423Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:46:59.743Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae30fba2f8a358a776e"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "BP30",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "backpack",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 4368000,
+  "estimated_maintenance_cost_per_year_ugx": 200000,
+  "estimated_running_cost_per_year_ugx": 100000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/VP300eco-telescop-ps-Original-JPLLCHS.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae30fba2f8a358a776f",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:23.554Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:47:59.438Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae30fba2f8a358a7771"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "Attix 44 Wet & Dry",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "dust",
+    "heavy soil",
+    "organic"
+  ],
+  "current_price_ugx": 5824000,
+  "estimated_maintenance_cost_per_year_ugx": 300000,
+  "estimated_running_cost_per_year_ugx": 180000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/ATTIX-44-2L-IC-ps-Original-EJUHNJ.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae30fba2f8a358a7772",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:23.713Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:49:21.654Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae30fba2f8a358a7774"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "Attix 965-01",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "hazardous",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "hazardous dust",
+    "oil"
+  ],
+  "current_price_ugx": 21840000,
+  "estimated_maintenance_cost_per_year_ugx": 700000,
+  "estimated_running_cost_per_year_ugx": 420000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/ATTIX-995-0HM_Type-22-ps-Original-ENJJLM.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae30fba2f8a358a7775",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:23.851Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:51:26.195Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae30fba2f8a358a7777"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SR1200S Walk Behind Sweeper",
+  "machine_category": "sweeper",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "wood",
+    "vinyl",
+    "asphalt"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic",
+    "heavy soil"
+  ],
+  "current_price_ugx": 21840000,
+  "estimated_maintenance_cost_per_year_ugx": 900000,
+  "estimated_running_cost_per_year_ugx": 500000,
+  "image_url": "https://metech.nl/wp-content/uploads/2023/08/Meijer-SR1200-veegschrobmachine-1024x768.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae30fba2f8a358a7778",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:23.988Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:58:22.363Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae40fba2f8a358a777a"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SR1900",
+  "machine_category": "sweeper",
+  "machine_subtype": "rider",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "asphalt"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "organic"
+  ],
+  "current_price_ugx": 109200000,
+  "estimated_maintenance_cost_per_year_ugx": 3500000,
+  "estimated_running_cost_per_year_ugx": 1800000,
+  "image_url": "https://www.powervac.com.au/wp-content/uploads/2014/06/nilfisk-sr1900-lr1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae40fba2f8a358a777b",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:24.115Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:59:04.189Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae40fba2f8a358a777f"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SW750",
+  "machine_category": "sweeper",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "asphalt",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "organic"
+  ],
+  "current_price_ugx": 43680000,
+  "estimated_maintenance_cost_per_year_ugx": 1800000,
+  "estimated_running_cost_per_year_ugx": 1000000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/908_4701_010_SW750GB_shadowweb-ps-Original-JNNUHNB.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae40fba2f8a358a7780",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:24.276Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:12:50.022Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae40fba2f8a358a7782"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "MC3C Cold Water Pressure Washer",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "organic"
+  ],
+  "current_price_ugx": 9828000,
+  "estimated_maintenance_cost_per_year_ugx": 500000,
+  "estimated_running_cost_per_year_ugx": 350000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/MC-3C_FlexoPower_R-ps-Original-TTHONK.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae40fba2f8a358a7783",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:24.407Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:14:12.725Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae40fba2f8a358a7785"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "MC5M",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "rust"
+  ],
+  "current_price_ugx": 21840000,
+  "estimated_maintenance_cost_per_year_ugx": 900000,
+  "estimated_running_cost_per_year_ugx": 620000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/MC-5M-200-1000-XT_R-ps-Original-EHCJTJ.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae40fba2f8a358a7786",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:24.588Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:15:14.331Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae40fba2f8a358a7788"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "MC7P Hot Water Pressure Washer",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "hot_water",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "oil",
+    "heavy soil",
+    "rust",
+    "lime scale"
+  ],
+  "current_price_ugx": 54600000,
+  "estimated_maintenance_cost_per_year_ugx": 2000000,
+  "estimated_running_cost_per_year_ugx": 1600000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/MC-7P-FA_R-ps-Original-EHELUP.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae40fba2f8a358a7789",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:24.787Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:16:05.810Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae40fba2f8a358a778b"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "Poseidon 3-36 PE Electric",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "petrol",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "petrol",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "rust"
+  ],
+  "current_price_ugx": 29120000,
+  "estimated_maintenance_cost_per_year_ugx": 300000,
+  "estimated_running_cost_per_year_ugx": 160000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/MC-7P-FA_R-ps-Original-EHELUP.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae40fba2f8a358a778c",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:24.992Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:17:12.735Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae50fba2f8a358a778e"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "C110 Bar Domestic Washer",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "light soil",
+    "organic",
+    "dust"
+  ],
+  "current_price_ugx": 1820000,
+  "estimated_maintenance_cost_per_year_ugx": 150000,
+  "estimated_running_cost_per_year_ugx": 90000,
+  "image_url": "https://www.sitebox.ltd.uk/prodimages/c11045pcaxtra.jpg?1781792280",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae50fba2f8a358a778f",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:25.127Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:18:22.983Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae50fba2f8a358a7791"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "C135.1-8 PAD X-TRA",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood",
+    "vehicles"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light soil",
+    "organic",
+    "heavy soil"
+  ],
+  "current_price_ugx": 2912000,
+  "estimated_maintenance_cost_per_year_ugx": 200000,
+  "estimated_running_cost_per_year_ugx": 120000,
+  "image_url": "https://nilfiskdealer.nl/media/catalog/product/cache/17cfbd1cb9a84ba8ed5f646b80aff585/1/2/128471217_c_135_1_8_pad_x_tra.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae50fba2f8a358a7792",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:25.273Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:19:47.945Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae50fba2f8a358a7794"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "D-ST15 Steam Cleaner",
+  "machine_category": "steam_cleaner",
+  "machine_subtype": "steam",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "food_grade",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "stainless steel",
+    "glass",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "lime scale",
+    "organic"
+  ],
+  "current_price_ugx": 7280000,
+  "estimated_maintenance_cost_per_year_ugx": 350000,
+  "estimated_running_cost_per_year_ugx": 200000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/SDV4500-Nilfisk-ps-Original-JNUPPOP.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae50fba2f8a358a7795",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:25.503Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:21:47.123Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae50fba2f8a358a7797"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "Multi II 30 Carpet Extractor",
+  "machine_category": "carpet_cleaner",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "carpet",
+    "upholstery"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "organic",
+    "heavy soil",
+    "grease"
+  ],
+  "current_price_ugx": 12376000,
+  "estimated_maintenance_cost_per_year_ugx": 600000,
+  "estimated_running_cost_per_year_ugx": 350000,
+  "image_url": "https://www.nilfisk.com/media/tfvfb5gs/multi_locationmulti-ii_30-t_uk5.jpg?width=1728&rxy=0.5%2c0.5&cc=0.06477356959050483%2c0%2c0.23411268200708507%2c0&format=webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae50fba2f8a358a7798",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:25.649Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:22:42.616Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae50fba2f8a358a779a"
+  },
+  "brand_name": "Numatic",
+  "model_name": "Henry HVR200",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 728000,
+  "estimated_maintenance_cost_per_year_ugx": 80000,
+  "estimated_running_cost_per_year_ugx": 50000,
+  "image_url": "https://numatic.com/wp-content/smush-webp/Henry-HVR200-Featured-Image.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae50fba2f8a358a779b",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:25.777Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:23:13.607Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae50fba2f8a358a779d"
+  },
+  "brand_name": "Numatic",
+  "model_name": "Harry HHR200",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "wood",
+    "carpet"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 1092000,
+  "estimated_maintenance_cost_per_year_ugx": 100000,
+  "estimated_running_cost_per_year_ugx": 60000,
+  "image_url": "https://numaticsupport.com/wp-content/uploads/elementor/thumbs/harry-f34r-copy-rdiw6jiqj3w9pilu4nxnwq6cjmg5jrpppdqg1axx28.png",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae50fba2f8a358a779e",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:25.915Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T14:24:10.617Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae60fba2f8a358a77a0"
+  },
+  "brand_name": "Numatic",
+  "model_name": "George GVE370",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 1638000,
+  "estimated_maintenance_cost_per_year_ugx": 120000,
+  "estimated_running_cost_per_year_ugx": 70000,
+  "image_url": "https://numatic.com/wp-content/smush-webp/George-GVE370-Featured-Image-1.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae60fba2f8a358a77a1",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:26.117Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T06:24:31.823Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae60fba2f8a358a77a3"
+  },
+  "brand_name": "Numatic",
+  "model_name": "NTD750 Industrial Vacuum",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "oil",
+    "organic"
+  ],
+  "current_price_ugx": 6552000,
+  "estimated_maintenance_cost_per_year_ugx": 350000,
+  "estimated_running_cost_per_year_ugx": 200000,
+  "image_url": "https://numatic.com/uk/wp-content/smush-webp/sites/2/NTD750-Featured-Image-1.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae60fba2f8a358a77a4",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:26.293Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T06:28:03.845Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae60fba2f8a358a77a6"
+  },
+  "brand_name": "Numatic",
+  "model_name": "NDD900 Industrial Vacuum",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "hazardous dust",
+    "oil"
+  ],
+  "current_price_ugx": 9464000,
+  "estimated_maintenance_cost_per_year_ugx": 500000,
+  "estimated_running_cost_per_year_ugx": 280000,
+  "image_url": "https://www.averncleaningsupplies.com/cdn/shop/products/NDD900-fine-dust-vacuum-cleaner-numatic.jpg?v=1771596444&width=1946",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae60fba2f8a358a77a7",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:26.528Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T06:31:47.075Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae60fba2f8a358a77a9"
+  },
+  "brand_name": "Numatic",
+  "model_name": "NRV200 Backpack Vacuum",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 1456000,
+  "estimated_maintenance_cost_per_year_ugx": 100000,
+  "estimated_running_cost_per_year_ugx": 60000,
+  "image_url": "https://www.averncleaningsupplies.com/cdn/shop/products/RSV200_20Blue.jpg?v=1771597072&width=1946",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae60fba2f8a358a77aa",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:26.660Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T06:35:29.783Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae60fba2f8a358a77ac"
+  },
+  "brand_name": "Numatic",
+  "model_name": "HZB200 HEPA Vacuum",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "hazardous",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "hazardous dust",
+    "light dust"
+  ],
+  "current_price_ugx": 3822000,
+  "estimated_maintenance_cost_per_year_ugx": 250000,
+  "estimated_running_cost_per_year_ugx": 140000,
+  "image_url": "https://www.averncleaningsupplies.com/cdn/shop/files/numatic-hz200-h-class-vacuum-cleaner.png?v=1763032021&width=1946",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae60fba2f8a358a77ad",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:26.834Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:00:48.478Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae70fba2f8a358a77af"
+  },
+  "brand_name": "Numatic",
+  "model_name": "WVD570 Wet & Dry Vacuum",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "heavy soil",
+    "dust",
+    "oil"
+  ],
+  "current_price_ugx": 5096000,
+  "estimated_maintenance_cost_per_year_ugx": 300000,
+  "estimated_running_cost_per_year_ugx": 170000,
+  "image_url": "https://numatic.com/uk/wp-content/smush-webp/sites/2/WV570-WVD570-Featured-Image-1-1.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae70fba2f8a358a77b0",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:27.041Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:26:06.114Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae70fba2f8a358a77b2"
+  },
+  "brand_name": "Numatic",
+  "model_name": "TT1840 Walk Behind Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "organic",
+    "grease",
+    "light dust"
+  ],
+  "current_price_ugx": 10920000,
+  "estimated_maintenance_cost_per_year_ugx": 600000,
+  "estimated_running_cost_per_year_ugx": 400000,
+  "image_url": "https://numatic.com/wp-content/smush-webp/TT1840-Featured-Image.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae70fba2f8a358a77b3",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:27.244Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:37:46.726Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae70fba2f8a358a77b5"
+  },
+  "brand_name": "Numatic",
+  "model_name": "TTB1840NX-R Cordless Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "organic",
+    "light dust"
+  ],
+  "current_price_ugx": 18200000,
+  "estimated_maintenance_cost_per_year_ugx": 700000,
+  "estimated_running_cost_per_year_ugx": 450000,
+  "image_url": "https://numatic.com/uk/wp-content/smush-webp/sites/2/TTB1840NX-R-Up-and-Running-in-Minutes-Full.png.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae70fba2f8a358a77b6",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:27.379Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:38:58.536Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae70fba2f8a358a77b8"
+  },
+  "brand_name": "Numatic",
+  "model_name": "440NX Cordless Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "organic",
+    "grease",
+    "light dust"
+  ],
+  "current_price_ugx": 21840000,
+  "estimated_maintenance_cost_per_year_ugx": 800000,
+  "estimated_running_cost_per_year_ugx": 500000,
+  "image_url": "https://cdn.insidedata.co.uk/avica/fit/500x500/product_images/9/913724__1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae70fba2f8a358a77b9",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:27.508Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:41:13.770Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae70fba2f8a358a77bb"
+  },
+  "brand_name": "Numatic",
+  "model_name": "TBL4055 Walk Behind Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "dust",
+    "spills",
+    "organic"
+  ],
+  "current_price_ugx": 36400000,
+  "estimated_maintenance_cost_per_year_ugx": 1400000,
+  "estimated_running_cost_per_year_ugx": 700000,
+  "image_url": "https://numatic.com/uk/wp-content/smush-webp/sites/2/TBL4055T-Featured-Image-1-1.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae70fba2f8a358a77bc",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:27.653Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:41:57.433Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae70fba2f8a358a77be"
+  },
+  "brand_name": "Numatic",
+  "model_name": "TTB3045NX Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "organic",
+    "light dust"
+  ],
+  "current_price_ugx": 14560000,
+  "estimated_maintenance_cost_per_year_ugx": 600000,
+  "estimated_running_cost_per_year_ugx": 380000,
+  "image_url": "https://numatic.com/wp-content/smush-webp/2024/06/TTB3045NX-R-Walk-Behind-Scrubber-Dryer-Top-Banner.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae70fba2f8a358a77bf",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:27.858Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:42:48.787Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae70fba2f8a358a77c1"
+  },
+  "brand_name": "Numatic",
+  "model_name": "TRL720 Ride-On Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills",
+    "organic"
+  ],
+  "current_price_ugx": 182000000,
+  "estimated_maintenance_cost_per_year_ugx": 6000000,
+  "estimated_running_cost_per_year_ugx": 3500000,
+  "image_url": "https://numatic.com/wp-content/smush-webp/TRL720-Featured-Image-1-3.png.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae70fba2f8a358a77c2",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:27.990Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:44:31.789Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae80fba2f8a358a77c4"
+  },
+  "brand_name": "Numatic",
+  "model_name": "TVL850 Ride-On Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 218400000,
+  "estimated_maintenance_cost_per_year_ugx": 7000000,
+  "estimated_running_cost_per_year_ugx": 4200000,
+  "image_url": "https://numatic.com/wp-content/smush-webp/TVL850-Featured-Image-1-1.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae80fba2f8a358a77c5",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:28.163Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:45:44.486Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae80fba2f8a358a77c7"
+  },
+  "brand_name": "Numatic",
+  "model_name": "CRL8072 Compact Rider Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "dust",
+    "spills"
+  ],
+  "current_price_ugx": 127400000,
+  "estimated_maintenance_cost_per_year_ugx": 4000000,
+  "estimated_running_cost_per_year_ugx": 2500000,
+  "image_url": "https://numatic.com/uk/wp-content/smush-webp/sites/2/CRL8072-Featured-Image-1.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae80fba2f8a358a77c8",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:28.308Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:46:58.261Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae80fba2f8a358a77ca"
+  },
+  "brand_name": "Numatic",
+  "model_name": "CRG8072 Rider Scrubber Dryer",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "dust",
+    "spills"
+  ],
+  "current_price_ugx": 145600000,
+  "estimated_maintenance_cost_per_year_ugx": 4500000,
+  "estimated_running_cost_per_year_ugx": 2800000,
+  "image_url": "https://numatic.com/uk/wp-content/smush-webp/sites/2/CRL8072-Featured-Image-1.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae80fba2f8a358a77cb",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:28.473Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:47:56.167Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae80fba2f8a358a77cd"
+  },
+  "brand_name": "Numatic",
+  "model_name": "RSB140NX Robotic Scrubber",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "organic",
+    "spills",
+    "light dust"
+  ],
+  "current_price_ugx": 145600000,
+  "estimated_maintenance_cost_per_year_ugx": 5000000,
+  "estimated_running_cost_per_year_ugx": 1800000,
+  "image_url": "https://www.jangro.net/media/catalog/product/cache/97803f71b8565fbda6884aec39004b24/F/A/FA621_20.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae80fba2f8a358a77ce",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:28.606Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:49:12.964Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae80fba2f8a358a77d4"
+  },
+  "brand_name": "Numatic",
+  "model_name": "WFF10 Walk Behind Carpet Cleaner",
+  "machine_category": "carpet_cleaner",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "carpet",
+    "upholstery"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "organic",
+    "heavy soil",
+    "grease"
+  ],
+  "current_price_ugx": 10920000,
+  "estimated_maintenance_cost_per_year_ugx": 500000,
+  "estimated_running_cost_per_year_ugx": 320000,
+  "image_url": "https://www.its-africa.co.za/wp-content/uploads/2020/10/va833024-2.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae80fba2f8a358a77d5",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:28.741Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:52:20.401Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae80fba2f8a358a77d7"
+  },
+  "brand_name": "Numatic",
+  "model_name": "WFF48 Spot Cleaner",
+  "machine_category": "carpet_cleaner",
+  "machine_subtype": "portable",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "carpet",
+    "upholstery"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "organic",
+    "light soil"
+  ],
+  "current_price_ugx": 2184000,
+  "estimated_maintenance_cost_per_year_ugx": 120000,
+  "estimated_running_cost_per_year_ugx": 80000,
+  "image_url": "https://numatic.com/uk/wp-content/smush-webp/sites/2/CT900-CTD900-Featured-Image-1.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae80fba2f8a358a77d8",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:28.869Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T07:54:16.449Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae90fba2f8a358a77da"
+  },
+  "brand_name": "Numatic",
+  "model_name": "SW900B Walk Behind Sweeper",
+  "machine_category": "sweeper",
+  "machine_subtype": "walk_behind",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "manual",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "wood",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 2548000,
+  "estimated_maintenance_cost_per_year_ugx": 50000,
+  "estimated_running_cost_per_year_ugx": null,
+  "image_url": "https://www.nilfisk.com/product-images-1920/SW900-OL-Rt-ps-Original-JPLHOHB.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae90fba2f8a358a77db",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:29.088Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:01:55.745Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae90fba2f8a358a77dd"
+  },
+  "brand_name": "Numatic",
+  "model_name": "NTT1840 Walk Behind Scrubber",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 25480000,
+  "estimated_maintenance_cost_per_year_ugx": 1000000,
+  "estimated_running_cost_per_year_ugx": 600000,
+  "image_url": "https://numatic.com/wp-content/uploads/TT1840G-Main.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae90fba2f8a358a77de",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:29.228Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:03:07.718Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae90fba2f8a358a77e0"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "WVC 2",
+  "machine_category": "window_cleaner",
+  "machine_subtype": "robotic",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "glass"
+  ],
+  "dirt_compatibility": [
+    "lime scale",
+    "organic",
+    "light dust"
+  ],
+  "current_price_ugx": 1092000,
+  "estimated_maintenance_cost_per_year_ugx": 60000,
+  "estimated_running_cost_per_year_ugx": 35000,
+  "image_url": "https://s1.kaercher-media.com/mam/11980350/mainproduct/f9c83a2c-f642-4591-86b4-a5b195d3fed0/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae90fba2f8a358a77e1",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:29.360Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:04:42.154Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae90fba2f8a358a77e3"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "WFP 60 Plus Water Fed Pole",
+  "machine_category": "window_cleaner",
+  "machine_subtype": "water_fed_pole",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "manual",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "glass"
+  ],
+  "dirt_compatibility": [
+    "lime scale",
+    "organic"
+  ],
+  "current_price_ugx": 3640000,
+  "estimated_maintenance_cost_per_year_ugx": 100000,
+  "estimated_running_cost_per_year_ugx": 80000,
+  "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsi6164RlxdF33C92OdKUZqvDSsqfbud0iNQ&s",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae90fba2f8a358a77e4",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:29.581Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:20:21.192Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae90fba2f8a358a77e6"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "WFC400 Water Fed Pole",
+  "machine_category": "window_cleaner",
+  "machine_subtype": "water_fed_pole",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "manual",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "glass"
+  ],
+  "dirt_compatibility": [
+    "lime scale",
+    "organic"
+  ],
+  "current_price_ugx": 5460000,
+  "estimated_maintenance_cost_per_year_ugx": 120000,
+  "estimated_running_cost_per_year_ugx": 100000,
+  "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIOO5azr8ZjHWUgsAi0degDZJpkXRneWPqFg&s",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae90fba2f8a358a77e7",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:29.727Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:22:08.580Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae90fba2f8a358a77eb"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HD 13/35-4 SX Plus",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "rust",
+    "lime scale"
+  ],
+  "current_price_ugx": 127400000,
+  "estimated_maintenance_cost_per_year_ugx": 5000000,
+  "estimated_running_cost_per_year_ugx": 3800000,
+  "image_url": "https://s1.kaercher-media.com/mam/13671540/mainproduct/45799/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae90fba2f8a358a77ec",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:29.858Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:22:39.632Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8ae90fba2f8a358a77ee"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "HDS 12/18-4 S",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "hot_water",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "stainless steel"
+  ],
+  "dirt_compatibility": [
+    "grease",
+    "oil",
+    "heavy soil",
+    "rust",
+    "lime scale"
+  ],
+  "current_price_ugx": 109200000,
+  "estimated_maintenance_cost_per_year_ugx": 4500000,
+  "estimated_running_cost_per_year_ugx": 3500000,
+  "image_url": "https://s1.kaercher-media.com/mam/10719590/mainproduct/4b33d0a8-a09e-422c-9b43-4d2b63d58e52/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8ae90fba2f8a358a77ef",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:29.986Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:23:33.671Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aea0fba2f8a358a77f1"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "IVC 30/12-1 Tact² M Bp",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "industrial",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "hazardous",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "concrete",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "hazardous dust",
+    "heavy soil"
+  ],
+  "current_price_ugx": 29120000,
+  "estimated_maintenance_cost_per_year_ugx": 1000000,
+  "estimated_running_cost_per_year_ugx": 500000,
+  "image_url": "https://s1.kaercher-media.com/mam/15761010/mainproduct/28680/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aea0fba2f8a358a77f2",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:30.115Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:24:21.800Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aea0fba2f8a358a77f4"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "Puzzi 30/4",
+  "machine_category": "carpet_cleaner",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "carpet",
+    "upholstery"
+  ],
+  "dirt_compatibility": [
+    "spills",
+    "heavy soil",
+    "grease",
+    "organic"
+  ],
+  "current_price_ugx": 10920000,
+  "estimated_maintenance_cost_per_year_ugx": 500000,
+  "estimated_running_cost_per_year_ugx": 300000,
+  "image_url": "https://s1.kaercher-media.com/mam/11011200/mainproduct/49004/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aea0fba2f8a358a77f5",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:30.252Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:25:21.974Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aea0fba2f8a358a77f7"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SC3500 Walk Behind Scrubber",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 87360000,
+  "estimated_maintenance_cost_per_year_ugx": 3200000,
+  "estimated_running_cost_per_year_ugx": 1800000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/SC3500GO-right-ps-Original-JNHELTN.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aea0fba2f8a358a77f8",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:30.391Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:25:56.639Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aea0fba2f8a358a77fa"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SC6000 Ride-On Scrubber",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 436800000,
+  "estimated_maintenance_cost_per_year_ugx": 12000000,
+  "estimated_running_cost_per_year_ugx": 6000000,
+  "image_url": "https://www.nilfisk.com/product-images-1920/SC6000-OL-Rt-ps-Original-JPLHEJK.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aea0fba2f8a358a77fb",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:30.531Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:26:29.177Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aea0fba2f8a358a77fd"
+  },
+  "brand_name": "Numatic",
+  "model_name": "NTT2045 Walk Behind Scrubber",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "grease",
+    "oil",
+    "spills"
+  ],
+  "current_price_ugx": 32760000,
+  "estimated_maintenance_cost_per_year_ugx": 1200000,
+  "estimated_running_cost_per_year_ugx": 700000,
+  "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzrxeTaDMWOztxR35P6WwrUuvmobZ114zwzA&s",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aea0fba2f8a358a77fe",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:30.669Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:27:12.312Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aea0fba2f8a358a7800"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "KM 70/20 C 2SB Compact Sweeper",
+  "machine_category": "sweeper",
+  "machine_subtype": "compact",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "manual",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 3640000,
+  "estimated_maintenance_cost_per_year_ugx": 80000,
+  "estimated_running_cost_per_year_ugx": null,
+  "image_url": "https://s1.kaercher-media.com/mam/15171310/mainproduct/216424/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aea0fba2f8a358a7801",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:30.829Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:28:44.238Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aeb0fba2f8a358a7803"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "SW5500 Ride-On Sweeper",
+  "machine_category": "sweeper",
+  "machine_subtype": "rider",
+  "intensity": "heavy",
+  "domain": "industrial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 21,
+  "surface_compatibility": [
+    "concrete",
+    "asphalt",
+    "tile"
+  ],
+  "dirt_compatibility": [
+    "heavy soil",
+    "dust",
+    "organic",
+    "debris"
+  ],
+  "current_price_ugx": 218400000,
+  "estimated_maintenance_cost_per_year_ugx": 7000000,
+  "estimated_running_cost_per_year_ugx": 4000000,
+  "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbHk60K-4J2X85Z3eDLlnamXHKjbmifRhaIQ&s",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aeb0fba2f8a358a7804",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:31.033Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:29:25.285Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aeb0fba2f8a358a7806"
+  },
+  "brand_name": "Numatic",
+  "model_name": "NR200 Backpack Vacuum (Battery)",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 2912000,
+  "estimated_maintenance_cost_per_year_ugx": 150000,
+  "estimated_running_cost_per_year_ugx": 80000,
+  "image_url": "https://numatic.com/uk/wp-content/uploads/sites/2/2024/02/RSB150NX-Pro-Features.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aeb0fba2f8a358a7807",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:31.193Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:30:05.182Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aeb0fba2f8a358a7809"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "K 3 Premium Full Control",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood",
+    "vehicles"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light soil",
+    "organic"
+  ],
+  "current_price_ugx": 2730000,
+  "estimated_maintenance_cost_per_year_ugx": 190000,
+  "estimated_running_cost_per_year_ugx": 140000,
+  "image_url": "https://s1.kaercher-media.com/mam/16031800/mainproduct/171326/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aeb0fba2f8a358a780a",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:31.340Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:34:26.553Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aeb0fba2f8a358a780c"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "Core 130-6 PowerControl",
+  "machine_category": "pressure_washer",
+  "machine_subtype": "electric",
+  "intensity": "light",
+  "domain": "domestic",
+  "environment": "outdoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "concrete",
+    "tile",
+    "wood",
+    "vehicles"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light soil",
+    "organic",
+    "heavy soil"
+  ],
+  "current_price_ugx": 2366000,
+  "estimated_maintenance_cost_per_year_ugx": 180000,
+  "estimated_running_cost_per_year_ugx": 110000,
+  "image_url": "https://shop.nilfisk.com/cdn/shop/files/128471256_128471286_Core_130.6_PowerControl_Angled_Topbox_RGB_1.jpg?crop=center&height=1024&v=1698324562&width=1024",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aeb0fba2f8a358a780d",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:31.545Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-19T08:35:09.296Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aeb0fba2f8a358a780f"
+  },
+  "brand_name": "Numatic",
+  "model_name": "Henry Micro HVR200M",
+  "machine_category": "vacuum_cleaner",
+  "machine_subtype": "wet_dry",
+  "intensity": "light",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "corded_electric",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 7,
+  "surface_compatibility": [
+    "tile",
+    "carpet",
+    "vinyl",
+    "wood"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic"
+  ],
+  "current_price_ugx": 910000,
+  "estimated_maintenance_cost_per_year_ugx": 80000,
+  "estimated_running_cost_per_year_ugx": 50000,
+  "image_url": "https://numatic.com/wp-content/smush-webp/Henry-HVR200-Featured-Image.jpg.webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aeb0fba2f8a358a7810",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:31.749Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-18T13:16:09.190Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aeb0fba2f8a358a7812"
+  },
+  "brand_name": "Kärcher",
+  "model_name": "KM 70/30 C Bp Plus",
+  "machine_category": "sweeper",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "any",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "concrete",
+    "wood",
+    "vinyl"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "light dust",
+    "organic",
+    "heavy soil"
+  ],
+  "current_price_ugx": 13104000,
+  "estimated_maintenance_cost_per_year_ugx": 450000,
+  "estimated_running_cost_per_year_ugx": 220000,
+  "image_url": "https://s1.kaercher-media.com/mam/15172120/mainproduct/45863/d1.jpg",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aeb0fba2f8a358a7813",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:31.877Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-17T13:15:55.486Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2f8aec0fba2f8a358a7815"
+  },
+  "brand_name": "Nilfisk",
+  "model_name": "BA410 Walk Behind Scrubber",
+  "machine_category": "scrubber_drier",
+  "machine_subtype": "walk_behind",
+  "intensity": "medium",
+  "domain": "commercial",
+  "environment": "indoor",
+  "min_aisle_width_mm": null,
+  "weight_kg": null,
+  "power_source": "battery",
+  "power_req": {
+    "kW": 0,
+    "type": "AC"
+  },
+  "motor_type": null,
+  "spare_part_lead_time_days": 14,
+  "surface_compatibility": [
+    "tile",
+    "vinyl",
+    "concrete",
+    "marble"
+  ],
+  "dirt_compatibility": [
+    "dust",
+    "spills",
+    "organic",
+    "grease",
+    "light dust"
+  ],
+  "current_price_ugx": 29120000,
+  "estimated_maintenance_cost_per_year_ugx": 1200000,
+  "estimated_running_cost_per_year_ugx": 650000,
+  "image_url": "https://www.nilfisk.com/media/tdjjio2y/nilfisk_professional_cleaning_sc550.jpg?width=1728&rxy=0.5%2c0.5&cc=0.2422344771859855%2c0%2c0.09126552281401454%2c0&format=webp",
+  "in_stock": true,
+  "active": true,
+  "equipment_id": "6a2f8aec0fba2f8a358a7816",
+  "createdAt": {
+    "$date": "2026-06-15T05:17:32.056Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-16T21:23:04.070Z"
+  },
+  "__v": 0
+}]

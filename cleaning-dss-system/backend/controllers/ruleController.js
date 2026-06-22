@@ -14,15 +14,39 @@ const AuditLog = require('../models/AuditLog');
  */
 const getAllRules = async (req, res, next) => {
   try {
-    const { category, action_type, active } = req.query;
+    const { category, action_type, active, search, page = 1, limit = 20 } = req.query;
     const filter = {};
     
     if (category) filter.category = category;
     if (action_type) filter['consequent.actions.type'] = action_type;
-    if (active !== undefined) filter.active = active === 'true';
-    
-    const rules = await Rule.find(filter).sort({ priority: -1, salience: -1 });
-    return success(res, rules, 'Rules retrieved');
+    if (active !== undefined && active !== '') filter.active = active === 'true';
+
+    // Multi-field text search across rule_id and rule_text
+    if (search) {
+      filter.$or = [
+        { rule_id: { $regex: search, $options: 'i' } },
+        { rule_text: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    // Server-side pagination
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [rules, total] = await Promise.all([
+      Rule.find(filter).sort({ priority: -1, salience: -1 }).skip(skip).limit(limitNum),
+      Rule.countDocuments(filter)
+    ]);
+
+    return success(res, {
+      rules,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      pages: Math.ceil(total / limitNum)
+    }, 'Rules retrieved');
   } catch (err) {
     next(err);
   }

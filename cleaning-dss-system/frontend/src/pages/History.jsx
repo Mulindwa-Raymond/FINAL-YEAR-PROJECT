@@ -182,7 +182,7 @@ export default function HistoryPage() {
   const handleViewDetails = (rec) => {
     navigate('/recommendation-details', {
       state: {
-        machine: rec.recommendations?.[0] || rec,
+        machine: rec.machine || rec,
         recommendationId: rec._id,
         category: { categoryName: getCategoryDisplayName(rec.machine_category), categoryId: rec.machine_category }
       }
@@ -437,42 +437,38 @@ export default function HistoryPage() {
                       <p className="text-[9px] font-mono uppercase text-slate-400 tracking-wider font-extrabold">Recommended Equipment Match</p>
                     </div>
 
-                    {rec.recommendations && rec.recommendations.length > 0 ? (
-                      <div className="grid md:grid-cols-2 gap-3">
-                        {rec.recommendations.slice(0, 2).map((machine, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/20 transition duration-150"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 shadow-sm">
-                                <Wrench size={14} />
-                              </div>
-                              <div>
-                                <p className="font-extrabold text-xs text-slate-800">
-                                  {machine.machine_name || machine.name || 'Equipment'}
-                                </p>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                  <span className="text-[10px] font-semibold text-slate-450">{machine.brand || 'Brand'}</span>
+                    {rec.machine ? (
+                      <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/20 transition duration-150">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 shadow-sm">
+                            <Wrench size={14} />
+                          </div>
+                          <div>
+                            <p className="font-extrabold text-xs text-slate-800">
+                              {rec.machine.name || 'Equipment'}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] font-semibold text-slate-450">{rec.machine.brand || 'Brand'}</span>
+                              {rec.machine.intensity && (
+                                <>
                                   <span className="w-1 h-1 rounded-full bg-slate-300" />
-                                  <span className="text-[9px] font-mono text-slate-400 uppercase">{machine.power_source || 'N/A'}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="text-right">
-                              <div className="flex items-center gap-1 justify-end">
-                                <TrendingUp size={10} className="text-emerald-500" />
-                                <p className="text-xs font-bold text-emerald-600">
-                                  {machine.match || machine.score || 85}% Match
-                                </p>
-                              </div>
-                              <p className="text-[9px] font-mono font-bold text-slate-400 mt-0.5">
-                                TCO: {formatCurrency(machine.tco || machine.estimated_tco_per_year_ugx)}/yr
-                              </p>
+                                  <span className="text-[9px] font-mono text-slate-400 uppercase capitalize">{rec.machine.intensity}</span>
+                                </>
+                              )}
                             </div>
                           </div>
-                        ))}
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-1 justify-end">
+                            <TrendingUp size={10} className="text-emerald-500" />
+                            <p className="text-xs font-bold text-emerald-600">
+                              {rec.machine.match_score || 85}% Match
+                            </p>
+                          </div>
+                          <p className="text-[9px] font-mono font-bold text-slate-400 mt-0.5">
+                            TCO: {formatCurrency(rec.machine.estimated_tco_per_year_ugx)}/yr
+                          </p>
+                        </div>
                       </div>
                     ) : (
                       <p className="text-xs text-slate-400 py-2 italic">No operational equipment mapped to this history item.</p>

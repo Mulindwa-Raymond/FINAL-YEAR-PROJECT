@@ -2,7 +2,14 @@
   {
     "rule_id": "R001",
     "rule_text": "IF machine_category = pressure_washer AND intensity = light AND domain = domestic AND surface_type = concrete AND dirt_type = light soil THEN recommend light-duty pressure washer with universal detergent",
-    "category": "equipment",
+    "category": "equipment",Purchase Price
+UGX 0
+Maintenance / year
+UGX 0
+Running cost / year
+UGX 0
+Annual Operating Cost
+UGX 0
     "priority": 85,
     "salience": 10,
     "certainty_factor": 0.95,

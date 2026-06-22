@@ -36,6 +36,7 @@ import { machineCategories, powerSources, equipmentBrands, intensityLabels } fro
 export const EquipmentList = () => {
   const [equipment, setEquipment] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({
     machine_category: '',
@@ -53,6 +54,15 @@ export const EquipmentList = () => {
   const getEquipmentId = (eq) => {
     return eq?._id || eq?.equipment_id || eq?.id;
   };
+
+  // Debounce: wait 350ms after user stops typing before running the query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const fetchEquipment = async () => {
     setLoading(true);
@@ -112,6 +122,7 @@ export const EquipmentList = () => {
 
   const clearFilters = () => {
     setFilters({ machine_category: '', power_source: '', brand_name: '' });
+    setSearchInput('');
     setSearch('');
     setPage(1);
   };
@@ -194,8 +205,8 @@ export const EquipmentList = () => {
             <input
               type="text"
               placeholder="Search by name, brand, model..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none transition-all text-sm"
             />
           </div>
@@ -213,7 +224,7 @@ export const EquipmentList = () => {
               <span className="w-2 h-2 bg-cyan-500 rounded-full"></span>
             )}
           </button>
-          {(search || Object.values(filters).some(v => v)) && (
+          {(searchInput || Object.values(filters).some(v => v)) && (
             <button 
               onClick={clearFilters} 
               className="inline-flex items-center gap-1 px-3 py-2 text-sm text-slate-500 hover:text-red-600 transition-colors"

@@ -14,18 +14,43 @@ const { invalidateDetergentCache } = require('../utils/cacheInvalidation');
 
 const getAllDetergents = async (req, res, next) => {
   try {
-    const { detergent_category, form, min_ph, max_ph, requires_ppe } = req.query;
+    const { detergent_category, form, min_ph, max_ph, requires_ppe, search, page = 1, limit = 20 } = req.query;
     const filter = {};
     if (detergent_category) filter.detergent_category = detergent_category;
     if (form) filter.form = form;
-    if (requires_ppe) filter.requires_ppe = requires_ppe === 'true';
+    if (requires_ppe !== undefined && requires_ppe !== '') filter.requires_ppe = requires_ppe === 'true';
     if (min_ph || max_ph) {
       filter.ph_value = {};
       if (min_ph) filter.ph_value.$gte = parseFloat(min_ph);
       if (max_ph) filter.ph_value.$lte = parseFloat(max_ph);
     }
-    const detergents = await Detergent.find(filter);
-    return success(res, detergents, 'Detergents retrieved');
+
+    // Multi-field text search across product_name and brand_name
+    if (search) {
+      filter.$or = [
+        { product_name: { $regex: search, $options: 'i' } },
+        { brand_name: { $regex: search, $options: 'i' } },
+        { detergent_category: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    // Server-side pagination
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [detergents, total] = await Promise.all([
+      Detergent.find(filter).skip(skip).limit(limitNum),
+      Detergent.countDocuments(filter)
+    ]);
+
+    return success(res, {
+      detergents,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      pages: Math.ceil(total / limitNum)
+    }, 'Detergents retrieved');
   } catch (err) {
     next(err);
   }

@@ -168,10 +168,12 @@ export const HistoryList = () => {
                 <tr><td colSpan="6" className="px-6 py-12 text-center text-slate-400">No recommendation history found.</td></tr>
               ) : (
                 history.map((item) => {
-                  const firstRec = item.recommendations?.[0] || {};
-                  // Support both user_id and userId field names
-                  const userInfo = item.user_id || item.userId;
-                  const userEmail = userInfo?.email || userInfo || '-';
+                  const equip = item.recommended_equipment_id;
+                  const machineName = equip
+                    ? `${equip.brand_name || ''} ${equip.model_name || ''}`.trim()
+                    : '-';
+                  const userInfo = item.user_id;
+                  const userEmail = userInfo?.email || userInfo?.username || '-';
                   
                   return (
                     <React.Fragment key={item._id}>
@@ -180,7 +182,7 @@ export const HistoryList = () => {
                         <td className="px-6 py-4 text-slate-600">{formatDate(item.timestamp)}</td>
                         <td className="px-6 py-4 text-slate-600 capitalize">{item.surface_type || '-'}</td>
                         <td className="px-6 py-4 text-slate-600 capitalize">{item.dirt_type || '-'}</td>
-                        <td className="px-6 py-4 font-medium text-slate-800">{firstRec.machineName || '-'}</td>
+                        <td className="px-6 py-4 font-medium text-slate-800">{machineName}</td>
                         <td className="px-6 py-4">{expandedRow === item._id ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}</td>
                       </tr>
                       {expandedRow === item._id && (
@@ -210,13 +212,11 @@ export const HistoryList = () => {
                                   </div>
                                 </div>
                               )}
-                              {item.recommendations && item.recommendations.length > 1 && (
+                              {item.recommended_detergent_id && (
                                 <div>
-                                  <span className="font-semibold text-slate-700">Alternative Recommendations:</span>
-                                  <div className="mt-1 space-y-1">
-                                    {item.recommendations.slice(1).map((rec, idx) => (
-                                      <div key={idx} className="text-xs text-slate-600">• {rec.machineName} (Score: {rec.score})</div>
-                                    ))}
+                                  <span className="font-semibold text-slate-700">Recommended Detergent:</span>
+                                  <div className="mt-1 text-xs text-slate-600">
+                                    • {item.recommended_detergent_id.brand_name} {item.recommended_detergent_id.product_name}
                                   </div>
                                 </div>
                               )}

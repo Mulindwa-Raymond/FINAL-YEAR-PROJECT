@@ -1,10 +1,13 @@
 // backend/utils/seedCompatibility.js
 /**
  * Seed script: populate EquipmentDetergentCompatibility based on actual data.
- * Uses Mongoose models to fetch equipment and detergents, then computes compatibility.
  * Idempotent: clears existing compatibilities before inserting.
  *
  * Run: node utils/seedCompatibility.js (after setting up env)
+ *
+ * NOTE: This version creates a compatibility record if there is ANY overlap
+ *       (surface OR dirt), making it more permissive to ensure every equipment
+ *       has at least some detergent candidates.
  */
 
 require('dotenv').config();
@@ -60,8 +63,7 @@ async function seedCompatibility() {
                 }
 
                 // ---- Intensity compatibility ----
-                // We'll allow any intensity, but we can store it as a note later.
-                // (Optional: require detergent.intensity >= eq.intensity? We'll skip that for now.)
+                // Allow any intensity, but we can store it as a note later.
 
                 // ---- Surface compatibility ----
                 const surfaceMatch = intersects(eq.surface_compatibility, det.surface_compatibility);
@@ -69,14 +71,13 @@ async function seedCompatibility() {
                 // ---- Dirt compatibility ----
                 const dirtMatch = intersects(eq.dirt_compatibility, det.dirt_compatibility);
 
-                // ---- Decide if compatible ----
-                // We require at least one match (surface or dirt) to create a record.
+                // ---- Relaxed compatibility: create record if EITHER surface OR dirt matches ----
                 if (!surfaceMatch && !dirtMatch) {
                     skipped++;
                     continue;
                 }
 
-                // Determine is_recommended: true if both surface and dirt match
+                // Determine is_recommended: true if both surface and dirt match, false otherwise
                 const isRecommended = surfaceMatch && dirtMatch;
 
                 // Build notes
@@ -113,7 +114,7 @@ async function seedCompatibility() {
         process.exit(0);
     } catch (error) {
         console.error('❌ Seeding failed:', error);
-        await mongoose.disconnect().catch(() => { });
+        await mongoose.disconnect().catch(() => {});
         process.exit(1);
     }
 }

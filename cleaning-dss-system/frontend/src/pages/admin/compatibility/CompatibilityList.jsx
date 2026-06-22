@@ -68,38 +68,46 @@ export const CompatibilityList = () => {
     return detergentMap[id] || 'Unknown Detergent';
   };
 
-  const fetchData = async () => {
+  // Load equipment and detergent maps once on mount (used only for filter dropdowns)
+  useEffect(() => {
+    const loadMaps = async () => {
+      try {
+        const [equipRes, detRes] = await Promise.all([
+          getAllEquipment({ limit: 100, page: 1 }),
+          getAllDetergents({ limit: 100, page: 1 })
+        ]);
+        const equipMap = {};
+        const equipList = equipRes.data.data?.equipment || equipRes.data.data || [];
+        equipList.forEach(e => {
+          const id = e._id || e.equipment_id;
+          equipMap[id] = `${e.brand_name || ''} ${e.model_name || ''}`.trim() || 'Unknown Equipment';
+        });
+        setEquipmentMap(equipMap);
+
+        const detMap = {};
+        const detList = detRes.data.data?.detergents || detRes.data.data || [];
+        detList.forEach(d => {
+          const id = d._id || d.detergent_id;
+          detMap[id] = d.product_name || 'Unknown Detergent';
+        });
+        setDetergentMap(detMap);
+      } catch (err) {
+        console.error('Failed to load filter maps:', err);
+      }
+    };
+    loadMaps();
+  }, []);
+
+  const fetchCompatibilities = async () => {
     setLoading(true);
     try {
-      // Fetch all data in parallel
-      const [compRes, equipRes, detRes] = await Promise.all([
-        getAllCompatibilities({ page, limit }),
-        getAllEquipment({ limit: 1000 }),
-        getAllDetergents({ limit: 1000 })
-      ]);
-      
+      const params = { page, limit };
+      if (filterEquipment) params.equipment_id = filterEquipment;
+      if (filterDetergent) params.detergent_id = filterDetergent;
+      const compRes = await getAllCompatibilities(params);
       const compatData = compRes.data.data?.compatibilities || compRes.data.data || [];
       setCompatibilities(compatData);
       setTotal(compRes.data.data?.total || compatData.length);
-      
-      // Build maps for quick lookup from IDs to names
-      const equipMap = {};
-      const equipList = equipRes.data.data?.equipment || equipRes.data.data || [];
-      equipList.forEach(e => {
-        const id = e._id || e.equipment_id;
-        const name = `${e.brand_name || ''} ${e.model_name || ''}`.trim() || e.name || 'Unknown Equipment';
-        equipMap[id] = name;
-      });
-      setEquipmentMap(equipMap);
-      
-      const detMap = {};
-      const detList = detRes.data.data?.detergents || detRes.data.data || [];
-      detList.forEach(d => {
-        const id = d._id || d.detergent_id;
-        const name = d.product_name || d.name || 'Unknown Detergent';
-        detMap[id] = name;
-      });
-      setDetergentMap(detMap);
     } catch (err) {
       console.error('Failed to fetch compatibility data:', err);
     } finally {
@@ -108,8 +116,8 @@ export const CompatibilityList = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [page]);
+    fetchCompatibilities();
+  }, [page, filterEquipment, filterDetergent]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -120,7 +128,7 @@ export const CompatibilityList = () => {
     }
     try {
       await deleteCompatibility(compatId);
-      fetchData();
+      fetchCompatibilities();
     } catch (err) {
       console.error('Delete failed:', err);
     } finally {
@@ -139,23 +147,15 @@ export const CompatibilityList = () => {
     opt.name.toLowerCase().includes(searchDet.toLowerCase())
   );
 
-  // Apply client-side filters
-  const filteredCompatibilities = compatibilities.filter(comp => {
-    const equipId = extractId(comp.equipment_id);
-    const detId = extractId(comp.detergent_id);
-    const equipName = getEquipmentName(comp.equipment_id);
-    const detName = getDetergentName(comp.detergent_id);
-    
-    if (filterEquipment && equipId !== filterEquipment && equipName !== filterEquipment) return false;
-    if (filterDetergent && detId !== filterDetergent && detName !== filterDetergent) return false;
-    return true;
-  });
+  // Filtering is now done server-side via equipment_id/detergent_id params
+  const filteredCompatibilities = compatibilities;
 
   const clearFilters = () => {
     setFilterEquipment('');
     setFilterDetergent('');
     setSearchEquip('');
     setSearchDet('');
+    setPage(1);
   };
 
   const totalPages = Math.ceil(total / limit);

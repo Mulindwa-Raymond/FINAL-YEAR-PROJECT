@@ -15,18 +15,34 @@ const { success, error } = require('../utils/apiResponse');
  */
 const getAllCompatibilities = async (req, res, next) => {
   try {
-    const { equipment_id, detergent_id, is_recommended } = req.query;
+    const { equipment_id, detergent_id, is_recommended, page = 1, limit = 20 } = req.query;
     const filter = {};
     
     if (equipment_id) filter.equipment_id = equipment_id;
     if (detergent_id) filter.detergent_id = detergent_id;
-    if (is_recommended !== undefined) filter.is_recommended = is_recommended === 'true';
+    if (is_recommended !== undefined && is_recommended !== '') filter.is_recommended = is_recommended === 'true';
+
+    // Server-side pagination
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [compatibilities, total] = await Promise.all([
+      Compatibility.find(filter)
+        .populate('equipment_id', 'brand_name model_name')
+        .populate('detergent_id', 'product_name brand_name')
+        .skip(skip)
+        .limit(limitNum),
+      Compatibility.countDocuments(filter)
+    ]);
     
-    const compatibilities = await Compatibility.find(filter)
-      .populate('equipment_id', 'brand_name model_name')
-      .populate('detergent_id', 'product_name brand_name');
-    
-    return success(res, compatibilities, 'Compatibility records retrieved');
+    return success(res, {
+      compatibilities,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      pages: Math.ceil(total / limitNum)
+    }, 'Compatibility records retrieved');
   } catch (err) {
     next(err);
   }

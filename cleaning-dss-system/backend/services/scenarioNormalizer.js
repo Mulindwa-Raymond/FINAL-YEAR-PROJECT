@@ -1,3 +1,9 @@
+/**
+ * scenarioNormalizer.js
+ * Normalizes user input into a consistent format for the inference engine.
+ * Ensures domain and intensity are derived from use_case and area_size.
+ */
+
 const toArray = (value) => {
   if (Array.isArray(value)) {
     return value.filter(Boolean);
@@ -59,6 +65,9 @@ const normalizeArray = (arr, mapping) => {
   return arr.map(v => normalizeValue(v, mapping)).filter(Boolean);
 };
 
+/**
+ * Derive domain and intensity from use_case.
+ */
 const deriveUseCase = (useCase) => {
   if (!useCase) return {};
   const lower = useCase.toLowerCase();
@@ -72,6 +81,16 @@ const deriveUseCase = (useCase) => {
     return { domain: 'industrial', intensity: 'heavy' };
   }
   return {};
+};
+
+/**
+ * Derive intensity from area size (m²) as a fallback.
+ */
+const deriveIntensityFromArea = (areaSize) => {
+  const area = parseFloat(areaSize) || 0;
+  if (area > 1500) return 'heavy';
+  if (area > 300) return 'medium';
+  return 'light';
 };
 
 const derivePressureIntensity = (pressureRequired) => {
@@ -104,10 +123,13 @@ const normalizeScenario = (raw = {}) => {
   const rawSoils = toArray(raw.dirt_type).concat(toArray(raw.dirt_compatibility)).concat(toArray(raw.debris_type)).concat(toArray(raw.soil_type));
   const soils = unique(normalizeArray(rawSoils, dirtMapping));
 
+  // Derive intensity: pressure override > raw intensity > use_case default > area fallback
+  const derivedIntensity = pressureIntensity || raw.intensity || useCaseDefaults.intensity || deriveIntensityFromArea(raw.area_size) || null;
+
   return {
     ...raw,
     domain: raw.domain || useCaseDefaults.domain || null,
-    intensity: pressureIntensity || raw.intensity || useCaseDefaults.intensity || null,
+    intensity: derivedIntensity,
     surfaces,
     soils,
     budget_ugx: Number(raw.budget_ugx || raw.budget || 0),

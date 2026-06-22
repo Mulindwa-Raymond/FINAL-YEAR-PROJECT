@@ -39,7 +39,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { saveRecommendationToHistory } from '../services/recommendationHistoryService';
 
 const formatCurrency = (amount) => {
-  if (!amount) return 'UGX 0';
+  if (amount == null || amount === '') return 'UGX 0';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'UGX',
@@ -47,7 +47,6 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
-// Map category to relevant specs for display
 const getCategorySpecs = (machine) => {
   const category = machine.machine_category;
   const specs = machine.specifications || {};
@@ -104,6 +103,14 @@ const getCategorySpecs = (machine) => {
   }
 };
 
+// ✅ FIX: also check > 0 so a backend-sent 0 falls through to maintenance + running sum
+const getOperatingCost = (machine) => {
+  if (machine.estimated_operating_cost_per_year_ugx != null && machine.estimated_operating_cost_per_year_ugx > 0) {
+    return machine.estimated_operating_cost_per_year_ugx;
+  }
+  return (machine.estimated_maintenance_cost_per_year_ugx || 0) + (machine.estimated_running_cost_per_year_ugx || 0);
+};
+
 export default function RecommendationResults() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -124,7 +131,6 @@ export default function RecommendationResults() {
     setFadeIn(true);
   }, []);
 
-  // Auto-save logic (unchanged)
   useEffect(() => {
     const saveRec = async () => {
       if (hasSaved.current || !recommendations || recommendations.length === 0 || !isAuthenticated) return;
@@ -176,7 +182,21 @@ export default function RecommendationResults() {
     saveRec();
   }, [recommendations, answers, category, isAuthenticated]);
 
-  // Group recommendations by brand
+  const getMatchScore = (machine) => {
+    return machine.match_score ?? machine.score ?? machine.match ?? 0;
+  };
+
+  const getPurchasePrice = (machine) => {
+    if (!machine) return 0;
+    // ✅ FIX: also check > 0 so null/0 from backend falls through to TCO calculation
+    if (machine.current_price_ugx != null && machine.current_price_ugx > 0) {
+      return machine.current_price_ugx;
+    }
+    const tco = machine.estimated_tco_per_year_ugx || 0;
+    const operatingCost = getOperatingCost(machine);
+    return tco > operatingCost ? tco - operatingCost : 0;
+  };
+
   const groupedByBrand = useMemo(() => {
     const groups = {};
     recommendations?.forEach((item) => {
@@ -184,18 +204,38 @@ export default function RecommendationResults() {
       if (!groups[brand]) groups[brand] = [];
       groups[brand].push(item);
     });
+
+    Object.keys(groups).forEach((brand) => {
+      groups[brand] = groups[brand]
+        .slice()
+        .sort((a, b) => getMatchScore(b) - getMatchScore(a))
+        .slice(0, 3);
+    });
+
     return groups;
   }, [recommendations]);
 
-  const brandNames = useMemo(() => Object.keys(groupedByBrand), [groupedByBrand]);
+  const brandNames = useMemo(() => Object.keys(groupedByBrand).sort((a, b) => {
+    const scoreA = getMatchScore(groupedByBrand[a]?.[0]) || 0;
+    const scoreB = getMatchScore(groupedByBrand[b]?.[0]) || 0;
+    return scoreB - scoreA;
+  }), [groupedByBrand]);
 
-  // Filter recommendations based on active brand tab
+  const brandSections = useMemo(() => (
+    brandNames.map((brand) => ({
+      brand,
+      machines: groupedByBrand[brand] || [],
+      topScore: getMatchScore(groupedByBrand[brand]?.[0]) || 0,
+    }))
+  ), [brandNames, groupedByBrand]);
+
   const filteredRecommendations = useMemo(() => {
+    if (!recommendations) return [];
     if (activeBrandTab === 'all') {
-      return recommendations || [];
+      return brandSections.flatMap((section) => section.machines);
     }
     return groupedByBrand[activeBrandTab] || [];
-  }, [activeBrandTab, groupedByBrand, recommendations]);
+  }, [activeBrandTab, groupedByBrand, brandSections, recommendations]);
 
   const addToCompare = (machine) => {
     const id = machine.id || machine._id;
@@ -211,7 +251,6 @@ export default function RecommendationResults() {
     navigate('/recommendation-details', { state: { machine, recommendationId, category } });
   };
 
-  // Scroll tab into view when active changes
   useEffect(() => {
     if (tabContainerRef.current) {
       const activeTabEl = tabContainerRef.current.querySelector(`[data-brand="${activeBrandTab}"]`);
@@ -236,7 +275,6 @@ export default function RecommendationResults() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-cyan-50/30">
-      {/* Background orbs */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-[100px] animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-400/20 rounded-full blur-[120px] animate-pulse delay-1000" />
@@ -245,7 +283,6 @@ export default function RecommendationResults() {
       </div>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-8 lg:py-12">
-        {/* Save status toasts */}
         {saveStatus === 'saved' && (
           <div className="fixed top-24 right-6 z-50 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 shadow-lg animate-in slide-in-from-right-5 duration-300">
             <div className="flex items-center gap-2"><Check size={16} className="text-emerald-600" /><span className="text-sm text-emerald-700">Saved to history!</span></div>
@@ -257,7 +294,6 @@ export default function RecommendationResults() {
           </div>
         )}
 
-        {/* Step tracker */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="flex items-center opacity-60">
             <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center"><CheckCircle2 size={14} className="text-slate-500" /></div>
@@ -295,7 +331,6 @@ export default function RecommendationResults() {
           )}
         </div>
 
-        {/* Brand Tab Strip – Centered, elegantly styled */}
         <div className="flex justify-center mb-8">
           <div className="relative overflow-x-auto scrollbar-hide py-2 px-1 w-full max-w-4xl" ref={tabContainerRef}>
             <div className="flex justify-center gap-2 min-w-max mx-auto">
@@ -328,17 +363,21 @@ export default function RecommendationResults() {
           </div>
         </div>
 
-        {/* Recommendations Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRecommendations.map((machine) => {
             const matchScore = machine.match_score || 85;
             const machineId = machine.id || machine._id;
             const isExpanded = expandedCard === machineId;
             const categorySpecs = getCategorySpecs(machine);
+            const operatingCost = getOperatingCost(machine);
+            const purchasePrice = getPurchasePrice(machine);
+            // ✅ FIX: read directly with ?? 0 so actual 0 renders and non-zero renders correctly
+            const maintenanceCost = machine.estimated_maintenance_cost_per_year_ugx ?? 0;
+            const runningCost = machine.estimated_running_cost_per_year_ugx ?? 0;
+            const tco = machine.estimated_tco_per_year_ugx ?? 0;
 
             return (
               <div key={machineId} className="group bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                {/* Image Section – 16:9 aspect ratio with object-contain to avoid cropping */}
                 <div className="relative w-full aspect-video bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden flex-shrink-0">
                   {machine.image_url ? (
                     <img
@@ -362,13 +401,17 @@ export default function RecommendationResults() {
                       <span className="text-xs text-slate-400 mt-1 font-mono">No Image</span>
                     </div>
                   )}
-                  {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent pointer-events-none" />
-                  {/* Brand tag */}
                   <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/10">
                     <span className="text-[10px] font-bold text-white">{machine.brand_name}</span>
                   </div>
-                  {/* Match badge */}
+                  {machine.detergent && (
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full shadow-lg border border-white/20">
+                      <span className="text-[8px] font-bold text-white flex items-center gap-1">
+                        <Droplets size={10} /> Detergent matched
+                      </span>
+                    </div>
+                  )}
                   <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full border shadow-sm bg-white/95 backdrop-blur-sm">
                     <div className="flex items-center gap-1">
                       <TrendingUp size={12} className="text-blue-600" />
@@ -383,7 +426,6 @@ export default function RecommendationResults() {
                     {machine.machine_category?.replace(/_/g, ' ')}
                   </p>
 
-                  {/* Category-specific specs */}
                   <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-slate-50 rounded-xl">
                     {categorySpecs.map((spec, idx) => (
                       <div key={idx} className="text-center">
@@ -394,13 +436,17 @@ export default function RecommendationResults() {
                     ))}
                   </div>
 
-                  {/* Operating cost */}
-                  <div className="flex items-center justify-between mb-3 p-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                    <span className="text-[10px] font-medium text-slate-600">Annual Operating Cost</span>
-                    <span className="text-sm font-bold text-emerald-700">{formatCurrency(machine.estimated_operating_cost_per_year_ugx || 0)}</span>
+                  <div className="grid grid-cols-2 gap-2 mb-3 p-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-medium text-slate-600">Purchase Price</span>
+                      <span className="text-sm font-bold text-slate-700">{formatCurrency(purchasePrice)}</span>
+                    </div>
+                    <div className="flex flex-col text-right">
+                      <span className="text-[10px] font-medium text-slate-600">Annual Operating Cost</span>
+                      <span className="text-sm font-bold text-emerald-700">{formatCurrency(operatingCost)}</span>
+                    </div>
                   </div>
 
-                  {/* Detergent */}
                   {machine.detergent ? (
                     <div className="mb-3 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
                       <div className="flex items-center gap-2 mb-2">
@@ -416,7 +462,7 @@ export default function RecommendationResults() {
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 e.target.style.display = 'none';
-                                e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-cyan-100"><Droplets size={20} className="text-cyan-600" /></div>';
+                                e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-cyan-100"></div>';
                               }}
                             />
                           ) : (
@@ -449,7 +495,6 @@ export default function RecommendationResults() {
                     </div>
                   )}
 
-                  {/* Alerts */}
                   {machine.alerts && machine.alerts.length > 0 && (
                     <div className="mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
                       {machine.alerts.slice(0, 1).map((alert, i) => (
@@ -459,7 +504,6 @@ export default function RecommendationResults() {
                     </div>
                   )}
 
-                  {/* Actions */}
                   <div className="flex gap-2 mt-auto pt-2">
                     <button onClick={() => handleViewDetails(machine)} className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl text-[11px] font-bold uppercase tracking-wider hover:shadow-md transition flex items-center justify-center gap-1.5">
                       Details <ArrowRight size={12} />
@@ -472,15 +516,27 @@ export default function RecommendationResults() {
                     </button>
                   </div>
 
-                  {/* Expandable section - full details */}
                   {isExpanded && (
                     <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                       <div className="text-xs font-bold text-slate-700">Full TCO Breakdown</div>
                       <div className="grid grid-cols-2 gap-2 text-[10px]">
-                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Purchase Price</span><span className="font-bold text-slate-700">{formatCurrency(machine.current_price_ugx || 0)}</span></div>
-                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Maintenance/yr</span><span className="font-bold text-amber-600">{formatCurrency(machine.estimated_maintenance_cost_per_year_ugx || 0)}</span></div>
-                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg"><span className="text-slate-500">Running/yr</span><span className="font-bold text-cyan-600">{formatCurrency(machine.estimated_running_cost_per_year_ugx || 0)}</span></div>
-                        <div className="flex justify-between py-1.5 px-2 bg-emerald-50 rounded-lg border border-emerald-100"><span className="text-slate-700 font-semibold">Total TCO/yr</span><span className="font-bold text-emerald-600">{formatCurrency(machine.estimated_tco_per_year_ugx || 0)}</span></div>
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg">
+                          <span className="text-slate-500">Purchase Price</span>
+                          <span className="font-bold text-slate-700">{formatCurrency(purchasePrice)}</span>
+                        </div>
+                        {/* ✅ FIX: use computed vars (not || 0) so real values from backend show */}
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg">
+                          <span className="text-slate-500">Maintenance/yr</span>
+                          <span className="font-bold text-amber-600">{formatCurrency(maintenanceCost)}</span>
+                        </div>
+                        <div className="flex justify-between py-1.5 px-2 bg-white rounded-lg">
+                          <span className="text-slate-500">Running/yr</span>
+                          <span className="font-bold text-cyan-600">{formatCurrency(runningCost)}</span>
+                        </div>
+                        <div className="flex justify-between py-1.5 px-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                          <span className="text-slate-700 font-semibold">Total TCO/yr</span>
+                          <span className="font-bold text-emerald-600">{formatCurrency(tco || (purchasePrice + operatingCost))}</span>
+                        </div>
                       </div>
                       <div className="text-xs font-bold text-slate-700">Additional Specs</div>
                       <div className="grid grid-cols-2 gap-3">
@@ -499,7 +555,6 @@ export default function RecommendationResults() {
           })}
         </div>
 
-        {/* Compare bar & modal */}
         {compareList.length > 0 && (
           <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white rounded-full px-5 py-3 shadow-2xl flex items-center gap-5 z-50 animate-in slide-in-from-bottom-5 duration-300">
             <div className="flex items-center gap-2"><BarChart3 size={14} className="text-cyan-400" /><span className="text-xs font-bold">{compareList.length}/2 selected</span></div>
@@ -527,6 +582,9 @@ export default function RecommendationResults() {
                   {compareList.map((machine, idx) => {
                     const matchScore = machine.match_score || 85;
                     const cmpId = machine.id || machine._id || idx;
+                    const operatingCost = getOperatingCost(machine);
+                    const purchasePrice = getPurchasePrice(machine);
+
                     return (
                       <div key={cmpId} className="border-2 border-slate-200 rounded-xl overflow-hidden hover:border-blue-300 transition">
                         <div className="p-5">
@@ -536,7 +594,7 @@ export default function RecommendationResults() {
                           </div>
                           <div className="space-y-3 text-sm">
                             <div className="flex justify-between py-2 border-b border-slate-100"><span className="text-slate-500 flex items-center gap-1"><Zap size={12} /> Power Source</span><span className="font-semibold text-slate-800 capitalize">{machine.power_source?.replace(/_/g, ' ') || 'N/A'}</span></div>
-                            <div className="flex justify-between py-2 border-b border-slate-100"><span className="text-slate-500 flex items-center gap-1"><DollarSign size={12} /> Operating Cost/yr</span><span className="font-bold text-emerald-600">{formatCurrency(machine.estimated_operating_cost_per_year_ugx || 0)}</span></div>
+                            <div className="flex justify-between py-2 border-b border-slate-100"><span className="text-slate-500 flex items-center gap-1"><DollarSign size={12} /> Operating Cost/yr</span><span className="font-bold text-emerald-600">{formatCurrency(operatingCost)}</span></div>
                             <div className="flex justify-between py-2 border-b border-slate-100"><span className="text-slate-500 flex items-center gap-1"><Gauge size={12} /> Intensity</span><span className="font-semibold capitalize">{machine.intensity || 'Medium'} Duty</span></div>
                             <div className="flex justify-between py-2"><span className="text-slate-500 flex items-center gap-1"><Droplets size={12} /> Tank</span><span className="font-semibold text-slate-800">{machine.specifications?.tank_capacity || 'N/A'} L</span></div>
                           </div>

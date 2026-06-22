@@ -37,6 +37,7 @@ import { actionTypes, ruleCategories } from '../../../utils/constants';
 export const RuleList = () => {
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterAction, setFilterAction] = useState('');
@@ -51,6 +52,15 @@ export const RuleList = () => {
   const getRuleId = (rule) => {
     return rule?._id || rule?.rule_id || rule?.id;
   };
+
+  // Debounce: wait 350ms after user stops typing before running the query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const fetchRules = async () => {
     setLoading(true);
@@ -174,8 +184,8 @@ export const RuleList = () => {
             <input
               type="text"
               placeholder="Search by rule ID, text..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-sm"
             />
           </div>
@@ -208,9 +218,9 @@ export const RuleList = () => {
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-          {(search || filterCategory || filterAction || filterStatus) && (
+          {(searchInput || filterCategory || filterAction || filterStatus) && (
             <button
-              onClick={() => { setSearch(''); setFilterCategory(''); setFilterAction(''); setFilterStatus(''); }}
+              onClick={() => { setSearchInput(''); setSearch(''); setFilterCategory(''); setFilterAction(''); setFilterStatus(''); setPage(1); }}
               className="inline-flex items-center gap-1 px-3 py-2 text-sm text-slate-500 hover:text-red-600 transition-colors"
             >
               <X className="w-3 h-3" /> Clear

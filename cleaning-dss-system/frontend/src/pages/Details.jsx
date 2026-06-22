@@ -42,12 +42,24 @@ import {
 import FeedbackModal from '../components/FeedbackModal';
 
 const formatCurrency = (amount) => {
-  if (!amount) return 'UGX 0';
+  if (amount == null || amount === '') return 'UGX 0';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'UGX',
     minimumFractionDigits: 0,
   }).format(amount);
+};
+
+const getPurchasePrice = (machine) => {
+  if (!machine) return 0;
+  if (machine.current_price_ugx != null && machine.current_price_ugx > 0) {
+    return machine.current_price_ugx;
+  }
+  const tco = machine.estimated_tco_per_year_ugx || 0;
+  const operating =
+    (machine.estimated_maintenance_cost_per_year_ugx || 0) +
+    (machine.estimated_running_cost_per_year_ugx || 0);
+  return tco > operating ? tco - operating : 0;
 };
 
 const getPhBadge = (ph) => {
@@ -73,6 +85,14 @@ const getCategoryDisplayName = (category) => {
   return map[category] || category?.replace(/_/g, ' ') || 'Equipment';
 };
 
+// ✅ FIX: also check > 0 so that a backend-sent 0 falls through to maintenance + running sum
+const getOperatingCost = (machine) => {
+  if (machine.estimated_operating_cost_per_year_ugx != null && machine.estimated_operating_cost_per_year_ugx > 0) {
+    return machine.estimated_operating_cost_per_year_ugx;
+  }
+  return (machine.estimated_maintenance_cost_per_year_ugx || 0) + (machine.estimated_running_cost_per_year_ugx || 0);
+};
+
 export default function Details() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -95,14 +115,18 @@ export default function Details() {
   }
 
   const matchScore = machine.match_score || machine.final_score || machine.match || 85;
-  const purchasePrice = machine.current_price_ugx || 0;
-  const operatingCost = machine.estimated_operating_cost_per_year_ugx || 0;
+  const purchasePrice = getPurchasePrice(machine);
+  const operatingCost = getOperatingCost(machine);
+
+  const maintenanceCost = machine.estimated_maintenance_cost_per_year_ugx ?? 0;
+  const runningCost = machine.estimated_running_cost_per_year_ugx ?? 0;
+  const totalTcoYr = machine.estimated_tco_per_year_ugx ?? (purchasePrice + operatingCost);
+
   const specs = machine.specifications || {};
   const categoryName = category?.categoryName || getCategoryDisplayName(machine.machine_category);
   const detergent = machine.detergent;
-  const phInfo = detergent ? getPhBadge(detergent.ph) : null;
+  const phInfo = detergent ? getPhBadge(detergent.ph ?? detergent.ph_value) : null;
 
-  // --- Enhanced specifications list ---
   const coreSpecs = [
     { icon: <Zap size={16} />, label: 'Power Source', value: machine.power_source?.replace(/_/g, ' ') || 'N/A' },
     { icon: <Gauge size={16} />, label: 'Intensity', value: `${machine.intensity || 'Medium'} Duty` },
@@ -120,7 +144,6 @@ export default function Details() {
     { icon: <Ruler size={16} />, label: 'Min Aisle Width', value: machine.min_aisle_width_mm ? `${machine.min_aisle_width_mm} mm` : 'N/A' },
   ];
 
-  // Additional specs (commonly available)
   const additionalSpecs = [
     { icon: <Award size={16} />, label: 'Warranty', value: machine.warranty_years ? `${machine.warranty_years} years` : (machine.warranty_months ? `${machine.warranty_months} months` : 'N/A') },
     { icon: <Zap size={16} />, label: 'Power Consumption', value: machine.power_consumption_w ? `${machine.power_consumption_w} W` : (machine.motor_power_kw ? `${machine.motor_power_kw} kW` : 'N/A') },
@@ -131,13 +154,8 @@ export default function Details() {
     { icon: <Wind size={16} />, label: 'Airflow', value: machine.airflow_m3h ? `${machine.airflow_m3h} m³/h` : (specs.airflow ? `${specs.airflow} m³/h` : 'N/A') },
   ];
 
-  // Combine all specs, filter out those with "N/A" for the "more" section (but we'll show all)
-  // We'll keep coreSpecs always visible, and additionalSpecs in an expandable section.
-
-  // For the main display, we show coreSpecs (14 items) and if there are additional, we show a toggle.
   const hasAdditionalSpecs = additionalSpecs.some(s => s.value !== 'N/A');
 
-  // Helper to render image – now larger
   const renderImage = (imageUrl, alt) => {
     if (!imageUrl) {
       return (
@@ -168,7 +186,6 @@ export default function Details() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50/50 via-white to-cyan-50/50 py-6 px-4 sm:px-6 lg:py-12">
-      {/* Background decorative blobs */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-[100px] animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-400/20 rounded-full blur-[120px] animate-pulse delay-1000" />
@@ -176,7 +193,6 @@ export default function Details() {
       </div>
 
       <main className="relative z-10 max-w-7xl mx-auto">
-        {/* Navigation and actions */}
         <div className="flex items-center justify-between mb-6 lg:mb-8">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition group">
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition" />
@@ -189,10 +205,8 @@ export default function Details() {
           </div>
         </div>
 
-        {/* Main Card – unified design */}
         <div className="bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden backdrop-blur-sm">
 
-          {/* --- Image + Header Row --- */}
           <div className="flex flex-col lg:flex-row">
             <div className="lg:w-2/5 bg-gradient-to-br from-slate-100 to-slate-200/50 p-4 flex items-center justify-center">
               <div className="w-full aspect-[4/3] max-h-[400px] rounded-2xl overflow-hidden bg-white shadow-md border border-slate-200">
@@ -203,7 +217,7 @@ export default function Details() {
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold border border-blue-100">
-                    {machine.brand || 'Brand'}
+                    {machine.brand || machine.brand_name || 'Brand'}
                   </span>
                   <span className="inline-block px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold border border-slate-200">
                     {categoryName}
@@ -212,7 +226,9 @@ export default function Details() {
                     {matchScore}% Match
                   </span>
                 </div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">{machine.name || 'Equipment Name'}</h1>
+                <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">
+                  {machine.name || `${machine.brand_name || ''} ${machine.model_name || ''}`.trim() || 'Equipment Name'}
+                </h1>
                 <p className="text-sm text-slate-500 mt-1">{machine.model_name || ''}</p>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-4 text-sm border-t border-slate-100 pt-5">
@@ -228,10 +244,8 @@ export default function Details() {
             </div>
           </div>
 
-          {/* --- Specs + Cost row (flex with equal height) --- */}
           <div className="p-6 lg:p-8 border-t border-slate-200">
             <div className="flex flex-col lg:flex-row gap-8 items-stretch">
-              {/* Specifications - takes 2/3 */}
               <div className="lg:flex-[2] flex flex-col">
                 <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Gauge size={18} className="text-blue-600" /> Technical Specifications
@@ -248,7 +262,6 @@ export default function Details() {
                       </div>
                     ))}
                   </div>
-                  {/* Expandable additional specs */}
                   {hasAdditionalSpecs && (
                     <div className="mt-4">
                       <button
@@ -276,7 +289,6 @@ export default function Details() {
                 </div>
               </div>
 
-              {/* Cost Breakdown - takes 1/3 */}
               <div className="lg:flex-1 flex flex-col">
                 <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <DollarSign size={18} className="text-emerald-600" /> Cost Breakdown
@@ -289,29 +301,31 @@ export default function Details() {
                     </div>
                     <div className="flex justify-between items-center border-t border-slate-200 pt-3">
                       <span className="text-sm text-slate-600">Maintenance / year</span>
-                      <span className="text-sm font-bold text-amber-600">{formatCurrency(machine.estimated_maintenance_cost_per_year_ugx || 0)}</span>
+                      <span className="text-sm font-bold text-amber-600">{formatCurrency(maintenanceCost)}</span>
                     </div>
                     <div className="flex justify-between items-center border-t border-slate-200 pt-3">
                       <span className="text-sm text-slate-600">Running cost / year</span>
-                      <span className="text-sm font-bold text-cyan-600">{formatCurrency(machine.estimated_running_cost_per_year_ugx || 0)}</span>
+                      <span className="text-sm font-bold text-cyan-600">{formatCurrency(runningCost)}</span>
                     </div>
-                    <div className="flex justify-between items-center border-t border-slate-200 pt-3 mt-1">
-                      <span className="text-sm font-semibold text-slate-700">Annual Operating Cost</span>
-                      <span className="text-lg font-bold text-emerald-600">{formatCurrency(operatingCost)}</span>
+                    <div className="flex justify-between items-center border-t border-slate-200 pt-3">
+                      <span className="text-sm text-slate-600">Annual Operating Cost</span>
+                      <span className="text-sm font-bold text-emerald-600">{formatCurrency(operatingCost)}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-t-2 border-slate-300 pt-3 mt-1">
+                      <span className="text-sm font-bold text-slate-800">Total TCO / yr</span>
+                      <span className="text-lg font-bold text-blue-700">{formatCurrency(totalTcoYr)}</span>
                     </div>
                   </div>
                   <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-4">
-                    <Info size={12} /> Operating cost = maintenance + running (excludes purchase price)
+                    <Info size={12} /> Total TCO/yr = Purchase Price + Annual Operating Cost (Year 1)
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* --- Detergent + Alerts row (equal height) --- */}
           <div className="p-6 lg:p-8 border-t border-slate-200">
             <div className="flex flex-col lg:flex-row gap-8 items-stretch">
-              {/* Detergent */}
               <div className="lg:flex-1 flex flex-col">
                 <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Droplets size={18} className="text-cyan-600" /> Recommended Detergent
@@ -352,7 +366,7 @@ export default function Details() {
                     </div>
                     <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
                       <div><span className="text-slate-500">Category:</span> <span className="font-semibold capitalize">{detergent.detergent_category}</span></div>
-                      <div><span className="text-slate-500">pH:</span> <span className="font-semibold inline-flex items-center gap-1">{detergent.ph} {phInfo && <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold ${phInfo.color}`}>{phInfo.icon} {phInfo.label}</span>}</span></div>
+                      <div><span className="text-slate-500">pH:</span> <span className="font-semibold inline-flex items-center gap-1">{detergent.ph ?? detergent.ph_value} {phInfo && <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold ${phInfo.color}`}>{phInfo.icon} {phInfo.label}</span>}</span></div>
                       <div><span className="text-slate-500">Unit:</span> <span className="font-semibold">{detergent.unit_size} L</span></div>
                       <div><span className="text-slate-500">Price:</span> <span className="font-semibold text-emerald-600">{formatCurrency(detergent.current_price_ugx)}</span></div>
                       <div className="col-span-2"><span className="text-slate-500">Dilution:</span> <span className="font-semibold">{detergent.dilution_ratio || 'N/A'}</span></div>
@@ -400,7 +414,6 @@ export default function Details() {
                 )}
               </div>
 
-              {/* Compatibility & Alerts */}
               <div className="lg:flex-1 flex flex-col">
                 <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Shield size={18} className="text-amber-600" /> Compatibility & Alerts
@@ -424,7 +437,6 @@ export default function Details() {
             </div>
           </div>
 
-          {/* --- Reasoning (if available) --- */}
           {machine.reasoning && (
             <div className="p-6 lg:p-8 border-t border-slate-200">
               <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -436,7 +448,6 @@ export default function Details() {
             </div>
           )}
 
-          {/* --- Call to Action --- */}
           <div className="p-6 lg:p-8 border-t border-slate-200 bg-gradient-to-br from-slate-50/80 to-white">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-4">
@@ -456,7 +467,6 @@ export default function Details() {
           </div>
         </div>
 
-        {/* Bottom navigation */}
         <div className="mt-8 text-center">
           <button onClick={() => navigate('/recommendation-results')} className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition group">
             Back to all recommendations <ArrowRight size={14} className="group-hover:translate-x-1 transition" />

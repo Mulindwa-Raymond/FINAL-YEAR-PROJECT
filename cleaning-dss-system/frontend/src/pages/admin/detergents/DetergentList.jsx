@@ -38,6 +38,7 @@ import { detergentCategories, detergentForms } from '../../../utils/constants';
 export const DetergentList = () => {
   const [detergents, setDetergents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({ detergent_category: '', form: '', requires_ppe: '' });
   const [showFilters, setShowFilters] = useState(false);
@@ -50,6 +51,15 @@ export const DetergentList = () => {
   const getDetergentId = (det) => {
     return det?._id || det?.detergent_id || det?.id;
   };
+
+  // Debounce: wait 350ms after user stops typing before running the query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const fetchDetergents = async () => {
     setLoading(true);
@@ -109,6 +119,7 @@ export const DetergentList = () => {
 
   const clearFilters = () => {
     setFilters({ detergent_category: '', form: '', requires_ppe: '' });
+    setSearchInput('');
     setSearch('');
     setPage(1);
   };
@@ -165,8 +176,8 @@ export const DetergentList = () => {
             <input
               type="text"
               placeholder="Search by name, brand..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-sm"
             />
           </div>
@@ -184,7 +195,7 @@ export const DetergentList = () => {
               <span className="w-2 h-2 bg-cyan-500 rounded-full"></span>
             )}
           </button>
-          {(search || Object.values(filters).some(v => v)) && (
+          {(searchInput || Object.values(filters).some(v => v)) && (
             <button 
               onClick={clearFilters} 
               className="inline-flex items-center gap-1 px-3 py-2 text-sm text-slate-500 hover:text-red-600 transition-colors"

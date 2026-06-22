@@ -57,7 +57,10 @@ const getAllEquipment = async (req, res, next) => {
       min_price, 
       max_price,
       in_stock,
-      active 
+      active,
+      search,
+      page = 1,
+      limit = 20
     } = req.query;
     
     const filter = {};
@@ -68,7 +71,6 @@ const getAllEquipment = async (req, res, next) => {
     if (domain) filter.domain = domain;
     if (environment) filter.environment = environment;
     if (power_source) filter.power_source = power_source;
-    if (brand_name) filter.brand_name = { $regex: brand_name, $options: 'i' };
     if (in_stock !== undefined) filter.in_stock = in_stock === 'true';
     if (active !== undefined) filter.active = active === 'true';
     
@@ -80,9 +82,36 @@ const getAllEquipment = async (req, res, next) => {
       if (max_price) filter.current_price_ugx.$lte = parseInt(max_price);
     }
     
-    const equipment = await Equipment.find(filter);
+    // Multi-field text search across brand_name and model_name
+    if (search) {
+      filter.$or = [
+        { brand_name: { $regex: search, $options: 'i' } },
+        { model_name: { $regex: search, $options: 'i' } },
+        { machine_category: { $regex: search, $options: 'i' } },
+        { machine_subtype: { $regex: search, $options: 'i' } },
+      ];
+    } else if (brand_name) {
+      filter.brand_name = { $regex: brand_name, $options: 'i' };
+    }
+    
+    // Server-side pagination
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    const skip = (pageNum - 1) * limitNum;
+    
+    const [equipment, total] = await Promise.all([
+      Equipment.find(filter).skip(skip).limit(limitNum),
+      Equipment.countDocuments(filter)
+    ]);
+    
     const equipmentWithTCO = await attachTCOToEquipment(equipment);
-    return success(res, equipmentWithTCO, 'Equipment retrieved');
+    return success(res, {
+      equipment: equipmentWithTCO,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      pages: Math.ceil(total / limitNum)
+    }, 'Equipment retrieved');
   } catch (err) {
     next(err);
   }
