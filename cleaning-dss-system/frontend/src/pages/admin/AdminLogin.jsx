@@ -141,14 +141,6 @@ export const AdminLogin = () => {
               )}
             </button>
           </form>
-
-          {/* Demo credentials hint */}
-          <div className="mt-6 p-3 bg-cyan-50 border border-cyan-200 rounded-xl text-xs text-cyan-700">
-            <p className="font-semibold mb-1">Demo Admin Credentials:</p>
-            <p>Email: admin@cleanmatch.com</p>
-            <p>Password: admin123</p>
-            <p className="mt-1 text-cyan-500">Super Admin: superadmin@cleanmatch.com / super123</p>
-          </div>
         </div>
       </div>
     </div>
