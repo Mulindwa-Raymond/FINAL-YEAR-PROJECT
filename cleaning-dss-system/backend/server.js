@@ -12,6 +12,7 @@ const app = express();
 // ==================== CORS Configuration ====================
 // Allow multiple origins for production and development
 const allowedOrigins = [
+  'https://cleanmatch-ten.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:5000'
