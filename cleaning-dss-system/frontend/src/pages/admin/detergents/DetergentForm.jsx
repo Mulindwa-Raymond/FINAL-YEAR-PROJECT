@@ -24,8 +24,10 @@ import {
   Building2,
   Bug,
   CheckCircle,
+  Upload,
+  Image as ImageIcon,
 } from 'lucide-react';
-import { createDetergent, updateDetergent, getDetergentById } from '../../../services/detergentService';
+import { createDetergent, updateDetergent, getDetergentById, uploadDetergentImage } from '../../../services/detergentService';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
 import { detergentCategories, detergentForms, surfaceTypes, dirtTypes } from '../../../utils/constants';
 
@@ -75,6 +77,8 @@ export const DetergentForm = () => {
   const [newSurface, setNewSurface] = useState('');
   const [newDirt, setNewDirt] = useState('');
   const [newHazard, setNewHazard] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Field validation errors (per field)
   const [fieldErrors, setFieldErrors] = useState({});
@@ -179,6 +183,38 @@ export const DetergentForm = () => {
       ...prev,
       [field]: prev[field].filter((item) => item !== value),
     }));
+  };
+
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!imageFile || !id) {
+      setError('Please select an image file and save the detergent first.');
+      return;
+    }
+
+    setUploadingImage(true);
+    setError('');
+
+    try {
+      const response = await uploadDetergentImage(id, imageFile);
+      setFormData((prev) => ({
+        ...prev,
+        image_url: response.data.data.image_url,
+      }));
+      setSuccess('Image uploaded successfully!');
+      setImageFile(null);
+    } catch (err) {
+      console.error('Image upload error:', err);
+      setError(err.response?.data?.error || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   // Full form validation before submit
@@ -780,6 +816,63 @@ export const DetergentForm = () => {
               placeholder="https://..."
               className="w-full border border-slate-200 rounded-lg p-2.5"
             />
+          </div>
+
+          {/* Image Upload */}
+          <div className="border-t border-slate-200 pt-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+              <Upload className="w-4 h-4 text-slate-500" /> Upload Image File
+            </label>
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/webp,image/gif"
+                  onChange={handleImageFileChange}
+                  className="flex-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100"
+                />
+                <button
+                  type="button"
+                  onClick={handleImageUpload}
+                  disabled={!imageFile || uploadingImage || !id}
+                  className="px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-700 transition flex items-center gap-2"
+                >
+                  {uploadingImage ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      <span>Upload</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              {imageFile && (
+                <p className="text-xs text-slate-500">Selected: {imageFile.name}</p>
+              )}
+              {!id && (
+                <p className="text-xs text-amber-600 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Save the detergent first before uploading an image
+                </p>
+              )}
+              {formData.image_url && (
+                <div className="mt-2">
+                  <p className="text-xs text-slate-500 mb-1">Current image:</p>
+                  <img
+                    src={formData.image_url}
+                    alt="Detergent preview"
+                    className="w-32 h-32 object-cover rounded-lg border border-slate-200"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Submit Buttons */}
