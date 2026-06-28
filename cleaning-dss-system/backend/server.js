@@ -1,4 +1,5 @@
 require('dotenv').config();
+const dns = require('dns');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -54,13 +55,30 @@ const mongooseOptions = {
   useUnifiedTopology: true,
   retryWrites: true,
   w: 'majority',
-  serverSelectionTimeoutMS: 10000,
-  socketTimeoutMS: 45000,
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 60000,
+  connectTimeoutMS: 30000,
   // For production: ensure proper SSL validation
   tls: true,
   tlsAllowInvalidCertificates: process.env.NODE_ENV !== 'production',
   tlsAllowInvalidHostnames: process.env.NODE_ENV !== 'production'
 };
+
+const dnsResolvers = process.env.DNS_RESOLVERS
+  ? process.env.DNS_RESOLVERS.split(',').map(address => address.trim()).filter(Boolean)
+  : [];
+const defaultDnsServers = dnsResolvers.length > 0
+  ? dnsResolvers
+  : ['8.8.8.8', '8.8.4.4', '1.1.1.1'];
+const currentDnsServers = dns.getServers();
+
+if (dnsResolvers.length > 0) {
+  logger.info(`Using DNS resolvers from DNS_RESOLVERS: ${defaultDnsServers.join(', ')}`);
+  dns.setServers(defaultDnsServers);
+} else if (currentDnsServers.length === 1 && currentDnsServers[0] === '127.0.0.1') {
+  logger.warn(`Local DNS resolver detected at 127.0.0.1. Switching Node DNS servers to ${defaultDnsServers.join(', ')} for MongoDB SRV lookups.`);
+  dns.setServers(defaultDnsServers);
+}
 
 mongoose.connect(process.env.MONGO_URI, mongooseOptions)
   .then(() => logger.info('MongoDB connected successfully'))
@@ -99,8 +117,15 @@ app.use(errorHandler);
 
 // ==================== Server Start ====================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  logger.info(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
-});
+
+// Export app for testing and use in server
+if (process.env.NODE_ENV === 'test') {
+  module.exports = app;
+} else {
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
+  });
+  module.exports = app;
+}

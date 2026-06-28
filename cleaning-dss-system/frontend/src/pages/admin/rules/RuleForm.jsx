@@ -9,7 +9,7 @@
  * - Certainty factor, priority, category
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Save, 
@@ -20,9 +20,12 @@ import {
   TrendingUp,
   Zap,
   Gavel,
-  Tag
+  Tag,
+  Search
 } from 'lucide-react';
-import { createRule, updateRule, getRuleById } from '../../../services/ruleService';
+import { createRule, updateRule, getRuleById, getAllRules } from '../../../services/ruleService';
+import { getAllEquipment } from '../../../services/equipmentService';
+import { getAllDetergents } from '../../../services/detergentService';
 import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
 import { actionTypes, ruleCategories, surfaceTypes, dirtTypes } from '../../../utils/constants';
 
@@ -32,6 +35,23 @@ export const RuleForm = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [ruleIdError, setRuleIdError] = useState('');
+
+  // All equipment and detergents loaded upfront
+  const [allEquipment, setAllEquipment] = useState([]);
+  const [allDetergents, setAllDetergents] = useState([]);
+  const [existingRuleIds, setExistingRuleIds] = useState(new Set());
+  const [loadingOptions, setLoadingOptions] = useState(true);
+
+  // Search states for equipment and detergents per action
+  const [equipmentSearch, setEquipmentSearch] = useState({});
+  const [detergentSearch, setDetergentSearch] = useState({});
+  const [showEquipDropdown, setShowEquipDropdown] = useState({});
+  const [showDetDropdown, setShowDetDropdown] = useState({});
+
+  // Refs for click-outside detection
+  const equipmentDropdownRefs = useRef({});
+  const detergentDropdownRefs = useRef({});
 
   const [formData, setFormData] = useState({
     rule_id: '',
@@ -49,6 +69,105 @@ export const RuleForm = () => {
     category: 'equipment',
     active: true,
   });
+
+  // Load all equipment, detergents, and existing rules on mount
+  useEffect(() => {
+    const fetchOptions = async () => {
+      setLoadingOptions(true);
+      try {
+        // Fetch with no limit to get ALL equipment and detergents
+        const [equipRes, detRes, rulesRes] = await Promise.all([
+          getAllEquipment({ limit: 10000 }),
+          getAllDetergents({ limit: 10000 }),
+          getAllRules({ limit: 10000 })
+        ]);
+        
+        console.log('Equipment API response:', equipRes);
+        console.log('Detergent API response:', detRes);
+        console.log('Rules API response:', rulesRes);
+        
+        // Extract data from response structure: { success, message, data: { equipment: [...], total, ... }, timestamp }
+        const equipment = equipRes.data?.data?.equipment || equipRes.data?.data || [];
+        const detergents = detRes.data?.data?.detergents || detRes.data?.data || [];
+        const rules = rulesRes.data?.data?.rules || rulesRes.data?.data || [];
+        
+        console.log('Extracted equipment count:', equipment.length);
+        console.log('Extracted detergents count:', detergents.length);
+        console.log('Extracted rules count:', rules.length);
+        
+        setAllEquipment(Array.isArray(equipment) ? equipment : []);
+        setAllDetergents(Array.isArray(detergents) ? detergents : []);
+        
+        // Build set of existing rule IDs (exclude current rule being edited)
+        const ruleIdSet = new Set();
+        if (Array.isArray(rules)) {
+          rules.forEach(rule => {
+            const ruleId = rule._id || rule.rule_id;
+            if (ruleId && ruleId !== id) {
+              ruleIdSet.add(rule.rule_id);
+            }
+          });
+        }
+        setExistingRuleIds(ruleIdSet);
+      } catch (err) {
+        console.error('Failed to fetch equipment/detergents:', err);
+        setError('Failed to load equipment and detergent data');
+      } finally {
+        setLoadingOptions(false);
+      }
+    };
+    fetchOptions();
+  }, [id]);
+
+  // Handle click-outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close equipment dropdowns
+      Object.entries(equipmentDropdownRefs.current).forEach(([idx, ref]) => {
+        if (ref && !ref.contains(event.target)) {
+          setShowEquipDropdown(prev => ({ ...prev, [idx]: false }));
+        }
+      });
+      // Close detergent dropdowns
+      Object.entries(detergentDropdownRefs.current).forEach(([idx, ref]) => {
+        if (ref && !ref.contains(event.target)) {
+          setShowDetDropdown(prev => ({ ...prev, [idx]: false }));
+        }
+      });
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Get filtered equipment for a specific action index
+  const getFilteredEquipment = (actionIdx) => {
+    const query = equipmentSearch[actionIdx] || '';
+    if (query.length < 2) return [];
+    return allEquipment.filter(eq => 
+      `${eq.brand_name} ${eq.model_name}`.toLowerCase().includes(query.toLowerCase())
+    );
+  };
+
+  // Get filtered detergents for a specific action index
+  const getFilteredDetergents = (actionIdx) => {
+    const query = detergentSearch[actionIdx] || '';
+    if (query.length < 2) return [];
+    return allDetergents.filter(det => 
+      `${det.brand_name} ${det.product_name}`.toLowerCase().includes(query.toLowerCase())
+    );
+  };
+
+  const selectEquipment = (actionIdx, equipment) => {
+    updateAction(actionIdx, 'target', equipment._id || equipment.equipment_id);
+    setEquipmentSearch(prev => ({ ...prev, [actionIdx]: `${equipment.brand_name} ${equipment.model_name}` }));
+    setShowEquipDropdown(prev => ({ ...prev, [actionIdx]: false }));
+  };
+
+  const selectDetergent = (actionIdx, detergent) => {
+    updateAction(actionIdx, 'target', detergent._id || detergent.detergent_id);
+    setDetergentSearch(prev => ({ ...prev, [actionIdx]: `${detergent.brand_name} ${detergent.product_name}` }));
+    setShowDetDropdown(prev => ({ ...prev, [actionIdx]: false }));
+  };
 
   const addCondition = () => {
     setFormData(prev => ({
@@ -130,6 +249,17 @@ export const RuleForm = () => {
     }));
   };
 
+  const handleRuleIdChange = (value) => {
+    setFormData({ ...formData, rule_id: value });
+    
+    // Check if rule ID already exists (when creating new, not editing)
+    if (!id && value.trim() && existingRuleIds.has(value.trim())) {
+      setRuleIdError(`Rule ID "${value}" already exists. Please use a different ID.`);
+    } else {
+      setRuleIdError('');
+    }
+  };
+
   useEffect(() => {
     if (id) {
       const fetchRule = async () => {
@@ -159,6 +289,14 @@ export const RuleForm = () => {
       setSaving(false);
       return;
     }
+    
+    // Check for duplicate rule ID
+    if (ruleIdError) {
+      setError('Cannot save rule: ' + ruleIdError);
+      setSaving(false);
+      return;
+    }
+    
     if (!formData.rule_text) {
       setError('Rule text is required');
       setSaving(false);
@@ -218,11 +356,20 @@ export const RuleForm = () => {
                 type="text"
                 name="rule_id"
                 value={formData.rule_id}
-                onChange={(e) => setFormData({ ...formData, rule_id: e.target.value })}
+                onChange={(e) => handleRuleIdChange(e.target.value)}
                 placeholder="e.g., R001, R002"
                 required
-                className="w-full border border-slate-200 rounded-lg p-2.5 font-mono text-sm focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none"
+                className={`w-full border rounded-lg p-2.5 font-mono text-sm focus:ring-1 outline-none ${
+                  ruleIdError 
+                    ? 'border-red-300 focus:border-red-400 focus:ring-red-400' 
+                    : 'border-slate-200 focus:border-cyan-400 focus:ring-cyan-400'
+                }`}
               />
+              {ruleIdError && (
+                <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> {ruleIdError}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1">
@@ -382,23 +529,73 @@ export const RuleForm = () => {
                 </select>
 
                 {action.type.includes('equipment') && (
-                  <input
-                    type="text"
-                    placeholder="Equipment ID or category"
-                    value={action.target || ''}
-                    onChange={(e) => updateAction(idx, 'target', e.target.value)}
-                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm"
-                  />
+                  <div className="flex-1 relative" ref={(el) => { if (el) equipmentDropdownRefs.current[idx] = el; }}>
+                    <div className="flex gap-1 items-center">
+                      <Search className="absolute left-2 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Search equipment..."
+                        value={equipmentSearch[idx] || ''}
+                        onChange={(e) => setEquipmentSearch(prev => ({ ...prev, [idx]: e.target.value }))}
+                        onFocus={() => setShowEquipDropdown(prev => ({ ...prev, [idx]: true }))}
+                        className="w-full border border-slate-200 rounded-lg p-2 pl-8 text-sm"
+                      />
+                    </div>
+                    {showEquipDropdown[idx] && getFilteredEquipment(idx).length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                        {getFilteredEquipment(idx).map((equipment) => (
+                          <div
+                            key={equipment._id}
+                            onMouseDown={() => selectEquipment(idx, equipment)}
+                            className="p-2 hover:bg-cyan-50 cursor-pointer border-b border-slate-100 last:border-b-0 text-sm"
+                          >
+                            <div className="font-medium">{equipment.brand_name} {equipment.model_name}</div>
+                            <div className="text-xs text-slate-600">{equipment.machine_category}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {showEquipDropdown[idx] && equipmentSearch[idx]?.length >= 2 && getFilteredEquipment(idx).length === 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-500 z-10">
+                        No equipment found
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {action.type.includes('detergent') && (
-                  <input
-                    type="text"
-                    placeholder="Detergent ID or category"
-                    value={action.target || ''}
-                    onChange={(e) => updateAction(idx, 'target', e.target.value)}
-                    className="flex-1 border border-slate-200 rounded-lg p-2 text-sm"
-                  />
+                  <div className="flex-1 relative" ref={(el) => { if (el) detergentDropdownRefs.current[idx] = el; }}>
+                    <div className="flex gap-1 items-center">
+                      <Search className="absolute left-2 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Search detergent..."
+                        value={detergentSearch[idx] || ''}
+                        onChange={(e) => setDetergentSearch(prev => ({ ...prev, [idx]: e.target.value }))}
+                        onFocus={() => setShowDetDropdown(prev => ({ ...prev, [idx]: true }))}
+                        className="w-full border border-slate-200 rounded-lg p-2 pl-8 text-sm"
+                      />
+                    </div>
+                    {showDetDropdown[idx] && getFilteredDetergents(idx).length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                        {getFilteredDetergents(idx).map((detergent) => (
+                          <div
+                            key={detergent._id}
+                            onMouseDown={() => selectDetergent(idx, detergent)}
+                            className="p-2 hover:bg-cyan-50 cursor-pointer border-b border-slate-100 last:border-b-0 text-sm"
+                          >
+                            <div className="font-medium">{detergent.brand_name} {detergent.product_name}</div>
+                            <div className="text-xs text-slate-600">{detergent.detergent_type}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {showDetDropdown[idx] && detergentSearch[idx]?.length >= 2 && getFilteredDetergents(idx).length === 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-500 z-10">
+                        No detergent found
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {action.type === 'flag_alert' && (

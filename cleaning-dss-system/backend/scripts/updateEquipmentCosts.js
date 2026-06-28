@@ -84,7 +84,7 @@ const Equipment = mongoose.model('Equipment', equipmentSchema, 'equipments');
 
   // 3. Connect to MongoDB
   try {
-    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 10000 });
+    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 30000, connectTimeoutMS: 30000 });
     console.log('✅  Connected to MongoDB\n');
   } catch (e) {
     console.error(`❌  Could not connect to MongoDB: ${e.message}`);

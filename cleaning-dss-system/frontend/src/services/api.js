@@ -7,7 +7,7 @@
 import axios from 'axios';
 
 // Use environment variable for API URL, fallback to production URL
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'https://clean-match.onrender.com/api/v1';
+const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'https://clean-match-backend.onrender.com/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

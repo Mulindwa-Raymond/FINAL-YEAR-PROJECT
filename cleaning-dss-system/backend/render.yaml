@@ -16,7 +16,10 @@ services:
         sync: false
       - key: CORS_ORIGIN
         value: https://cleanmatch-ten.vercel.app
+        value: https://localhost:5000
       - key: ADMIN_EMAIL
         value: admin@cleanmatch.com
       - key: ADMIN_PASSWORD
         value: admin123
+      - key: DNS_RESOLVERS
+        value: 8.8.8.8,1.1.1.1  

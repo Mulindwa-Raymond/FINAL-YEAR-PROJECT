@@ -42,7 +42,10 @@ import {
   PieChart,
   TrendingDown,
   Sparkles,
-  Globe
+  Globe,
+  X,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import {
   AreaChart,
@@ -130,9 +133,126 @@ const AnimatedCounter = ({ value, suffix = '', prefix = '', duration = 1000 }) =
   return <span ref={elementRef}>{prefix}{count.toLocaleString()}{suffix}</span>;
 };
 
+// ============================================
+// SYSTEM GUIDE VIDEO MODAL COMPONENT
+// ============================================
+const SystemGuideModal = ({ isOpen, onClose }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = React.useRef(null);
+
+  useEffect(() => {
+    if (isOpen && videoRef.current) {
+      // Reset video when modal opens
+      videoRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  }, [isOpen]);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl overflow-hidden animate-in zoom-in-95 duration-300">
+        
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center shadow-md">
+              <Play size={16} className="text-white fill-white ml-0.5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">System Guide</h3>
+              <p className="text-[10px] text-slate-400">Learn how to use Clean Match DSS</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleFullscreen}
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Video Player */}
+        <div className="relative bg-slate-950 aspect-video flex items-center justify-center">
+          <video
+            ref={videoRef}
+            className="w-full h-full object-contain"
+            controls
+            autoPlay
+            playsInline
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+          >
+            <source src="/system-guide.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          
+          {/* Video Controls Overlay Hint */}
+          {!isPlaying && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-xl">
+                <Play size={32} className="text-white fill-white ml-1" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Modal Footer */}
+        <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[10px] text-slate-500">
+            <Clock size={12} className="text-slate-400" />
+            <span>Watch the system guide to get started</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] text-slate-400">v1.0</span>
+            <button
+              onClick={onClose}
+              className="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg text-[10px] font-bold hover:shadow-md transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useAuth();
+  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
 
   const handleStartRecommendation = () => {
     if (!isAuthenticated) {
@@ -140,6 +260,10 @@ export default function Home() {
     } else {
       navigate('/machine-type');
     }
+  };
+
+  const handleOpenGuide = () => {
+    setIsGuideModalOpen(true);
   };
 
   if (loading) {
@@ -160,7 +284,10 @@ export default function Home() {
       </div>
 
       <main className="relative z-10">
-        <HeroSection onStartRecommendation={handleStartRecommendation} />
+        <HeroSection 
+          onStartRecommendation={handleStartRecommendation} 
+          onOpenGuide={handleOpenGuide}
+        />
         <ScrollingStatusBar />
         <MarketIntelligenceSection />
         <ImpactGrid />
@@ -168,12 +295,18 @@ export default function Home() {
         <UgandanRealitiesSection />
         <UpgradeBanner />
       </main>
+
+      {/* System Guide Modal */}
+      <SystemGuideModal 
+        isOpen={isGuideModalOpen} 
+        onClose={() => setIsGuideModalOpen(false)} 
+      />
     </div>
   );
 }
 
 // ======================= HERO SECTION =======================
-const HeroSection = ({ onStartRecommendation }) => {
+const HeroSection = ({ onStartRecommendation, onOpenGuide }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
   const [loaded, setLoaded] = useState(false);
@@ -233,8 +366,12 @@ const HeroSection = ({ onStartRecommendation }) => {
                 >
                   Start Match Engine <ChevronRight size={15} />
                 </button>
-                <button className="px-5 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all text-xs uppercase tracking-wider flex items-center gap-2">
-                  <Play size={10} fill="currentColor" className="text-slate-600" /> System Guide
+                <button 
+                  onClick={onOpenGuide}
+                  className="px-5 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all text-xs uppercase tracking-wider flex items-center gap-2 group"
+                >
+                  <Play size={10} fill="currentColor" className="text-slate-600 group-hover:text-blue-600 transition" /> 
+                  System Guide
                 </button>
               </div>
 
